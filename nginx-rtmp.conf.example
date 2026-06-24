@@ -1,0 +1,60 @@
+worker_processes auto;
+rtmp_auto_push on;
+
+events {
+    worker_connections 1024;
+}
+
+rtmp {
+    server {
+        listen 1935;
+        chunk_size 4096;
+
+        application live {
+            live on;
+            record off;
+
+            # HLS
+            hls on;
+            hls_path /path/to/your/project/public/hls;
+            hls_fragment 3;
+            hls_playlist_length 60;
+
+            # Thumbnail generation
+            exec ffmpeg -i rtmp://localhost:1935/live/$name
+                -vf "scale=320:180:force_original_aspect_ratio=decrease,pad=320:180:(ow-iw)/2:(oh-ih)/2"
+                -vframes 1
+                -f image2
+                /path/to/your/project/storage/app/public/streams/thumbnails/$name.jpg
+                -y;
+        }
+    }
+}
+
+http {
+    server {
+        listen 8080;
+
+        location /hls {
+            # Serve HLS fragments
+            types {
+                application/vnd.apple.mpegurl m3u8;
+                video/mp2t ts;
+            }
+            root /path/to/your/project/public;
+            add_header Cache-Control no-cache;
+            add_header Access-Control-Allow-Origin *;
+        }
+
+        location /stat {
+            # RTMP statistics
+            rtmp_stat all;
+            rtmp_stat_stylesheet stat.xsl;
+        }
+
+        location /stat.xsl {
+            # RTMP statistics stylesheet
+            root /path/to/nginx-rtmp-module;
+        }
+    }
+} 
