@@ -80,6 +80,15 @@ class AppServiceProvider extends ServiceProvider
             }
             return new \App\Services\Nft\LocalFakeStorageService();
         });
+
+        $this->app->bind(\App\Services\Nft\Contracts\MarketplaceService::class, function () {
+            $driver = config('web3.driver', 'auto');
+            $thirdweb = new \App\Services\Nft\ThirdwebMarketplaceService();
+            if ($driver === 'thirdweb' || ($driver === 'auto' && $thirdweb->isLive())) {
+                return $thirdweb;
+            }
+            return new \App\Services\Nft\FakeMarketplaceService();
+        });
         
         // Bind App\User to App\Model\User for backward compatibility
         // This fixes issues where code references App\User but the model is in App\Model\User

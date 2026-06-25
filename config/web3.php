@@ -47,4 +47,7 @@ return [
 
     // Default creator royalty on resales, in basis points (1000 = 10%).
     'default_royalty_bps' => (int) env('NFT_DEFAULT_ROYALTY_BPS', 1000),
+
+    // Marketplace platform fee on each sale, in basis points (250 = 2.5%).
+    'marketplace_fee_bps' => (int) env('NFT_MARKETPLACE_FEE_BPS', 250),
 ];

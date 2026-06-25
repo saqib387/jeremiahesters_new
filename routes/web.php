@@ -814,6 +814,10 @@ Route::prefix('nft')->name('nft.')->middleware(['auth', 'verified', '2fa'])->gro
     Route::get('/mint-from/{type}/{id}', [App\Http\Controllers\MediaNftController::class, 'confirm'])->name('mint-from');
     Route::post('/mint-from/{type}/{id}', [App\Http\Controllers\MediaNftController::class, 'mint'])->name('mint-from.store');
 
+    // Marketplace actions (multi-segment so they never collide with GET /{id}).
+    Route::post('/list/{id}', [App\Http\Controllers\NFTMarketplaceController::class, 'list'])->name('list');
+    Route::post('/listing/{id}/cancel', [App\Http\Controllers\NFTMarketplaceController::class, 'cancelListing'])->name('listing.cancel');
+
     // View NFT
     Route::get('/{id}', [App\Http\Controllers\NFTMarketplaceController::class, 'show'])->name('show');
     

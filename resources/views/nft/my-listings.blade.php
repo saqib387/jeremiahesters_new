@@ -18,7 +18,7 @@
                              class="card-img-top nft-image" 
                              alt="{{ $listing->nft->name }}">
                         <div class="nft-price-badge">
-                            <i class="fab fa-ethereum"></i> {{ number_format($listing->price, 4) }} ETH
+                            {{ rtrim(rtrim(number_format($listing->price, 6), '0'), '.') }} {{ strtoupper(config('web3.network')) }}
                         </div>
                     </div>
                     <div class="card-body d-flex flex-column">
@@ -29,9 +29,17 @@
                             </span>
                         </p>
                         <div class="mt-auto">
-                            <a href="{{ route('nft.show', $listing->nft_id) }}" class="btn btn-sm btn-primary btn-block">
+                            <a href="{{ route('nft.show', $listing->nft_id) }}" class="btn btn-sm btn-outline-primary btn-block">
                                 View Details
                             </a>
+                            @if($listing->status === 'active')
+                                <form action="{{ route('nft.listing.cancel', $listing->id) }}" method="POST" class="mt-1">
+                                    @csrf
+                                    <button class="btn btn-sm btn-outline-danger btn-block">
+                                        <i class="fas fa-times"></i> Cancel listing
+                                    </button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>

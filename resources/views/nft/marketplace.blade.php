@@ -44,7 +44,7 @@
                              class="card-img-top nft-image" 
                              alt="{{ $listing->nft->name }}">
                         <div class="nft-price-badge">
-                            <i class="fab fa-ethereum"></i> {{ number_format($listing->price, 4) }} ETH
+                            {{ rtrim(rtrim(number_format($listing->price, 6), '0'), '.') }} {{ strtoupper(config('web3.network')) }}
                         </div>
                     </div>
                     <div class="card-body d-flex flex-column">
@@ -52,13 +52,18 @@
                         <p class="card-text text-muted small flex-grow-1">
                             {{ Str::limit($listing->nft->description ?? 'No description', 100) }}
                         </p>
+                        <div class="small text-muted mb-2">
+                            <i class="fas fa-user"></i> {{ $listing->seller->name ?? 'Unknown' }}
+                        </div>
                         <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <small class="text-muted">
-                                <i class="fas fa-user"></i> {{ $listing->seller->name ?? 'Unknown' }}
-                            </small>
-                            <a href="{{ route('nft.show', $listing->nft_id) }}" class="btn btn-sm btn-primary">
-                                View
-                            </a>
+                            <a href="{{ route('nft.show', $listing->nft_id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                            @if((int) $listing->seller_id !== (int) auth()->id() && auth()->user()->wallet_address)
+                                <form action="{{ route('nft.buy', $listing->id) }}" method="POST"
+                                      onsubmit="return confirm('Buy this NFT for {{ $listing->price }} {{ strtoupper(config('web3.network')) }}?');">
+                                    @csrf
+                                    <button class="btn btn-sm btn-primary"><i class="fas fa-shopping-cart"></i> Buy</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                 </div>

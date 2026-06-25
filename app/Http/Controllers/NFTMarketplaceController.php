@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Jobs\MintNft;
 use App\Models\NFT;
 use App\Models\NFTListing;
+use App\Services\Nft\Contracts\MarketplaceService;
 use App\Services\Nft\Contracts\MetadataStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,10 +15,12 @@ use Illuminate\Support\Facades\Validator;
 class NFTMarketplaceController extends Controller
 {
     protected MetadataStorageService $storage;
+    protected MarketplaceService $marketplace;
 
-    public function __construct(MetadataStorageService $storage)
+    public function __construct(MetadataStorageService $storage, MarketplaceService $marketplace)
     {
         $this->storage = $storage;
+        $this->marketplace = $marketplace;
     }
 
     /**
@@ -156,19 +159,73 @@ class NFTMarketplaceController extends Controller
     }
 
     /**
-     * Buy an NFT — disabled until the marketplace phase. Guarded so nothing fakes a sale.
+     * List an owned NFT for sale at a price (native token).
      */
-    public function buy(Request $request, $id)
+    public function list(Request $request, $id)
     {
-        return back()->with('error', 'Buying is being rebuilt for real on-chain settlement and is not enabled yet.');
+        $validator = Validator::make($request->all(), ['price' => 'required|numeric|min:0.000001']);
+        if ($validator->fails()) {
+            return back()->withErrors($validator);
+        }
+
+        $nft = NFT::findOrFail($id);
+        try {
+            $this->marketplace->list($nft, Auth::user(), (float) $request->price);
+
+            return redirect()->route('nft.show', $nft->id)->with('success', 'Listed for sale.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     /**
-     * Resell / list an NFT — disabled until the marketplace phase. Guarded so nothing fakes a listing.
+     * Cancel an active listing (seller only).
+     */
+    public function cancelListing(Request $request, $id)
+    {
+        $listing = NFTListing::findOrFail($id);
+        try {
+            $this->marketplace->cancel($listing, Auth::user());
+
+            return redirect()->route('nft.show', $listing->nft_id)->with('success', 'Listing cancelled.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Buy an active listing — ownership transfers to the buyer with the fee/royalty split recorded.
+     */
+    public function buy(Request $request, $id)
+    {
+        $listing = NFTListing::where('id', $id)->where('status', 'active')->firstOrFail();
+        try {
+            $tx = $this->marketplace->buy($listing, Auth::user());
+
+            return redirect()->route('nft.show', $tx->nft_id)->with('success', 'Purchase complete — you now own this NFT.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
+    }
+
+    /**
+     * Resell an owned NFT: re-list it for sale (same as listing).
      */
     public function resell(Request $request, $id)
     {
-        return back()->with('error', 'Listing for sale is being rebuilt for real on-chain settlement and is not enabled yet.');
+        $validator = Validator::make($request->all(), ['price' => 'required|numeric|min:0.000001']);
+        if ($validator->fails()) {
+            return back()->withErrors($validator);
+        }
+
+        $nft = NFT::findOrFail($id);
+        try {
+            $this->marketplace->list($nft, Auth::user(), (float) $request->price);
+
+            return redirect()->route('nft.my-listings')->with('success', 'Listed for sale.');
+        } catch (\Throwable $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
     /**
