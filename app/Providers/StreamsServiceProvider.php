@@ -264,7 +264,8 @@ class StreamsServiceProvider extends ServiceProvider
         }
 
         if(isset($options['searchTerm'])){
-            $streams->where('name', 'like', '%'.$options['searchTerm'].'%');
+            // The streams table stores the stream name in `title`; `name` does not exist.
+            $streams->where('title', 'like', '%'.$options['searchTerm'].'%');
         }
 
         // Using the safe approach to get blocked list ID
