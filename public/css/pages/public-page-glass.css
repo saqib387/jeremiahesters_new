@@ -1,0 +1,279 @@
+/* ============================================
+   PUBLIC PAGES (Help, Privacy, Terms) — neutral
+   Brand accent: #cb0c9f / #830866
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+.public-page {
+    --pp-brand: #830866;
+    --pp-accent: #cb0c9f;
+    --pp-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --pp-font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --pp-radius-sm: 8px;
+    --pp-radius-md: 12px;
+    --pp-radius-lg: 16px;
+    --pp-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    position: relative;
+    isolation: isolate;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    font-family: var(--pp-font);
+    color: var(--pp-text-primary);
+    overflow-x: hidden;
+}
+
+.public-page--dark {
+    --pp-text-primary: #f4f4f5;
+    --pp-text-secondary: #a1a1aa;
+    --pp-text-muted: #71717a;
+    --pp-page-bg: #09090b;
+    --pp-surface: #18181e;
+    --pp-border: rgba(255, 255, 255, 0.08);
+    --pp-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    --pp-link: #f0abfc;
+    --pp-link-hover: #f5d0fe;
+}
+
+.public-page--light {
+    --pp-text-primary: #111827;
+    --pp-text-secondary: #6b7280;
+    --pp-text-muted: #9ca3af;
+    --pp-page-bg: #f4f4f7;
+    --pp-surface: #ffffff;
+    --pp-border: rgba(15, 23, 42, 0.08);
+    --pp-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+    --pp-link: var(--pp-brand);
+    --pp-link-hover: var(--pp-accent);
+}
+
+.public-page {
+    background: var(--pp-page-bg);
+}
+
+.public-page__glow {
+    display: none;
+}
+
+.public-page__scroll {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.public-page__inner {
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 16px 32px;
+    box-sizing: border-box;
+}
+
+.public-page__header {
+    margin: 0;
+    padding: 16px 0 12px;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.public-page__title {
+    margin: 0;
+    font-family: var(--pp-font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+    color: var(--pp-text-primary);
+}
+
+.public-page__meta {
+    margin: 8px 0 0;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+    color: var(--pp-text-muted);
+}
+
+.public-page__card {
+    width: 100%;
+    border-radius: var(--pp-radius-lg);
+    border: 1px solid var(--pp-border);
+    background: var(--pp-surface);
+    box-shadow: var(--pp-shadow);
+    overflow: hidden;
+}
+
+.public-page__card-top {
+    padding: 14px 20px 0;
+}
+
+.public-page__body {
+    padding: 20px;
+    color: var(--pp-text-secondary);
+    font-size: 0.9375rem;
+    line-height: 1.75;
+}
+
+.public-page__body > :first-child {
+    margin-top: 0;
+}
+
+.public-page__body > :last-child {
+    margin-bottom: 0;
+}
+
+.public-page__body h1,
+.public-page__body h2,
+.public-page__body h3,
+.public-page__body h4,
+.public-page__body h5,
+.public-page__body h6 {
+    color: var(--pp-text-primary);
+    font-family: var(--pp-font-display);
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.public-page__body h2 {
+    margin: 28px 0 12px;
+    padding-bottom: 10px;
+    font-size: 1.0625rem;
+    border-bottom: 1px solid var(--pp-border);
+}
+
+.public-page__body h2:first-child {
+    margin-top: 0;
+}
+
+.public-page__body h3 {
+    margin: 22px 0 10px;
+    font-size: 1rem;
+}
+
+.public-page__body p {
+    margin: 0 0 16px;
+}
+
+.public-page__body ul,
+.public-page__body ol {
+    margin: 0 0 16px;
+    padding-left: 1.25rem;
+}
+
+.public-page__body li {
+    margin-bottom: 8px;
+}
+
+.public-page__body li:last-child {
+    margin-bottom: 0;
+}
+
+.public-page__body strong,
+.public-page__body b {
+    color: var(--pp-text-primary);
+    font-weight: 700;
+}
+
+.public-page__body a {
+    color: var(--pp-link) !important;
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.public-page__body a:hover {
+    color: var(--pp-link-hover) !important;
+    text-decoration: underline;
+}
+
+.public-page__body blockquote {
+    margin: 16px 0;
+    padding: 14px 16px;
+    border-left: 3px solid var(--pp-accent);
+    border-radius: 0 var(--pp-radius-sm) var(--pp-radius-sm) 0;
+    background: rgba(203, 12, 159, 0.06);
+    color: var(--pp-text-secondary);
+}
+
+.public-page__body code {
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--pp-text-primary);
+    font-size: 0.875em;
+}
+
+.public-page--light .public-page__body code {
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.public-page__body hr {
+    border: none;
+    border-top: 1px solid var(--pp-border);
+    margin: 24px 0;
+}
+
+body:has(.public-page) .phpdebugbar,
+body:has(.public-page) .phpdebugbar-openhandler-overlay {
+    display: none !important;
+}
+
+body.d-flex.flex-column > .flex-fill:has(.public-page) {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    min-width: 0;
+    overflow-x: hidden;
+}
+
+@media (max-width: 767px) {
+    .public-page__inner {
+        padding-top: 12px;
+        padding-bottom: 24px;
+    }
+
+    .public-page__card-top {
+        padding: 12px 16px 0;
+    }
+
+    .public-page__body {
+        padding: 16px;
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .public-page__body h2 {
+        margin-top: 22px;
+        font-size: 1.05rem;
+    }
+}
+
+@media (min-width: 768px) {
+    .public-page__header {
+        padding-top: 20px;
+    }
+
+    .public-page__body {
+        padding: 24px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .public-page__body a {
+        transition: none;
+    }
+}

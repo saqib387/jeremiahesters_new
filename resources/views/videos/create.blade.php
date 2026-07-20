@@ -4,312 +4,225 @@
     {{ __('Upload Video') }}
 @endsection
 
-@section('content')
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card shadow-sm video-upload-card">
-                <div class="card-header bg-gradient text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                    <h2 class="mb-0">
-                        <i class="fa fa-video-camera mr-2"></i>Upload Video
-                    </h2>
-                </div>
-                <div class="card-body p-4">
-                    {{-- Show posting warnings if user doesn't meet requirements --}}
-                    @if(isset($postingWarnings) && count($postingWarnings) > 0)
-                        <div class="alert alert-warning">
-                            <h5 class="alert-heading"><i class="fa fa-exclamation-triangle mr-2"></i>Action Required</h5>
-                            <p class="mb-2">To upload videos, please complete the following:</p>
-                            <ul class="mb-2">
-                                @foreach($postingWarnings as $warning)
-                                    <li>{{ $warning }}</li>
-                                @endforeach
-                            </ul>
-                            <hr>
-                            <a href="{{ route('my.settings', ['type' => 'verify']) }}" class="btn btn-warning btn-sm">
-                                <i class="fa fa-check-circle mr-1"></i>Complete Verification
-                            </a>
-                        </div>
-                    @endif
-
-                    @if ($errors->any())
-                        <div class="alert alert-danger">
-                            <ul class="mb-0">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </div>
-                    @endif
-
-                    @if (session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
-                        </div>
-                    @endif
-
-                    @if (session('error'))
-                        <div class="alert alert-danger">
-                            {{ session('error') }}
-                        </div>
-                    @endif
-
-                    <form method="POST" action="{{ route('videos.store') }}" enctype="multipart/form-data" id="videoUploadForm">
-                        @csrf
-                        
-                        {{-- Video File Upload --}}
-                        <div class="form-group mb-4">
-                            <label for="video" class="font-weight-bold">Video File <span class="text-danger">*</span></label>
-                            <div class="upload-zone" id="videoDropZone">
-                                <input type="file" class="form-control d-none @error('video') is-invalid @enderror" 
-                                       id="video" name="video" accept="video/mp4,video/mov,video/webm,video/avi" required>
-                                <div class="upload-placeholder text-center py-5" id="videoPlaceholder">
-                                    <i class="fa fa-cloud-upload fa-3x text-muted mb-3"></i>
-                                    <h5 class="text-muted">Drag & drop your video here</h5>
-                                    <p class="text-muted small mb-3">or click to browse</p>
-                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('video').click()">
-                                        <i class="fa fa-folder-open mr-2"></i>Choose File
-                                    </button>
-                                    <p class="text-muted small mt-3 mb-0">
-                                        Supported formats: MP4, MOV, WebM, AVI (Max 20MB)
-                                    </p>
-                                </div>
-                                <div class="upload-preview d-none" id="videoPreview">
-                                    <video id="videoPreviewPlayer" class="w-100 rounded" style="max-height: 300px;" controls></video>
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <span class="text-muted small" id="videoFileName"></span>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearVideoPreview()">
-                                            <i class="fa fa-times mr-1"></i>Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            @error('video')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        {{-- Title --}}
-                        <div class="form-group mb-4">
-                            <label for="title" class="font-weight-bold">Title <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control @error('title') is-invalid @enderror" 
-                                   id="title" name="title" value="{{ old('title') }}" 
-                                   placeholder="Enter a catchy title for your video" required maxlength="191">
-                            <small class="form-text text-muted">
-                                <span id="titleCharCount">0</span>/191 characters
-                            </small>
-                            @error('title')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        {{-- Description --}}
-                        <div class="form-group mb-4">
-                            <label for="description" class="font-weight-bold">Description</label>
-                            <textarea class="form-control @error('description') is-invalid @enderror" 
-                                      id="description" name="description" rows="4" 
-                                      placeholder="Tell viewers what your video is about..." maxlength="1000">{{ old('description') }}</textarea>
-                            <small class="form-text text-muted">
-                                <span id="descCharCount">0</span>/1000 characters
-                            </small>
-                            @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        {{-- Thumbnail Upload --}}
-                        <div class="form-group mb-4">
-                            <label for="thumbnail" class="font-weight-bold">Thumbnail (Optional)</label>
-                            <div class="upload-zone thumbnail-zone" id="thumbnailDropZone">
-                                <input type="file" class="form-control d-none @error('thumbnail') is-invalid @enderror" 
-                                       id="thumbnail" name="thumbnail" accept="image/jpeg,image/png,image/jpg,image/gif">
-                                <div class="upload-placeholder text-center py-4" id="thumbnailPlaceholder">
-                                    <i class="fa fa-image fa-2x text-muted mb-2"></i>
-                                    <p class="text-muted small mb-2">Click to upload a custom thumbnail</p>
-                                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="document.getElementById('thumbnail').click()">
-                                        <i class="fa fa-upload mr-2"></i>Upload Image
-                                    </button>
-                                    <p class="text-muted small mt-2 mb-0">
-                                        JPEG, PNG, GIF (Max 5MB) - Recommended: 1280x720
-                                    </p>
-                                </div>
-                                <div class="upload-preview d-none" id="thumbnailPreview">
-                                    <img id="thumbnailPreviewImg" class="w-100 rounded" style="max-height: 200px; object-fit: cover;">
-                                    <div class="d-flex justify-content-between align-items-center mt-2">
-                                        <span class="text-muted small" id="thumbnailFileName"></span>
-                                        <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearThumbnailPreview()">
-                                            <i class="fa fa-times mr-1"></i>Remove
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            @error('thumbnail')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        {{-- Upload Progress --}}
-                        <div class="form-group mb-4 d-none" id="uploadProgress">
-                            <label class="font-weight-bold">Upload Progress</label>
-                            <div class="progress" style="height: 25px;">
-                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                                     role="progressbar" style="width: 0%;" id="progressBar">
-                                    <span id="progressText">0%</span>
-                                </div>
-                            </div>
-                            <p class="text-muted small mt-2" id="uploadStatus">Preparing upload...</p>
-                        </div>
-
-                        {{-- Submit Buttons --}}
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary btn-lg btn-block mb-2" id="submitBtn" @if(isset($canPost) && !$canPost) disabled @endif>
-                                <i class="fa fa-upload mr-2"></i>Upload Video
-                            </button>
-                            <a href="{{ route('videos.reels') }}" class="btn btn-outline-secondary btn-block">
-                                <i class="fa fa-arrow-left mr-2"></i>Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        {{-- Sidebar --}}
-        <div class="col-md-4">
-            {{-- Upload Guidelines --}}
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fa fa-lightbulb-o text-warning mr-2"></i>Upload Tips</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-3">
-                            <i class="fa fa-check-circle text-success mr-2"></i>
-                            Use good lighting for better quality
-                        </li>
-                        <li class="mb-3">
-                            <i class="fa fa-check-circle text-success mr-2"></i>
-                            Keep videos under 20MB for faster uploads
-                        </li>
-                        <li class="mb-3">
-                            <i class="fa fa-check-circle text-success mr-2"></i>
-                            Use vertical format (9:16) for best viewing
-                        </li>
-                        <li class="mb-3">
-                            <i class="fa fa-check-circle text-success mr-2"></i>
-                            Write catchy titles to attract viewers
-                        </li>
-                        <li>
-                            <i class="fa fa-check-circle text-success mr-2"></i>
-                            Add a custom thumbnail to stand out
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            {{-- Community Guidelines --}}
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h5 class="mb-0"><i class="fa fa-shield text-primary mr-2"></i>Guidelines</h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info mb-0">
-                        <p class="small mb-2">By uploading, you agree to our community guidelines:</p>
-                        <ul class="small mb-0 pl-3">
-                            <li>No illegal or harmful content</li>
-                            <li>Respect copyright and intellectual property</li>
-                            <li>No hate speech or harassment</li>
-                            <li>Must be appropriate for the platform</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
+@php
+    $isDarkTheme = Cookie::get('app_theme') == null
+        ? getSetting('site.default_user_theme') == 'dark'
+        : Cookie::get('app_theme') == 'dark';
+@endphp
 
 @section('styles')
-<style>
-    .video-upload-card .card-header h2 {
-        font-size: 1.5rem;
-    }
-    
-    .upload-zone {
-        border: 2px dashed #dee2e6;
-        border-radius: 10px;
-        background-color: #f8f9fa;
-        transition: all 0.3s ease;
-        cursor: pointer;
-    }
-    
-    .upload-zone:hover {
-        border-color: #667eea;
-        background-color: #f0f4ff;
-    }
-    
-    .upload-zone.dragover {
-        border-color: #667eea;
-        background-color: #e8ecff;
-        transform: scale(1.02);
-    }
-    
-    .upload-zone .upload-placeholder {
-        padding: 2rem;
-    }
-    
-    .upload-zone .upload-preview {
-        padding: 1rem;
-    }
-    
-    .video-upload-card .btn-primary {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border: none;
-        font-weight: 600;
-    }
-    
-    .video-upload-card .btn-primary:hover {
-        background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-    
-    .video-upload-card .btn-outline-primary {
-        border-color: #667eea;
-        color: #667eea;
-    }
-    
-    .video-upload-card .btn-outline-primary:hover {
-        background-color: #667eea;
-        border-color: #667eea;
-        color: #fff;
-    }
-    
-    .video-upload-card .progress {
-        border-radius: 15px;
-        overflow: hidden;
-    }
-    
-    .video-upload-card .progress-bar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        font-weight: 600;
-    }
-    
-    .video-upload-card .form-control:focus {
-        border-color: #667eea;
-        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-    }
-    
-    .thumbnail-zone {
-        min-height: 150px;
-    }
-    
-    @media (max-width: 768px) {
-        .col-md-4 {
-            margin-top: 1.5rem;
-        }
-    }
-</style>
+    <link rel="stylesheet" href="{{ asset('css/pages/video-upload.css') }}?v=20260714c">
+@endsection
+
+@section('content')
+<div class="vu-page {{ $isDarkTheme ? 'vu-page--dark' : 'vu-page--light' }}">
+<div class="vu-container">
+
+    <header class="vu-header">
+        <div class="vu-header__text">
+            <h1 class="vu-header__title">{{ __('Upload Video') }}</h1>
+            <p class="vu-header__sub">{{ __('Share a new video with your audience') }}</p>
+        </div>
+        <a href="{{ route('videos.reels') }}" class="vu-back">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M19 12H5M12 19l-7-7 7-7" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            {{ __('Cancel') }}
+        </a>
+    </header>
+
+    {{-- Posting warnings --}}
+    @if(isset($postingWarnings) && count($postingWarnings) > 0)
+        <div class="vu-alert vu-alert--warn">
+            <div class="vu-alert__icon"><svg class="vu-ic" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="vu-alert__body">
+                <h3>{{ __('Action Required') }}</h3>
+                <p>{{ __('To upload videos, please complete the following:') }}</p>
+                <ul>
+                    @foreach($postingWarnings as $warning)
+                        <li>{{ $warning }}</li>
+                    @endforeach
+                </ul>
+                <a href="{{ route('my.settings', ['type' => 'verify']) }}" class="vu-btn vu-btn--warn">
+                    <svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{{ __('Complete Verification') }}
+                </a>
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="vu-alert vu-alert--danger">
+            <div class="vu-alert__icon"><svg class="vu-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div class="vu-alert__body">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    @endif
+
+    @if (session('success'))
+        <div class="vu-alert vu-alert--ok">
+            <div class="vu-alert__icon"><svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="vu-alert__body"><p>{{ session('success') }}</p></div>
+        </div>
+    @endif
+
+    @if (session('error'))
+        <div class="vu-alert vu-alert--danger">
+            <div class="vu-alert__icon"><svg class="vu-ic" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg></div>
+            <div class="vu-alert__body"><p>{{ session('error') }}</p></div>
+        </div>
+    @endif
+
+    <div class="vu-grid">
+        <form class="vu-main" method="POST" action="{{ route('videos.store') }}" enctype="multipart/form-data" id="videoUploadForm">
+            @csrf
+
+            <div class="vu-card">
+                {{-- Video File --}}
+                <div class="vu-field">
+                    <div class="vu-label-row">
+                        <span class="vu-label">{{ __('Video File') }}<span class="vu-req">*</span></span>
+                    </div>
+                    <div class="vu-dropzone" id="videoDropZone">
+                        <input type="file" class="d-none @error('video') is-invalid @enderror"
+                               id="video" name="video" accept="video/mp4,video/mov,video/webm,video/avi" required>
+                        <div class="vu-dropzone__placeholder" id="videoPlaceholder">
+                            <div class="vu-dropzone__icon"><svg class="vu-ic" viewBox="0 0 24 24"><path d="M16 16l-4-4-4 4"/><path d="M12 12v9"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>
+                            <h5 class="vu-dropzone__title">{{ __('Drag & drop your video here') }}</h5>
+                            <p class="vu-dropzone__hint">{{ __('or click to browse') }}</p>
+                            <button type="button" class="vu-choose" onclick="document.getElementById('video').click()">
+                                <svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>{{ __('Choose File') }}
+                            </button>
+                            <p class="vu-dropzone__formats">{{ __('Supported formats') }}: <b>MP4, MOV, WebM, AVI</b> ({{ __('Max 20MB') }})</p>
+                        </div>
+                        <div class="vu-dropzone__preview d-none" id="videoPreview">
+                            <video id="videoPreviewPlayer" controls></video>
+                            <div class="vu-preview-bar">
+                                <span class="vu-preview-name" id="videoFileName"></span>
+                                <button type="button" class="vu-remove" onclick="clearVideoPreview()">
+                                    <svg class="vu-ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>{{ __('Remove') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @error('video')
+                        <span class="vu-error-text">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Title --}}
+                <div class="vu-field">
+                    <div class="vu-label-row">
+                        <label for="title" class="vu-label">{{ __('Title') }}<span class="vu-req">*</span></label>
+                        <span class="vu-count"><span id="titleCharCount">0</span>/191</span>
+                    </div>
+                    <input type="text" class="vu-input @error('title') is-invalid @enderror"
+                           id="title" name="title" value="{{ old('title') }}"
+                           placeholder="{{ __('Enter a catchy title for your video') }}" required maxlength="191">
+                    @error('title')
+                        <span class="vu-error-text">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Description --}}
+                <div class="vu-field">
+                    <div class="vu-label-row">
+                        <label for="description" class="vu-label">{{ __('Description') }}</label>
+                        <span class="vu-count"><span id="descCharCount">0</span>/1000</span>
+                    </div>
+                    <textarea class="vu-textarea @error('description') is-invalid @enderror"
+                              id="description" name="description" rows="4"
+                              placeholder="{{ __('Tell viewers what your video is about...') }}" maxlength="1000">{{ old('description') }}</textarea>
+                    @error('description')
+                        <span class="vu-error-text">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Thumbnail --}}
+                <div class="vu-field">
+                    <div class="vu-label-row">
+                        <label for="thumbnail" class="vu-label">{{ __('Thumbnail') }} <span class="vu-count">({{ __('Optional') }})</span></label>
+                    </div>
+                    <div class="vu-dropzone vu-dropzone--thumb" id="thumbnailDropZone">
+                        <input type="file" class="d-none @error('thumbnail') is-invalid @enderror"
+                               id="thumbnail" name="thumbnail" accept="image/jpeg,image/png,image/jpg,image/gif">
+                        <div class="vu-dropzone__placeholder" id="thumbnailPlaceholder">
+                            <div class="vu-dropzone__icon"><svg class="vu-ic" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
+                            <h5 class="vu-dropzone__title">{{ __('Upload a custom thumbnail') }}</h5>
+                            <button type="button" class="vu-choose" onclick="document.getElementById('thumbnail').click()">
+                                <svg class="vu-ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>{{ __('Upload Image') }}
+                            </button>
+                            <p class="vu-dropzone__formats">{{ __('JPEG, PNG, GIF (Max 5MB)') }} — {{ __('Recommended: 1280x720') }}</p>
+                        </div>
+                        <div class="vu-dropzone__preview d-none" id="thumbnailPreview">
+                            <img id="thumbnailPreviewImg" alt="thumbnail preview">
+                            <div class="vu-preview-bar">
+                                <span class="vu-preview-name" id="thumbnailFileName"></span>
+                                <button type="button" class="vu-remove" onclick="clearThumbnailPreview()">
+                                    <svg class="vu-ic" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>{{ __('Remove') }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    @error('thumbnail')
+                        <span class="vu-error-text">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                {{-- Upload Progress --}}
+                <div class="vu-field d-none" id="uploadProgress">
+                    <div class="vu-label-row">
+                        <span class="vu-label">{{ __('Upload Progress') }}</span>
+                        <span class="vu-count" id="progressText">0%</span>
+                    </div>
+                    <div class="vu-progress-track">
+                        <div class="vu-progress-fill" id="progressBar" role="progressbar"></div>
+                    </div>
+                    <p class="vu-progress-status" id="uploadStatus">{{ __('Preparing upload...') }}</p>
+                </div>
+
+                {{-- Actions --}}
+                <div class="vu-actions">
+                    <button type="submit" class="vu-btn vu-btn--primary" id="submitBtn" @if(isset($canPost) && !$canPost) disabled @endif>
+                        <svg class="vu-ic" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>{{ __('Upload Video') }}
+                    </button>
+                    <a href="{{ route('videos.reels') }}" class="vu-btn vu-btn--ghost">{{ __('Cancel') }}</a>
+                </div>
+            </div>
+        </form>
+
+        {{-- Sidebar --}}
+        <aside class="vu-side">
+            <div class="vu-card">
+                <h2 class="vu-card__title"><svg class="vu-ic" viewBox="0 0 24 24"><line x1="9" y1="18" x2="15" y2="18"/><line x1="10" y1="22" x2="14" y2="22"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>{{ __('Upload Tips') }}</h2>
+                <ul class="vu-tips">
+                    <li><svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{{ __('Use good lighting for better quality') }}</li>
+                    <li><svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{{ __('Keep videos under 20MB for faster uploads') }}</li>
+                    <li><svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{{ __('Use vertical format (9:16) for best viewing') }}</li>
+                    <li><svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{{ __('Write catchy titles to attract viewers') }}</li>
+                    <li><svg class="vu-ic" viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>{{ __('Add a custom thumbnail to stand out') }}</li>
+                </ul>
+            </div>
+
+            <div class="vu-card">
+                <h2 class="vu-card__title"><svg class="vu-ic" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>{{ __('Guidelines') }}</h2>
+                <p class="vu-note">{{ __('By uploading, you agree to our community guidelines:') }}</p>
+                <ul class="vu-guidelines">
+                    <li>{{ __('No illegal or harmful content') }}</li>
+                    <li>{{ __('Respect copyright and intellectual property') }}</li>
+                    <li>{{ __('No hate speech or harassment') }}</li>
+                    <li>{{ __('Must be appropriate for the platform') }}</li>
+                </ul>
+            </div>
+        </aside>
+    </div>
+
+</div>
+</div>
 @endsection
 
 @section('scripts')

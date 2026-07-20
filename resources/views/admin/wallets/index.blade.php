@@ -3,16 +3,21 @@
 @section('page_title', 'Wallet Management')
 
 @section('page_header')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-8">
-                <h1 class="page-title">
-                    <i class="voyager-wallet"></i> Wallet Management
-                </h1>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="voyager-wallet"></i>
+                </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">Wallet Management</h1>
+                    <p class="jf-dash-page-header__desc">Monitor user wallets, balances, and activity across all cryptocurrencies</p>
+                </div>
             </div>
-            <div class="col-md-4 text-right">
-                <a href="{{ route('voyager.wallets.export', request()->query()) }}" class="btn btn-success">
-                    <i class="voyager-download"></i> <span>Export CSV</span>
+            <div class="jf-dash-page-header__actions">
+                <a href="{{ route('voyager.wallets.export', request()->query()) }}" class="jf-dash-btn jf-dash-btn--green">
+                    <i class="voyager-download"></i>
+                    <span class="jf-pill-label">Export CSV</span>
                 </a>
             </div>
         </div>
@@ -20,73 +25,106 @@
 @stop
 
 @section('content')
-    <div class="page-content browse container-fluid">
+    <div class="page-content browse container-fluid jf-dash-page jf-wallets-page">
         @include('voyager::alerts')
 
-        <!-- Statistics Cards -->
+        @php
+            $activePct = $stats['total_wallets'] > 0
+                ? round(($stats['active_wallets'] / $stats['total_wallets']) * 100)
+                : 0;
+            $withBalancePct = $stats['total_wallets'] > 0
+                ? round(($stats['wallets_with_balance'] / $stats['total_wallets']) * 100)
+                : 0;
+        @endphp
+
+        <!-- Summary banner -->
         <div class="row">
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#3498db;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['total_wallets']) }}</h4>
-                        <p>Total Wallets</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#2ecc71;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['active_wallets']) }}</h4>
-                        <p>Active</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#f39c12;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['wallets_with_balance']) }}</h4>
-                        <p>With Balance</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel widget center bgimage" style="background-color:#9b59b6;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>${{ number_format($stats['total_balance_usd'], 2) }}</h4>
-                        <p>Total Balance USD</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="panel widget center bgimage" style="background-color:#e74c3c;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['unique_users']) }}</h4>
-                        <p>Unique Users</p>
+            <div class="col-md-12">
+                <div class="panel jf-hero-panel">
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h3 style="margin-top: 0;">
+                                    <i class="voyager-wallet"></i> Platform Wallet Overview
+                                </h3>
+                                <p>
+                                    {{ number_format($stats['total_wallets']) }} wallets across {{ number_format($stats['unique_users']) }} users
+                                    · {{ number_format($stats['active_wallets']) }} active
+                                    · {{ number_format($stats['wallets_with_balance']) }} with balance
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-right">
+                                <div style="margin-top: 10px;">
+                                    <span class="jf-hero-panel__label">Total Balance (USD)</span><br>
+                                    <span class="jf-hero-panel__value">${{ number_format($stats['total_balance_usd'], 2) }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Filters and Search -->
+        <!-- Statistics Cards -->
+        <div class="jf-stat-cards-row jf-stat-cards-row--five">
+            @include('admin.dashboard.partials.stat-card', [
+                'icon' => 'voyager-wallet',
+                'accent' => '#4f8cff',
+                'label' => 'Total Wallets',
+                'value' => number_format($stats['total_wallets']),
+                'footer' => 'All user wallets',
+            ])
+            @include('admin.dashboard.partials.stat-card', [
+                'icon' => 'voyager-check',
+                'accent' => '#22c55e',
+                'label' => 'Active',
+                'value' => number_format($stats['active_wallets']),
+                'footer' => $activePct . '% of total',
+            ])
+            @include('admin.dashboard.partials.stat-card', [
+                'icon' => 'voyager-dollar',
+                'accent' => '#f59e0b',
+                'label' => 'With Balance',
+                'value' => number_format($stats['wallets_with_balance']),
+                'footer' => $withBalancePct . '% funded',
+            ])
+            @include('admin.dashboard.partials.stat-card', [
+                'icon' => 'voyager-credit-cards',
+                'accent' => '#7928ca',
+                'label' => 'Total Balance USD',
+                'value' => '$' . number_format($stats['total_balance_usd'], 0),
+                'footer' => 'Combined holdings',
+            ])
+            @include('admin.dashboard.partials.stat-card', [
+                'icon' => 'voyager-people',
+                'accent' => '#f472b6',
+                'label' => 'Unique Users',
+                'value' => number_format($stats['unique_users']),
+                'footer' => 'Wallet holders',
+            ])
+        </div>
+
+        <!-- Filters -->
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-bordered">
-                    <div class="panel-body">
-                        <form method="GET" action="{{ route('voyager.wallets.index') }}" class="form-inline">
-                            <div class="form-group">
-                                <input type="text" 
-                                       name="search" 
-                                       class="form-control" 
-                                       placeholder="Search wallets, users, cryptocurrencies..." 
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--filters">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--purple"><i class="voyager-search"></i></span>
+                            <span>Search &amp; Filters</span>
+                        </h3>
+                    </div>
+                    <div class="panel-body jf-dash-card__body">
+                        <form method="GET" action="{{ route('voyager.wallets.index') }}" class="jf-wallets-filter">
+                            <div class="jf-wallets-filter__field">
+                                <input type="text"
+                                       name="search"
+                                       class="form-control"
+                                       placeholder="Search wallets, users, cryptocurrencies..."
                                        value="{{ request('search') }}">
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-wallets-filter__field">
                                 <select name="status" class="form-control">
                                     <option value="">All Status</option>
                                     <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
@@ -95,8 +133,8 @@
                                     <option value="empty" {{ request('status') == 'empty' ? 'selected' : '' }}>Empty</option>
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-wallets-filter__field">
                                 <select name="cryptocurrency_id" class="form-control">
                                     <option value="">All Cryptocurrencies</option>
                                     @foreach($cryptocurrencies as $crypto)
@@ -106,29 +144,32 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-wallets-filter__field">
                                 <select name="sort_by" class="form-control">
                                     <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Sort by Created</option>
                                     <option value="updated_at" {{ request('sort_by') == 'updated_at' ? 'selected' : '' }}>Sort by Updated</option>
                                     <option value="balance" {{ request('sort_by') == 'balance' ? 'selected' : '' }}>Sort by Balance</option>
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-wallets-filter__field">
                                 <select name="sort_dir" class="form-control">
                                     <option value="desc" {{ request('sort_dir') == 'desc' ? 'selected' : '' }}>Descending</option>
                                     <option value="asc" {{ request('sort_dir') == 'asc' ? 'selected' : '' }}>Ascending</option>
                                 </select>
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="voyager-search"></i> Filter
-                            </button>
-                            
-                            <a href="{{ route('voyager.wallets.index') }}" class="btn btn-default">
-                                <i class="voyager-refresh"></i> Clear
-                            </a>
+
+                            <div class="jf-wallets-filter__actions">
+                                <button type="submit" class="jf-dash-btn jf-dash-btn--blue">
+                                    <i class="voyager-search"></i>
+                                    <span class="jf-pill-label">Filter</span>
+                                </button>
+                                <a href="{{ route('voyager.wallets.index') }}" class="jf-dash-btn jf-dash-btn--purple">
+                                    <i class="voyager-refresh"></i>
+                                    <span class="jf-pill-label">Clear</span>
+                                </a>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -138,10 +179,16 @@
         <!-- Wallets Table -->
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-bordered">
-                    <div class="panel-body">
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--wallets-table">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--green"><i class="voyager-wallet"></i></span>
+                            <span>All Wallets</span>
+                        </h3>
+                    </div>
+                    <div class="panel-body jf-dash-card__body">
                         <div class="table-responsive">
-                            <table class="table table-hover">
+                            <table class="table table-hover jf-tokens-table" id="dataTable">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
@@ -158,14 +205,12 @@
                                 <tbody>
                                     @forelse($wallets as $wallet)
                                         <tr>
-                                            <td>
-                                                <strong>#{{ $wallet->id }}</strong>
-                                            </td>
+                                            <td><strong>#{{ $wallet->id }}</strong></td>
                                             <td>
                                                 @if($wallet->user)
-                                                    <div>
-                                                        <strong>{{ $wallet->user->name }}</strong><br>
-                                                        <small class="text-muted">{{ $wallet->user->email }}</small>
+                                                    <div class="jf-wallet-user">
+                                                        <strong class="jf-wallet-user__name">{{ $wallet->user->name }}</strong>
+                                                        <span class="jf-wallet-user__email">{{ $wallet->user->email }}</span>
                                                     </div>
                                                 @else
                                                     <span class="text-muted">Unknown User</span>
@@ -173,18 +218,21 @@
                                             </td>
                                             <td>
                                                 @if($wallet->cryptocurrency)
-                                                    <div class="media">
+                                                    <div class="jf-token-cell">
                                                         @if($wallet->cryptocurrency->logo)
-                                                            <div class="media-left">
-                                                                <img src="{{ Storage::url($wallet->cryptocurrency->logo) }}" 
-                                                                     alt="{{ $wallet->cryptocurrency->name }}" 
-                                                                     class="media-object" 
-                                                                     style="width: 30px; height: 30px; border-radius: 50%;">
+                                                            <div class="jf-token-cell__avatar jf-token-cell__avatar--sm">
+                                                                <img src="{{ Storage::url($wallet->cryptocurrency->logo) }}" alt="{{ $wallet->cryptocurrency->name }}">
+                                                            </div>
+                                                        @else
+                                                            <div class="jf-token-cell__avatar jf-token-cell__avatar--sm jf-token-cell__avatar--placeholder">
+                                                                <i class="voyager-trophy"></i>
                                                             </div>
                                                         @endif
-                                                        <div class="media-body">
-                                                            <strong>{{ $wallet->cryptocurrency->name }}</strong><br>
-                                                            <small class="text-muted">{{ $wallet->cryptocurrency->symbol }}</small>
+                                                        <div class="jf-token-cell__body">
+                                                            <span class="jf-token-cell__name">{{ $wallet->cryptocurrency->name }}</span>
+                                                            <div class="jf-token-cell__meta">
+                                                                <span>{{ $wallet->cryptocurrency->symbol }}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 @else
@@ -197,62 +245,57 @@
                                                     <br><small class="text-muted">{{ $wallet->cryptocurrency->symbol }}</small>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <strong>{{ $wallet->formatted_balance_usd }}</strong>
-                                            </td>
+                                            <td><strong>{{ $wallet->formatted_balance_usd }}</strong></td>
                                             <td>
                                                 @if($wallet->wallet_address)
-                                                    <code title="{{ $wallet->wallet_address }}">{{ $wallet->masked_address }}</code>
+                                                    <code class="jf-wallet-address" title="{{ $wallet->wallet_address }}">{{ $wallet->masked_address }}</code>
                                                     @if($wallet->has_private_key)
-                                                        <i class="voyager-key text-warning" title="Has Private Key"></i>
+                                                        <i class="voyager-key jf-wallet-key" title="Has Private Key"></i>
                                                     @endif
                                                 @else
                                                     <span class="text-muted">No Address</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="label {{ $wallet->status_badge_class }}">
+                                                <span class="jf-token-badge {{ $wallet->is_active ? 'jf-token-badge--success' : 'jf-token-badge--danger' }}">
                                                     {{ $wallet->status_text }}
                                                 </span>
                                             </td>
+                                            <td>{{ $wallet->created_at ? $wallet->created_at->format('M d, Y') : 'N/A' }}</td>
                                             <td>
-                                                {{ $wallet->created_at ? $wallet->created_at->format('M d, Y') : 'N/A' }}
-                                            </td>
-                                            <td>
-                                                <div class="btn-group-horizontal">
-                                                    <a href="#" 
-                                                       onclick="showWalletDetails({{ $wallet->id }}); return false;" 
-                                                       data-toggle="modal" 
-                                                       data-target="#walletModal"
-                                                       class="btn btn-sm btn-info"
-                                                       title="View Details">
-                                                        <i class="voyager-eye"></i> Details
-                                                    </a>
-                                                    
-                                                    <a href="{{ route('voyager.wallets.toggle-status', $wallet->id) }}" 
+                                                <div class="jf-wallet-actions">
+                                                    <button type="button"
+                                                            onclick="showWalletDetails({{ $wallet->id }}); return false;"
+                                                            data-toggle="modal"
+                                                            data-target="#walletModal"
+                                                            class="jf-dash-btn jf-dash-btn--blue jf-wallet-actions-btn"
+                                                            title="View Details">
+                                                        <i class="voyager-eye"></i>
+                                                        <span class="jf-pill-label">Details</span>
+                                                    </button>
+                                                    <a href="{{ route('voyager.wallets.toggle-status', $wallet->id) }}"
                                                        onclick="return confirm('Are you sure you want to {{ $wallet->is_active ? 'deactivate' : 'activate' }} this wallet?')"
-                                                       class="btn btn-sm {{ $wallet->is_active ? 'btn-warning' : 'btn-success' }}"
+                                                       class="jf-dash-btn {{ $wallet->is_active ? 'jf-dash-btn--amber' : 'jf-dash-btn--green' }} jf-wallet-actions-btn"
                                                        title="{{ $wallet->is_active ? 'Deactivate' : 'Activate' }} Wallet">
-                                                        <i class="voyager-power"></i> 
-                                                        {{ $wallet->is_active ? 'Deactivate' : 'Activate' }}
+                                                        <i class="voyager-power"></i>
+                                                        <span class="jf-pill-label">{{ $wallet->is_active ? 'Off' : 'On' }}</span>
                                                     </a>
                                                 </div>
                                             </td>
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="9" class="text-center">
-                                                <p>No wallets found.</p>
+                                            <td colspan="9">
+                                                <div class="jf-dash-card__empty">No wallets found.</div>
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
-                        
-                        <!-- Pagination -->
+
                         @if($wallets->hasPages())
-                            <div class="text-center">
+                            <div class="jf-tokens-pagination">
                                 {{ $wallets->appends(request()->query())->links() }}
                             </div>
                         @endif
@@ -263,7 +306,7 @@
     </div>
 
     <!-- Wallet Details Modal -->
-    <div class="modal fade" id="walletModal" tabindex="-1" role="dialog">
+    <div class="modal fade jf-wallets-modal" id="walletModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -274,7 +317,7 @@
                 </div>
                 <div class="modal-body" id="walletModalBody">
                     <div class="text-center">
-                        <i class="voyager-refresh" style="font-size: 24px;"></i>
+                        <i class="voyager-refresh"></i>
                         <p>Loading wallet details...</p>
                     </div>
                 </div>
@@ -289,61 +332,73 @@
 @section('javascript')
 <script>
 function showWalletDetails(walletId) {
-    // Reset modal content
     $('#walletModalBody').html(`
         <div class="text-center">
-            <i class="voyager-refresh" style="font-size: 24px;"></i>
+            <i class="voyager-refresh"></i>
             <p>Loading wallet details...</p>
         </div>
     `);
-    
-    // Fetch wallet details
+
     $.get('{{ route("voyager.wallets.details", ":id") }}'.replace(':id', walletId))
         .done(function(data) {
+            const detailTable = (rows) => `
+                <table class="jf-wallet-details-table">
+                    ${rows.map(([label, value]) => `<tr><td>${label}</td><td>${value}</td></tr>`).join('')}
+                </table>
+            `;
+
+            const hasAddress = data.wallet_address && data.wallet_address !== 'No Address';
+
             const html = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>User Information</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Name:</strong></td><td>${data.user_name}</td></tr>
-                            <tr><td><strong>Email:</strong></td><td>${data.user_email}</td></tr>
-                        </table>
-                        
-                        <h5>Cryptocurrency</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Name:</strong></td><td>${data.cryptocurrency_name}</td></tr>
-                            <tr><td><strong>Symbol:</strong></td><td>${data.cryptocurrency_symbol}</td></tr>
-                        </table>
+                <div class="jf-wallet-details">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">User Information</h5>
+                                ${detailTable([
+                                    ['Name', data.user_name],
+                                    ['Email', data.user_email]
+                                ])}
+                            </div>
+
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Cryptocurrency</h5>
+                                ${detailTable([
+                                    ['Name', data.cryptocurrency_name],
+                                    ['Symbol', data.cryptocurrency_symbol]
+                                ])}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Wallet Information</h5>
+                                ${detailTable([
+                                    ['Balance', `${data.balance} ${data.cryptocurrency_symbol}`],
+                                    ['Balance USD', data.balance_usd],
+                                    ['Status', `<span class="jf-token-badge ${data.is_active ? 'jf-token-badge--success' : 'jf-token-badge--danger'}">${data.status_text}</span>`],
+                                    ['Has Private Key', data.has_private_key ? '<i class="voyager-check text-success"></i> Yes' : '<i class="voyager-x text-danger"></i> No']
+                                ])}
+                            </div>
+
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Timestamps</h5>
+                                ${detailTable([
+                                    ['Created', data.created_at],
+                                    ['Updated', data.updated_at]
+                                ])}
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <h5>Wallet Information</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Balance:</strong></td><td>${data.balance} ${data.cryptocurrency_symbol}</td></tr>
-                            <tr><td><strong>Balance USD:</strong></td><td>${data.balance_usd}</td></tr>
-                            <tr><td><strong>Status:</strong></td><td><span class="label ${data.is_active ? 'label-success' : 'label-danger'}">${data.status_text}</span></td></tr>
-                            <tr><td><strong>Has Private Key:</strong></td><td>${data.has_private_key ? '<i class="voyager-check text-success"></i> Yes' : '<i class="voyager-x text-danger"></i> No'}</td></tr>
-                        </table>
-                        
-                        <h5>Timestamps</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Created:</strong></td><td>${data.created_at}</td></tr>
-                            <tr><td><strong>Updated:</strong></td><td>${data.updated_at}</td></tr>
-                        </table>
-                    </div>
-                </div>
-                
-                ${data.wallet_address ? `
-                <div class="row">
-                    <div class="col-md-12">
-                        <h5>Wallet Address</h5>
-                        <div class="well">
-                            <code style="font-size: 12px; word-break: break-all;">${data.wallet_address}</code>
+
+                    <div class="jf-wallet-details__section">
+                        <h5 class="jf-wallet-details__heading">Wallet Address</h5>
+                        <div class="jf-wallet-address-block">
+                            ${hasAddress ? `<code>${data.wallet_address}</code>` : '<span class="jf-wallet-details__empty">No address assigned</span>'}
                         </div>
                     </div>
                 </div>
-                ` : ''}
             `;
-            
+
             $('#walletModalBody').html(html);
         })
         .fail(function() {
@@ -355,27 +410,4 @@ function showWalletDetails(walletId) {
         });
 }
 </script>
-
-<style>
-/* Simple button styling */
-.btn-group-horizontal {
-    display: inline-block;
-}
-
-.btn-group-horizontal .btn {
-    margin-right: 5px;
-}
-
-.btn-group-horizontal .btn:last-child {
-    margin-right: 0;
-}
-
-/* Ensure buttons are properly spaced */
-.btn-sm {
-    padding: 5px 10px;
-    font-size: 12px;
-    line-height: 1.5;
-    border-radius: 3px;
-}
-</style>
 @stop

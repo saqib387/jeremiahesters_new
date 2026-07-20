@@ -8,11 +8,11 @@
             '/libs/swiper/swiper-bundle.min.css',
             '/libs/photoswipe/dist/photoswipe.css',
             '/libs/photoswipe/dist/default-skin/default-skin.css',
-            '/css/pages/bookmarks.css',
             '/css/posts/post.css',
             '/css/pages/checkout.css'
          ])->withFullUrl()
     !!}
+    <link rel="stylesheet" href="{{ asset('css/pages/bookmarks.css') }}?v=20260712c">
     @if(getSetting('feed.post_box_max_height'))
         @include('elements.feed.fixed-height-feed-posts', ['height' => getSetting('feed.post_box_max_height')])
     @endif
@@ -37,53 +37,49 @@
 @stop
 
 @section('content')
-    <div class="">
-        <div class="row">
-
-            <div class="col-12 col-md-6 col-lg-3 mb-3 settings-menu pr-0">
-                <div class="bookmarks-menu-wrapper">
-                    <div class="mt-3 ml-3">
-                        <h5 class="text-bold {{(Cookie::get('app_theme') == null ? (getSetting('site.default_user_theme') == 'dark' ? '' : 'text-dark-r') : (Cookie::get('app_theme') == 'dark' ? '' : 'text-dark-r'))}}">{{__('Bookmarks')}}</h5>
-                    </div>
-                    <hr class="mb-0">
-                    <div class="d-lg-block bookmarks-nav">
-                        <div class="d-none d-md-block">
-                            @include('elements.bookmarks.bookmarks-menu',['variant' => 'desktop'])
-                        </div>
-                        <div class="bookmarks-menu-mobile d-block d-md-none mt-3">
-                            @include('elements.bookmarks.bookmarks-menu',['variant' => 'mobile'])
-                        </div>
-                    </div>
-                </div>
+@php
+    $bmDark = Cookie::get('app_theme') == null
+        ? getSetting('site.default_user_theme') == 'dark'
+        : Cookie::get('app_theme') == 'dark';
+    $bmEmpty = $posts->count() === 0;
+    $bmActiveTab = $activeTab ?? 'all';
+@endphp
+<div class="bookmarks-page bookmarks-page--{{ $bmDark ? 'dark' : 'light' }}{{ $bmEmpty ? ' bookmarks-page--empty' : '' }}">
+    <div class="bookmarks-page__scroll">
+        <header class="bookmarks-page__header d-none d-md-flex">
+            <div class="bookmarks-page__inner">
+                <h1 class="bookmarks-page__title">{{ __('Bookmarks') }}</h1>
             </div>
+        </header>
 
-            <div class="col-12 col-md-6 col-lg-9 mb-5 mb-lg-0 min-vh-100 border-left border-right settings-content pl-md-0 pr-md-0">
-                <div class="px-2 px-md-3">
-                    @if(isset($filterType))
-                        {{$filterType}}
-                    @endif
-                </div>
+        <div class="bookmarks-page__tabs">
+            @include('elements.bookmarks.bookmarks-menu', ['activeTab' => $bmActiveTab])
+        </div>
+
+        <div class="bookmarks-page__inner">
+            <div class="bookmarks-list{{ $bmEmpty ? ' bookmarks-list--empty' : '' }}">
                 @include('elements.feed.posts-load-more')
-                <div class="feed-box mt-0  pt-4 posts-wrapper">
-                    @include('elements.feed.posts-wrapper',['posts'=>$posts])
+                <div class="feed-box posts-wrapper bookmarks-feed">
+                    @include('elements.feed.posts-wrapper', ['posts' => $posts, 'emptyVariant' => 'bookmarks'])
                 </div>
                 @include('elements.feed.posts-loading-spinner')
             </div>
-            @include('elements.checkout.checkout-box')
         </div>
     </div>
+</div>
 
-    <div class="d-none">
-        <ion-icon name="heart"></ion-icon>
-        <ion-icon name="heart-outline"></ion-icon>
-    </div>
+<div class="d-none">
+    <ion-icon name="heart"></ion-icon>
+    <ion-icon name="heart-outline"></ion-icon>
+</div>
 
-    @include('elements.standard-dialog',[
-        'dialogName' => 'comment-delete-dialog',
-        'title' => __('Delete comment'),
-        'content' => __('Are you sure you want to delete this comment?'),
-        'actionLabel' => __('Delete'),
-        'actionFunction' => 'Post.deleteComment();',
-    ])
+@include('elements.checkout.checkout-box')
 
+@include('elements.standard-dialog',[
+    'dialogName' => 'comment-delete-dialog',
+    'title' => __('Delete comment'),
+    'content' => __('Are you sure you want to delete this comment?'),
+    'actionLabel' => __('Delete'),
+    'actionFunction' => 'Post.deleteComment();',
+])
 @stop

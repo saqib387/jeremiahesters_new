@@ -1,17 +1,30 @@
-<h5 class="mt-3">{{__('Proceed with payment')}}</h5>
-<div class="input-group mb-3 mt-3">
-    <div class="input-group-prepend">
-        <span class="input-group-text" id="amount-label">@include('elements.icon',['icon'=>'cash-outline','variant'=>'medium'])</span>
+@php
+    $depositMinFormatted = \App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount(\App\Providers\PaymentsServiceProvider::getDepositMinimumAmount());
+    $depositMaxFormatted = \App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount(\App\Providers\PaymentsServiceProvider::getDepositMaximumAmount());
+@endphp
+<div class="wallet-settings__panel">
+<h5 class="wallet-settings__panel-title">{{__('Proceed with payment')}}</h5>
+<div class="wallet-settings__field">
+    <div class="wallet-settings__input-wrap">
+        <span class="wallet-settings__input-icon" id="amount-label" aria-hidden="true">
+            @include('elements.icon',['icon'=>'cash-outline','variant'=>'small','centered'=>true])
+        </span>
+        <input class="form-control wallet-settings__input"
+               placeholder="{{\App\Providers\PaymentsServiceProvider::getDepositLimitAmounts()}}"
+               aria-label="{{__('Amount')}}"
+               aria-describedby="deposit-amount-error"
+               id="deposit-amount"
+               type="number"
+               min="{{\App\Providers\PaymentsServiceProvider::getDepositMinimumAmount()}}"
+               step="1"
+               max="{{\App\Providers\PaymentsServiceProvider::getDepositMaximumAmount()}}">
     </div>
-    <input class="form-control" placeholder="{{\App\Providers\PaymentsServiceProvider::getDepositLimitAmounts()}}"
-           aria-label="{{__('Username')}}"
-           aria-describedby="amount-label"
-           id="deposit-amount"
-           type="number"
-           min="{{\App\Providers\PaymentsServiceProvider::getDepositMinimumAmount()}}"
-           step="1"
-           max="{{\App\Providers\PaymentsServiceProvider::getDepositMaximumAmount()}}">
-    <div class="invalid-feedback">{{__('Please enter a valid amount.')}}</div>
+    <div class="wallet-settings__error" id="deposit-amount-error" role="alert" aria-live="polite">
+        <span class="wallet-settings__error-icon" aria-hidden="true">
+            @include('elements.icon', ['icon' => 'alert-circle-outline', 'variant' => 'small', 'centered' => true])
+        </span>
+        <span class="wallet-settings__error-text">{{ __('Please enter an amount between :min and :max.', ['min' => $depositMinFormatted, 'max' => $depositMaxFormatted]) }}</span>
+    </div>
 </div>
 
 <div>
@@ -117,6 +130,7 @@
     </div>
     <div class="payment-error error text-danger d-none mt-3">{{__('Please select your payment method')}}</div>
     <button class="btn btn-primary btn-block rounded mr-0 mt-4 deposit-continue-btn" type="submit">{{__('Add funds')}}</button>
+</div>
 </div>
 @include('elements.uploaded-file-preview-template')
 

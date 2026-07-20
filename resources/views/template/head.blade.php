@@ -75,11 +75,12 @@
             (Cookie::get('app_rtl') == null ? (getSetting('site.default_site_direction') == 'rtl' ? '.rtl' : '') : (Cookie::get('app_rtl') == 'rtl' ? '.rtl' : '')).
             (Cookie::get('app_theme') == null ? (getSetting('site.default_user_theme') == 'dark' ? '.dark' : '') : (Cookie::get('app_theme') == 'dark' ? '.dark' : '')).
             '.css',
-            '/css/app.css',
          ],
          (isset($additionalCss) ? $additionalCss : [])
          ))->withFullUrl()
 !!}
+<link rel="stylesheet" href="{{ asset('css/app.css') }}?v=20260712a">
+<link rel="stylesheet" href="{{ asset('css/mobile-sidebar.css') }}?v=20260715b">
 
 {{-- FontAwesome (icons used by crypto/creator pages on the generic layout) --}}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

@@ -12,22 +12,41 @@
 @section('page_title', __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular'))
 
 @section('page_header')
-    <h1 class="page-title">
-        <i class="{{ $dataType->icon }}"></i>
-        {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }}
-    </h1>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="{{ $dataType->icon }}"></i>
+                </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">
+                        {{ __('voyager::generic.'.($edit ? 'edit' : 'add')).' '.$dataType->getTranslatedAttribute('display_name_singular') }}
+                    </h1>
+                    @if($edit && !empty($dataTypeContent->name))
+                        <p class="jf-dash-page-header__desc">{{ $dataTypeContent->name }}</p>
+                    @endif
+                </div>
+            </div>
+            <div class="jf-dash-page-header__actions">
+                <a href="{{ route('voyager.'.$dataType->slug.'.index') }}" class="jf-dash-btn jf-dash-btn--amber">
+                    <i class="voyager-list"></i>
+                    <span class="jf-pill-label">Back to Users</span>
+                </a>
+            </div>
+        </div>
+    </div>
     @include('voyager::multilingual.language-selector')
 @stop
 
 @section('content')
-    <div class="page-content edit-add container-fluid">
+    <div class="page-content edit-add container-fluid jf-dash-page jf-users-form-page">
         <div class="row">
             <div class="col-md-12">
 
-                <div class="panel panel-bordered">
+                <div class="panel panel-bordered jf-dash-card jf-users-form-card">
                     <!-- form start -->
                     <form role="form"
-                            class="form-edit-add"
+                            class="form-edit-add jf-admin-form"
                             action="{{ $edit ? route('voyager.'.$dataType->slug.'.update', $dataTypeContent->getKey()) : route('voyager.'.$dataType->slug.'.store') }}"
                             method="POST" enctype="multipart/form-data">
                         <!-- PUT Method if we are editing -->
@@ -38,7 +57,7 @@
                         <!-- CSRF TOKEN -->
                         {{ csrf_field() }}
 
-                        <div class="panel-body">
+                        <div class="panel-body jf-dash-card__body">
 
                         @if($dataType->slug == 'user-verifies')
                             <div class="identity-files-preview">
@@ -55,7 +74,7 @@
                             </div>
                         @endif
                         @if (count($errors) > 0)
-                                <div class="alert alert-danger">
+                                <div class="alert alert-danger jf-users-form-page__alert">
                                     <ul>
                                         @foreach ($errors->all() as $error)
                                             <li>{{ $error }}</li>
@@ -106,9 +125,16 @@
 
                         </div><!-- panel-body -->
 
-                        <div class="panel-footer">
+                        <div class="panel-footer jf-users-form__footer">
                             @section('submit-buttons')
-                                <button type="submit" class="btn btn-primary save">{{ __('voyager::generic.save') }}</button>
+                                <button type="submit" class="jf-dash-btn jf-dash-btn--green save">
+                                    <i class="voyager-check"></i>
+                                    <span class="jf-pill-label">{{ __('voyager::generic.save') }}</span>
+                                </button>
+                                <a href="{{ route('voyager.'.$dataType->slug.'.index') }}" class="jf-dash-btn jf-dash-btn--blue">
+                                    <i class="voyager-x"></i>
+                                    <span class="jf-pill-label">{{ __('voyager::generic.cancel') }}</span>
+                                </a>
                             @stop
                             @yield('submit-buttons')
                         </div>

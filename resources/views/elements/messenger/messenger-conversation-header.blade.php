@@ -1,6 +1,11 @@
 <div class="conversation-header d-none">
     <div class="details-holder">
         <div class="d-flex align-items-center">
+            <button type="button" class="conversation-header-back d-md-none" id="messenger-conversation-back" aria-label="{{ __('Back') }}">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="m15 6-6 6 6 6"/>
+                </svg>
+            </button>
             <div class="d-flex align-items-center flex-grow-1 min-w-0">
                 <img class="conversation-header-avatar" src="{{asset('/img/no-avatar.png')}}" alt="Avatar" />
                 <div class="conversation-header-user text-truncate ml-2 ml-md-3">

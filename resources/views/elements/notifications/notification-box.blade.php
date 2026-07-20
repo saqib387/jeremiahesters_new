@@ -1,15 +1,38 @@
-<div class="py-2 notification-box  pl-3 pl-md-4 {{!$notification->read?'unread':''}}">
-    <div class="d-flex flex-row-no-rtl my-1">
-        @if($notification->fromUser)
-            <div class="">
-                <img class="rounded-circle avatar" src="{{$notification->fromUser->avatar}}" alt="{{$notification->fromUser->username}}">
-            </div>
-        @else
-            <div class="">
-                <img class="rounded-circle avatar" src="{{\App\Providers\GenericHelperServiceProvider::getStorageAvatarPath(null)}}" alt="Avatar">
-            </div>
-        @endif
-        <div class="pl-3 w-100">
+@php
+    $notifBadgeIcon = 'notifications-outline';
+    $notifBadgeKind = 'default';
+    switch ($notification->type) {
+        case \App\Model\Notification::NEW_TIP:
+            $notifBadgeIcon = 'cash'; $notifBadgeKind = 'tip'; break;
+        case \App\Model\Notification::NEW_REACTION:
+            $notifBadgeIcon = 'heart'; $notifBadgeKind = 'like'; break;
+        case \App\Model\Notification::NEW_COMMENT:
+            $notifBadgeIcon = 'chatbubble-ellipses'; $notifBadgeKind = 'comment'; break;
+        case \App\Model\Notification::NEW_SUBSCRIPTION:
+            $notifBadgeIcon = 'person-add'; $notifBadgeKind = 'subscription'; break;
+        case \App\Model\Notification::WITHDRAWAL_ACTION:
+            $notifBadgeIcon = 'wallet'; $notifBadgeKind = 'tip'; break;
+        case \App\Model\Notification::NEW_MESSAGE:
+            $notifBadgeIcon = 'paper-plane'; $notifBadgeKind = 'message'; break;
+        case \App\Model\Notification::EXPIRING_STREAM:
+            $notifBadgeIcon = 'radio'; $notifBadgeKind = 'live'; break;
+        case \App\Model\Notification::PPV_UNLOCK:
+            $notifBadgeIcon = 'lock-open'; $notifBadgeKind = 'tip'; break;
+    }
+@endphp
+<div class="notifications-card notification-box {{ !$notification->read ? 'notifications-card--unread unread' : '' }}" data-notification-read="{{ $notification->read ? '1' : '0' }}">
+    <div class="notifications-card__body d-flex flex-row-no-rtl">
+        <div class="notifications-card__avatar-wrap">
+            @if($notification->fromUser)
+                <img class="rounded-circle avatar notifications-card__avatar" src="{{$notification->fromUser->avatar}}" alt="{{$notification->fromUser->username}}">
+            @else
+                <img class="rounded-circle avatar notifications-card__avatar" src="{{\App\Providers\GenericHelperServiceProvider::getStorageAvatarPath(null)}}" alt="Avatar">
+            @endif
+            <span class="notifications-card__type-badge notifications-card__type-badge--{{ $notifBadgeKind }}" aria-hidden="true">
+                @include('elements.icon',['icon'=>$notifBadgeIcon])
+            </span>
+        </div>
+        <div class="notifications-card__content">
             <div class="d-flex flex-row-no-rtl justify-content-between">
                 @if($notification->fromUser)
                     <div class="d-flex flex-column">
@@ -21,7 +44,7 @@
                 </div>
             </div>
             <div>
-                <div class="my-1 text-break pr-3 {{!$notification->read?'text-bold':''}}">
+                <div class="my-1 text-break {{!$notification->read?'text-bold':''}}">
                     @switch($notification->type)
                         @case(\App\Model\Notification::NEW_TIP)
                             @if(isset($notification->transaction))

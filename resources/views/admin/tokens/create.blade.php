@@ -3,37 +3,52 @@
 @section('page_title', 'Create Token')
 
 @section('page_header')
-    <div class="container-fluid">
-        <h1 class="page-title">
-            <i class="voyager-plus"></i> Create Token
-        </h1>
-        <a href="{{ route('voyager.tokens.index') }}" class="btn btn-warning btn-add-new">
-            <i class="voyager-list"></i> <span>Back to Tokens</span>
-        </a>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="voyager-plus"></i>
+                </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">Create Token</h1>
+                    <p class="jf-dash-page-header__desc">Add a new cryptocurrency to the platform registry</p>
+                </div>
+            </div>
+            <div class="jf-dash-page-header__actions">
+                <a href="{{ route('voyager.tokens.index') }}" class="jf-dash-btn jf-dash-btn--amber">
+                    <i class="voyager-list"></i>
+                    <span class="jf-pill-label">Back to Tokens</span>
+                </a>
+            </div>
+        </div>
     </div>
 @stop
 
 @section('content')
-    <div class="page-content edit-add container-fluid">
+    <div class="page-content edit-add container-fluid jf-dash-page jf-tokens-form-page">
         @include('voyager::alerts')
 
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-bordered">
-                    <div class="panel-body">
+                <div class="panel panel-bordered jf-dash-card jf-tokens-form-card">
+                    <div class="panel-body jf-dash-card__body">
                         <form role="form"
                               action="{{ route('voyager.tokens.store') }}"
                               method="POST"
-                              enctype="multipart/form-data">
+                              enctype="multipart/form-data"
+                              class="jf-tokens-form">
                             @csrf
 
                             <div class="row">
                                 <div class="col-md-8">
-                                    <div class="panel panel-bordered panel-info">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Basic Information</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--blue"><i class="voyager-edit"></i></span>
+                                                <span>Basic Information</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body jf-dash-card__body">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -71,11 +86,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="panel panel-bordered panel-success">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Price & Market Data</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--green"><i class="voyager-dollar"></i></span>
+                                                <span>Price &amp; Market Data</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body jf-dash-card__body">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -120,11 +138,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="panel panel-bordered panel-warning">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Supply Information</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--amber"><i class="voyager-data"></i></span>
+                                                <span>Supply Information</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body jf-dash-card__body">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -157,11 +178,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="panel panel-bordered panel-primary">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Blockchain & Contract</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--purple"><i class="voyager-world"></i></span>
+                                                <span>Blockchain &amp; Contract</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body jf-dash-card__body">
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -194,14 +218,24 @@
                                 </div>
 
                                 <div class="col-md-4">
-                                    <div class="panel panel-bordered">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Logo & Settings</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--rose"><i class="voyager-upload"></i></span>
+                                                <span>Logo &amp; Settings</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body jf-dash-card__body">
                                             <div class="form-group">
                                                 <label>Upload Logo</label>
-                                                <input type="file" name="logo" class="form-control" accept="image/*">
+                                                <div class="jf-file-upload">
+                                                    <input type="file" name="logo" id="token-logo-upload" class="jf-file-upload__input" accept="image/*">
+                                                    <label for="token-logo-upload" class="jf-file-upload__btn">
+                                                        <i class="voyager-upload"></i>
+                                                        <span>Choose File</span>
+                                                    </label>
+                                                    <span class="jf-file-upload__name" data-placeholder="No file chosen">No file chosen</span>
+                                                </div>
                                                 <small class="help-block">JPG, PNG, GIF, SVG. Max 2MB.</small>
                                             </div>
 
@@ -219,11 +253,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="panel panel-bordered panel-info">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Fee Structure</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--blue"><i class="voyager-receipt"></i></span>
+                                                <span>Fee Structure</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
+                                        <div class="panel-body jf-dash-card__body">
                                             <div class="form-group">
                                                 <label>Creator Fee % <span class="text-danger">*</span></label>
                                                 <div class="input-group">
@@ -250,40 +287,43 @@
                                         </div>
                                     </div>
 
-                                    <div class="panel panel-bordered panel-success">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Token Features</h3>
+                                    <div class="panel panel-bordered jf-dash-card jf-tokens-form-section">
+                                        <div class="panel-heading jf-dash-card__head">
+                                            <h3 class="panel-title jf-dash-card__title">
+                                                <span class="jf-dash-card__title-icon jf-dash-card__title-icon--green"><i class="voyager-check"></i></span>
+                                                <span>Token Features</span>
+                                            </h3>
                                         </div>
-                                        <div class="panel-body">
-                                            <div class="form-group">
+                                        <div class="panel-body jf-dash-card__body">
+                                            <div class="form-group jf-tokens-form__checkbox">
                                                 <label>
                                                     <input type="checkbox" name="enable_burning" value="1" {{ old('enable_burning') ? 'checked' : '' }}>
                                                     Enable Token Burning
                                                 </label>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group jf-tokens-form__checkbox">
                                                 <label>
                                                     <input type="checkbox" name="enable_minting" value="1" {{ old('enable_minting') ? 'checked' : '' }}>
                                                     Enable Token Minting
                                                 </label>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group jf-tokens-form__checkbox">
                                                 <label>
                                                     <input type="checkbox" name="transferable" value="1" {{ old('transferable', true) ? 'checked' : '' }}>
                                                     Transferable
                                                 </label>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group jf-tokens-form__checkbox">
                                                 <label>
                                                     <input type="checkbox" name="is_verified" value="1" {{ old('is_verified') ? 'checked' : '' }}>
                                                     Verified Token
                                                 </label>
                                             </div>
 
-                                            <div class="form-group">
+                                            <div class="form-group jf-tokens-form__checkbox">
                                                 <label>
                                                     <input type="checkbox" name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
                                                     Active Token
@@ -294,12 +334,14 @@
                                 </div>
                             </div>
 
-                            <div class="panel-footer">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="voyager-check"></i> Create Token
+                            <div class="panel-footer jf-tokens-form__footer">
+                                <button type="submit" class="jf-dash-btn jf-dash-btn--green">
+                                    <i class="voyager-check"></i>
+                                    <span class="jf-pill-label">Create Token</span>
                                 </button>
-                                <a href="{{ route('voyager.tokens.index') }}" class="btn btn-default">
-                                    <i class="voyager-x"></i> Cancel
+                                <a href="{{ route('voyager.tokens.index') }}" class="jf-dash-btn jf-dash-btn--blue">
+                                    <i class="voyager-x"></i>
+                                    <span class="jf-pill-label">Cancel</span>
                                 </a>
                             </div>
                         </form>
@@ -325,6 +367,16 @@ $(document).ready(function() {
         if (!currentPrice.val() || parseFloat(currentPrice.val()) === 0) {
             currentPrice.val($(this).val());
         }
+    });
+
+    $('#token-logo-upload').on('change', function() {
+        var $wrap = $(this).closest('.jf-file-upload');
+        var $name = $wrap.find('.jf-file-upload__name');
+        var placeholder = $name.data('placeholder') || 'No file chosen';
+        var fileName = this.files && this.files.length ? this.files[0].name : '';
+
+        $name.text(fileName || placeholder);
+        $name.toggleClass('is-selected', !!fileName);
     });
 });
 </script>

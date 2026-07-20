@@ -3,54 +3,68 @@
 @section('page_title', 'Platform Dashboard')
 
 @section('page_header')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-8">
-                <h1 class="page-title">
-                    <i class="voyager-dashboard"></i> Platform Dashboard
-                </h1>
-                <p class="page-description">Overview of your cryptocurrency platform</p>
-            </div>
-            <div class="col-md-4 text-right">
-                <div class="btn-group">
-                    <button class="btn btn-primary" onclick="refreshDashboard()">
-                        <i class="voyager-refresh"></i> Refresh
-                    </button>
-                    <button class="btn btn-success" onclick="exportSummary()">
-                        <i class="voyager-download"></i> Export
-                    </button>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="voyager-dashboard"></i>
                 </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">Platform Dashboard</h1>
+                    <p class="jf-dash-page-header__desc">Overview of your cryptocurrency platform</p>
+                </div>
+            </div>
+            <div class="jf-dash-page-header__actions">
+                <button type="button" class="jf-dash-btn jf-dash-btn--blue" onclick="refreshDashboard()">
+                    <i class="voyager-refresh"></i>
+                    <span class="jf-pill-label">Refresh</span>
+                </button>
+                <button type="button" class="jf-dash-btn jf-dash-btn--green" onclick="exportSummary()">
+                    <i class="voyager-download"></i>
+                    <span class="jf-pill-label">Export</span>
+                </button>
             </div>
         </div>
     </div>
 @stop
 
 @section('content')
-    <div class="page-content browse container-fluid">
+@php
+    $totalUsers = $overviewStats['total_users'] ?? 0;
+    $totalTokens = $overviewStats['total_tokens'] ?? 0;
+    $verifiedTokens = $overviewStats['verified_tokens'] ?? 0;
+    $activeWallets = $overviewStats['active_wallets'] ?? 0;
+    $totalWallets = $overviewStats['total_wallets'] ?? 0;
+    $activeUsersPct = $quickStats['active_users_percentage'] ?? 0;
+    $tokenVerifiedPct = $totalTokens > 0 ? ($verifiedTokens / $totalTokens) * 100 : 0;
+    $walletActivePct = $totalWallets > 0 ? ($activeWallets / $totalWallets) * 100 : 0;
+    $distEfficiency = $quickStats['distribution_efficiency'] ?? 0;
+@endphp
+    <div class="page-content browse container-fluid jf-dash-page">
         @include('voyager::alerts')
         @include('admin.dashboard.partials.section-nav')
         
         <!-- Platform Health Banner -->
         <div class="row">
             <div class="col-md-12">
-                <div class="panel" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none;">
+                <div class="panel jf-hero-panel">
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-8">
-                                <h3 style="color: white; margin-top: 0;">
-                                    <i class="voyager-activity"></i> Platform Health Score: 
+                                <h3 style="margin-top: 0;">
+                                    <i class="voyager-activity"></i> Platform Health Score:
                                     <span id="health-score">{{ $overviewStats['platform_health_score'] ?? 85 }}</span>%
                                 </h3>
-                                <p style="color: rgba(255,255,255,0.8);">
+                                <p>
                                     Real-time monitoring of your cryptocurrency platform performance
                                     <span id="last-updated" style="font-size: 12px;">• Last updated: {{ now()->format('H:i:s') }}</span>
                                 </p>
                             </div>
                             <div class="col-md-4 text-right">
-                                <div style="font-size: 24px; margin-top: 10px;">
+                                <div style="margin-top: 10px;">
                                     <i class="voyager-trophy" style="margin-right: 10px;"></i>
-                                    <span style="font-size: 14px;">Total Platform Value</span><br>
-                                    <strong>${{ number_format(($quickStats['total_platform_value'] ?? 0), 2) }}</strong>
+                                    <span class="jf-hero-panel__label">Total Platform Value</span><br>
+                                    <span class="jf-hero-panel__value">${{ number_format(($quickStats['total_platform_value'] ?? 0), 2) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -61,52 +75,47 @@
 
         <!-- Key Metrics Cards -->
         <div class="row">
-            <!-- Users & Platform -->
             <div class="col-md-3">
-                <div class="panel widget center bgimage" style="background-color:#3498db;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4 id="total-users">{{ number_format($overviewStats['total_users'] ?? 0) }}</h4>
-                        <p>Total Users</p>
-                        <small>+{{ $overviewStats['new_users_today'] ?? 0 }} today</small>
-                    </div>
-                </div>
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-people',
+                    'accent' => '#4f8cff',
+                    'label' => 'Total Users',
+                    'value' => number_format($totalUsers),
+                    'footer' => '+' . number_format($overviewStats['new_users_today'] ?? 0) . ' today',
+                    'valueId' => 'total-users',
+                ])
             </div>
-            
-            <!-- Tokens -->
+
             <div class="col-md-3">
-                <div class="panel widget center bgimage" style="background-color:#2ecc71;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($overviewStats['total_tokens'] ?? 0) }}</h4>
-                        <p>Total Tokens</p>
-                        <small>{{ $overviewStats['verified_tokens'] ?? 0 }} verified</small>
-                    </div>
-                </div>
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-trophy',
+                    'accent' => '#22c55e',
+                    'label' => 'Total Tokens',
+                    'value' => number_format($totalTokens),
+                    'footer' => number_format($verifiedTokens) . ' verified',
+                ])
             </div>
-            
-            <!-- Wallets -->
+
             <div class="col-md-3">
-                <div class="panel widget center bgimage" style="background-color:#f39c12;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4 id="active-wallets">{{ number_format($overviewStats['active_wallets'] ?? 0) }}</h4>
-                        <p>Active Wallets</p>
-                        <small>${{ number_format($overviewStats['total_wallet_balance_usd'] ?? 0, 0) }} total value</small>
-                    </div>
-                </div>
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-wallet',
+                    'accent' => '#f59e0b',
+                    'label' => 'Active Wallets',
+                    'value' => number_format($activeWallets),
+                    'footer' => '$' . number_format($overviewStats['total_wallet_balance_usd'] ?? 0, 0) . ' total value',
+                    'valueId' => 'active-wallets',
+                ])
             </div>
-            
-            <!-- Revenue -->
+
             <div class="col-md-3">
-                <div class="panel widget center bgimage" style="background-color:#e74c3c;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4 id="pending-distributions">{{ number_format($overviewStats['pending_distributions'] ?? 0) }}</h4>
-                        <p>Pending Distributions</p>
-                        <small id="overdue-count">{{ $overviewStats['overdue_distributions'] ?? 0 }} overdue</small>
-                    </div>
-                </div>
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-dollar',
+                    'accent' => '#f472b6',
+                    'label' => 'Pending Distributions',
+                    'value' => number_format($overviewStats['pending_distributions'] ?? 0),
+                    'footer' => '<span id="overdue-count">' . number_format($overviewStats['overdue_distributions'] ?? 0) . ' overdue</span>',
+                    'valueId' => 'pending-distributions',
+                ])
             </div>
         </div>
 
@@ -114,23 +123,18 @@
         @if(!empty($alerts))
         <div class="row" id="platform-alerts-row">
             <div class="col-md-12">
-                <div class="panel panel-bordered" id="platform-alerts-panel">
-                    <div class="panel-heading">
+                <div class="panel panel-bordered jf-platform-alerts" id="platform-alerts-panel">
+                    <div class="panel-heading jf-platform-alerts__head">
                         <h3 class="panel-title platform-alerts-title">
-                            <i class="voyager-warning"></i> Platform Alerts
+                            <span class="platform-alerts-title__icon" aria-hidden="true">
+                                <i class="voyager-warning"></i>
+                            </span>
+                            <span class="platform-alerts-title__text">Platform Alerts</span>
                         </h3>
                     </div>
                     <div class="panel-body platform-alerts-body">
                         @foreach($alerts as $alert)
-                            <div class="alert alert-{{ $alert['type'] }} alert-dismissible platform-alert-item">
-                                <button type="button" class="close" data-dismiss="alert">&times;</button>
-                                <strong>{{ $alert['title'] }}</strong> {{ $alert['message'] }}
-                                @if($alert['action_url'])
-                                    <a href="{{ $alert['action_url'] }}" class="btn btn-sm btn-{{ $alert['type'] }} pull-right">
-                                        {{ $alert['action_text'] }}
-                                    </a>
-                                @endif
-                            </div>
+                            @include('admin.dashboard.partials.platform-alert-item', ['alert' => $alert])
                         @endforeach
                     </div>
                 </div>
@@ -139,37 +143,40 @@
         @endif
 
         <!-- Quick Actions & Recent Activity -->
-        <div class="row">
+        <div class="row jf-dash-cards-row">
             <!-- Quick Actions -->
             <div class="col-md-4">
-                <div class="panel panel-bordered">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <i class="voyager-rocket"></i> Quick Actions
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--actions">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--purple"><i class="voyager-rocket"></i></span>
+                            <span>Quick Actions</span>
                         </h3>
                     </div>
-                    <div class="panel-body">
-                        <div class="list-group">
-                            <a href="{{ route('voyager.tokens.index') }}" class="list-group-item">
-                                <i class="voyager-trophy text-primary"></i>
-                                <strong>Manage Tokens</strong>
-                                <span class="pull-right">{{ $overviewStats['total_tokens'] ?? 0 }}</span>
-                            </a>
-                            <a href="{{ route('voyager.wallets.index') }}" class="list-group-item">
-                                <i class="voyager-wallet text-success"></i>
-                                <strong>View Wallets</strong>
-                                <span class="pull-right">{{ $overviewStats['total_wallets'] ?? 0 }}</span>
-                            </a>
-                            <a href="{{ route('voyager.revenue.index', ['status' => 'pending']) }}" class="list-group-item">
-                                <i class="voyager-dollar text-warning"></i>
-                                <strong>Pending Distributions</strong>
-                                <span class="pull-right">{{ $overviewStats['pending_distributions'] ?? 0 }}</span>
-                            </a>
-                            <a href="{{ route('voyager.revenue.index', ['status' => 'overdue']) }}" class="list-group-item">
-                                <i class="voyager-exclamation text-danger"></i>
-                                <strong>Overdue Distributions</strong>
-                                <span class="pull-right">{{ $overviewStats['overdue_distributions'] ?? 0 }}</span>
-                            </a>
+                    <div class="panel-body jf-dash-card__body">
+                        <div class="jf-dash-card__content">
+                            <div class="jf-quick-actions">
+                                <a href="{{ route('voyager.tokens.index') }}" class="jf-quick-action jf-quick-action--blue">
+                                    <span class="jf-quick-action__icon"><i class="voyager-trophy"></i></span>
+                                    <span class="jf-quick-action__label">Manage Tokens</span>
+                                    <span class="jf-quick-action__count">{{ $overviewStats['total_tokens'] ?? 0 }}</span>
+                                </a>
+                                <a href="{{ route('voyager.wallets.index') }}" class="jf-quick-action jf-quick-action--green">
+                                    <span class="jf-quick-action__icon"><i class="voyager-wallet"></i></span>
+                                    <span class="jf-quick-action__label">View Wallets</span>
+                                    <span class="jf-quick-action__count">{{ $overviewStats['total_wallets'] ?? 0 }}</span>
+                                </a>
+                                <a href="{{ route('voyager.revenue.index', ['status' => 'pending']) }}" class="jf-quick-action jf-quick-action--amber">
+                                    <span class="jf-quick-action__icon"><i class="voyager-dollar"></i></span>
+                                    <span class="jf-quick-action__label">Pending Distributions</span>
+                                    <span class="jf-quick-action__count">{{ $overviewStats['pending_distributions'] ?? 0 }}</span>
+                                </a>
+                                <a href="{{ route('voyager.revenue.index', ['status' => 'overdue']) }}" class="jf-quick-action jf-quick-action--rose">
+                                    <span class="jf-quick-action__icon"><i class="voyager-exclamation"></i></span>
+                                    <span class="jf-quick-action__label">Overdue Distributions</span>
+                                    <span class="jf-quick-action__count">{{ $overviewStats['overdue_distributions'] ?? 0 }}</span>
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,41 +184,49 @@
 
             <!-- Recent Tokens -->
             <div class="col-md-4">
-                <div class="panel panel-bordered">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <i class="voyager-trophy"></i> Recent Tokens
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--tokens">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--blue"><i class="voyager-trophy"></i></span>
+                            <span>Recent Tokens</span>
                         </h3>
                     </div>
-                    <div class="panel-body">
-                        @if(!empty($recentActivity['recent_tokens']) && $recentActivity['recent_tokens']->count() > 0)
-                            @foreach($recentActivity['recent_tokens'] as $token)
-                                <div class="media" style="margin-bottom: 10px;">
-                                    @if($token->logo)
-                                        <div class="media-left">
-                                            <img src="{{ Storage::url($token->logo) }}" 
-                                                 alt="{{ $token->name }}" 
-                                                 style="width: 30px; height: 30px; border-radius: 50%;">
+                    <div class="panel-body jf-dash-card__body">
+                        <div class="jf-dash-card__content">
+                            @if(!empty($recentActivity['recent_tokens']) && $recentActivity['recent_tokens']->count() > 0)
+                                <div class="jf-feed-list">
+                                    @foreach($recentActivity['recent_tokens'] as $token)
+                                        <div class="jf-feed-item">
+                                            @if($token->logo)
+                                                <div class="jf-feed-item__avatar">
+                                                    <img src="{{ Storage::url($token->logo) }}" alt="{{ $token->name }}">
+                                                </div>
+                                            @else
+                                                <div class="jf-feed-item__avatar jf-feed-item__avatar--placeholder">
+                                                    <i class="voyager-trophy"></i>
+                                                </div>
+                                            @endif
+                                            <div class="jf-feed-item__body">
+                                                <div class="jf-feed-item__title">
+                                                    {{ $token->name }}
+                                                    <span class="jf-feed-item__symbol">({{ $token->symbol }})</span>
+                                                    @if($token->is_verified)
+                                                        <i class="voyager-check jf-feed-item__verified"></i>
+                                                    @endif
+                                                </div>
+                                                <div class="jf-feed-item__meta">
+                                                    {{ $token->created_at ? $token->created_at->diffForHumans() : 'Unknown' }}
+                                                </div>
+                                            </div>
                                         </div>
-                                    @endif
-                                    <div class="media-body">
-                                        <strong>{{ $token->name }}</strong>
-                                        <small class="text-muted">({{ $token->symbol }})</small>
-                                        @if($token->is_verified)
-                                            <i class="voyager-check text-success"></i>
-                                        @endif
-                                        <br>
-                                        <small class="text-muted">
-                                            {{ $token->created_at ? $token->created_at->diffForHumans() : 'Unknown' }}
-                                        </small>
-                                    </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        @else
-                            <p class="text-muted">No recent tokens found.</p>
-                        @endif
-                        <div class="text-center" style="margin-top: 10px;">
-                            <a href="{{ route('voyager.tokens.index') }}" class="btn btn-sm btn-primary">
+                            @else
+                                <div class="jf-dash-card__empty">No recent tokens found.</div>
+                            @endif
+                        </div>
+                        <div class="jf-dash-card__footer">
+                            <a href="{{ route('voyager.tokens.index') }}" class="jf-dash-card__btn jf-dash-card__btn--blue">
                                 View All Tokens
                             </a>
                         </div>
@@ -221,35 +236,45 @@
 
             <!-- Recent Distributions -->
             <div class="col-md-4">
-                <div class="panel panel-bordered">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <i class="voyager-dollar"></i> Recent Distributions
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--distributions">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--green"><i class="voyager-dollar"></i></span>
+                            <span>Recent Distributions</span>
                         </h3>
                     </div>
-                    <div class="panel-body">
-                        @if(!empty($recentActivity['recent_distributions']) && $recentActivity['recent_distributions']->count() > 0)
-                            @foreach($recentActivity['recent_distributions'] as $distribution)
-                                <div style="margin-bottom: 10px; padding: 8px; border-left: 3px solid #2ecc71;">
-                                    <strong>${{ number_format($distribution->distribution_amount, 2) }}</strong>
-                                    @if($distribution->cryptocurrency)
-                                        <small>({{ $distribution->cryptocurrency->symbol }})</small>
-                                    @endif
-                                    <br>
-                                    @if($distribution->user)
-                                        <small class="text-muted">{{ $distribution->user->name }}</small><br>
-                                    @endif
-                                    <small class="text-success">
-                                        <i class="voyager-check"></i>
-                                        {{ $distribution->distributed_at ? $distribution->distributed_at->diffForHumans() : 'Recently' }}
-                                    </small>
+                    <div class="panel-body jf-dash-card__body">
+                        <div class="jf-dash-card__content">
+                            @if(!empty($recentActivity['recent_distributions']) && $recentActivity['recent_distributions']->count() > 0)
+                                <div class="jf-feed-list">
+                                    @foreach($recentActivity['recent_distributions'] as $distribution)
+                                        <div class="jf-feed-item jf-feed-item--distribution">
+                                            <div class="jf-feed-item__avatar jf-feed-item__avatar--green">
+                                                <i class="voyager-check"></i>
+                                            </div>
+                                            <div class="jf-feed-item__body">
+                                                <div class="jf-feed-item__title">
+                                                    ${{ number_format($distribution->distribution_amount, 2) }}
+                                                    @if($distribution->cryptocurrency)
+                                                        <span class="jf-feed-item__symbol">({{ $distribution->cryptocurrency->symbol }})</span>
+                                                    @endif
+                                                </div>
+                                                <div class="jf-feed-item__meta">
+                                                    @if($distribution->user)
+                                                        {{ $distribution->user->name }} ·
+                                                    @endif
+                                                    {{ $distribution->distributed_at ? $distribution->distributed_at->diffForHumans() : 'Recently' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        @else
-                            <p class="text-muted">No recent distributions found.</p>
-                        @endif
-                        <div class="text-center" style="margin-top: 10px;">
-                            <a href="{{ route('voyager.revenue.index', ['status' => 'distributed']) }}" class="btn btn-sm btn-success">
+                            @else
+                                <div class="jf-dash-card__empty">No recent distributions found.</div>
+                            @endif
+                        </div>
+                        <div class="jf-dash-card__footer">
+                            <a href="{{ route('voyager.revenue.index', ['status' => 'distributed']) }}" class="jf-dash-card__btn jf-dash-card__btn--green">
                                 View All Distributions
                             </a>
                         </div>
@@ -259,41 +284,34 @@
         </div>
 
         <!-- Performance Metrics -->
-        <div class="row">
+        <div class="row jf-dash-cards-row">
             <!-- Market Overview -->
             <div class="col-md-6">
-                <div class="panel panel-bordered">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <i class="voyager-bar-chart"></i> Market Overview
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--market">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--blue"><i class="voyager-bar-chart"></i></span>
+                            <span>Market Overview</span>
                         </h3>
                     </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="metric-box text-center">
-                                    <h4 class="text-primary">${{ number_format($overviewStats['total_market_cap'] ?? 0, 0) }}</h4>
-                                    <p class="text-muted">Total Market Cap</p>
+                    <div class="panel-body jf-dash-card__body">
+                        <div class="jf-dash-card__content">
+                            <div class="jf-metric-grid">
+                                <div class="jf-metric-tile jf-metric-tile--blue">
+                                    <div class="jf-metric-tile__value">${{ number_format($overviewStats['total_market_cap'] ?? 0, 0) }}</div>
+                                    <div class="jf-metric-tile__label">Total Market Cap</div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="metric-box text-center">
-                                    <h4 class="text-success">${{ number_format($overviewStats['total_distributed_amount'] ?? 0, 0) }}</h4>
-                                    <p class="text-muted">Total Distributed</p>
+                                <div class="jf-metric-tile jf-metric-tile--green">
+                                    <div class="jf-metric-tile__value">${{ number_format($overviewStats['total_distributed_amount'] ?? 0, 0) }}</div>
+                                    <div class="jf-metric-tile__label">Total Distributed</div>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="metric-box text-center">
-                                    <h4 class="text-info">{{ number_format($quickStats['active_users_percentage'] ?? 0, 1) }}%</h4>
-                                    <p class="text-muted">Active Users</p>
+                                <div class="jf-metric-tile jf-metric-tile--teal">
+                                    <div class="jf-metric-tile__value">{{ number_format($quickStats['active_users_percentage'] ?? 0, 1) }}%</div>
+                                    <div class="jf-metric-tile__label">Active Users</div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="metric-box text-center">
-                                    <h4 class="text-warning">{{ number_format($quickStats['distribution_efficiency'] ?? 0, 1) }}%</h4>
-                                    <p class="text-muted">Distribution Efficiency</p>
+                                <div class="jf-metric-tile jf-metric-tile--amber">
+                                    <div class="jf-metric-tile__value">{{ number_format($quickStats['distribution_efficiency'] ?? 0, 1) }}%</div>
+                                    <div class="jf-metric-tile__label">Distribution Efficiency</div>
                                 </div>
                             </div>
                         </div>
@@ -303,45 +321,55 @@
 
             <!-- High Priority Items -->
             <div class="col-md-6">
-                <div class="panel panel-bordered">
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            <i class="voyager-exclamation"></i> High Priority Items
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--priority">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--rose"><i class="voyager-exclamation"></i></span>
+                            <span>High Priority Items</span>
                         </h3>
                     </div>
-                    <div class="panel-body">
-                        @if(!empty($recentActivity['pending_high_priority']) && $recentActivity['pending_high_priority']->count() > 0)
-                            @foreach($recentActivity['pending_high_priority'] as $priority)
-                                <div style="margin-bottom: 10px; padding: 8px; border-left: 3px solid #e74c3c;">
-                                    <strong>${{ number_format($priority->distribution_amount, 2) }}</strong>
-                                    @if($priority->cryptocurrency)
-                                        <small>({{ $priority->cryptocurrency->symbol }})</small>
-                                    @endif
-                                    @if($priority->created_at && $priority->created_at->diffInDays(now()) > 30)
-                                        <span class="label label-danger">OVERDUE</span>
-                                    @elseif($priority->distribution_amount > 1000)
-                                        <span class="label label-warning">HIGH VALUE</span>
-                                    @endif
-                                    <br>
-                                    @if($priority->user)
-                                        <small class="text-muted">{{ $priority->user->name }}</small><br>
-                                    @endif
-                                    <small class="text-danger">
-                                        <i class="voyager-clock"></i>
-                                        {{ $priority->created_at ? $priority->created_at->diffForHumans() : 'Unknown date' }}
-                                    </small>
+                    <div class="panel-body jf-dash-card__body">
+                        <div class="jf-dash-card__content">
+                            @if(!empty($recentActivity['pending_high_priority']) && $recentActivity['pending_high_priority']->count() > 0)
+                                <div class="jf-feed-list">
+                                    @foreach($recentActivity['pending_high_priority'] as $priority)
+                                        <div class="jf-feed-item jf-priority-item">
+                                            <div class="jf-feed-item__avatar jf-feed-item__avatar--rose">
+                                                <i class="voyager-clock"></i>
+                                            </div>
+                                            <div class="jf-feed-item__body">
+                                                <div class="jf-feed-item__title">
+                                                    ${{ number_format($priority->distribution_amount, 2) }}
+                                                    @if($priority->cryptocurrency)
+                                                        <span class="jf-feed-item__symbol">({{ $priority->cryptocurrency->symbol }})</span>
+                                                    @endif
+                                                    @if($priority->created_at && $priority->created_at->diffInDays(now()) > 30)
+                                                        <span class="jf-priority-badge jf-priority-badge--danger">Overdue</span>
+                                                    @elseif($priority->distribution_amount > 1000)
+                                                        <span class="jf-priority-badge jf-priority-badge--warning">High Value</span>
+                                                    @endif
+                                                </div>
+                                                <div class="jf-feed-item__meta">
+                                                    @if($priority->user)
+                                                        {{ $priority->user->name }} ·
+                                                    @endif
+                                                    {{ $priority->created_at ? $priority->created_at->diffForHumans() : 'Unknown date' }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
                                 </div>
-                            @endforeach
-                        @else
-                            <div class="text-center">
-                                <i class="voyager-check text-success" style="font-size: 48px;"></i>
-                                <p class="text-success"><strong>All Clear!</strong></p>
-                                <p class="text-muted">No high priority items requiring attention.</p>
-                            </div>
-                        @endif
+                            @else
+                                <div class="jf-priority-clear">
+                                    <div class="jf-priority-clear__icon"><i class="voyager-check"></i></div>
+                                    <div class="jf-priority-clear__title">All Clear!</div>
+                                    <div class="jf-priority-clear__text">No high priority items requiring attention.</div>
+                                </div>
+                            @endif
+                        </div>
                         @if(!empty($recentActivity['pending_high_priority']) && $recentActivity['pending_high_priority']->count() > 0)
-                            <div class="text-center" style="margin-top: 10px;">
-                                <a href="{{ route('voyager.revenue.index', ['status' => 'overdue']) }}" class="btn btn-sm btn-danger">
+                            <div class="jf-dash-card__footer">
+                                <a href="{{ route('voyager.revenue.index', ['status' => 'overdue']) }}" class="jf-dash-card__btn jf-dash-card__btn--rose">
                                     View All High Priority
                                 </a>
                             </div>
@@ -419,9 +447,9 @@ function toggleAutoRefresh() {
 function updateRealtimeStats() {
     $.get('{{ route("voyager.dashboard.realtime-stats") }}')
         .done(function(data) {
-            $('#pending-distributions').text(data.pending_distributions.toLocaleString());
-            $('#overdue-count').text(data.overdue_distributions + ' overdue');
-            $('#active-wallets').text(data.active_wallets.toLocaleString());
+            $('#pending-distributions').text(Number(data.pending_distributions).toLocaleString());
+            $('#overdue-count').text(Number(data.overdue_distributions).toLocaleString() + ' overdue');
+            $('#active-wallets').text(Number(data.active_wallets).toLocaleString());
             $('#health-score').text(data.platform_health_score);
             $('#last-updated').text('• Last updated: ' + data.last_updated);
             $('#refresh-time').text(new Date().toLocaleString());
@@ -440,73 +468,5 @@ function exportSummary() {
     window.location.href = '{{ route("voyager.dashboard.export") }}';
     toastr.info('Exporting dashboard summary...');
 }
-
-// Add some visual feedback
-$('.panel.widget').hover(
-    function() { $(this).addClass('animated pulse'); },
-    function() { $(this).removeClass('animated pulse'); }
-);
 </script>
-
-<style>
-.metric-box {
-    padding: 15px;
-    margin-bottom: 15px;
-}
-
-.metric-box h4 {
-    margin: 0 0 5px 0;
-    font-weight: bold;
-}
-
-.metric-box p {
-    margin: 0;
-    font-size: 12px;
-}
-
-.panel.widget {
-    transition: transform 0.2s;
-}
-
-.panel.widget:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-}
-
-.list-group-item {
-    border: none;
-    padding: 10px 15px;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.list-group-item:hover {
-    background-color: #f8f9fa;
-}
-
-.alert {
-    margin-bottom: 10px;
-}
-
-/* Tighten heading → first alert; hide empty panel when all alerts dismissed */
-.platform-alerts-body {
-    padding-top: 10px;
-}
-.platform-alerts-body .platform-alert-item:first-child {
-    margin-top: 0;
-}
-
-.media {
-    align-items: center;
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.05); }
-    100% { transform: scale(1); }
-}
-
-.animated.pulse {
-    animation: pulse 1s;
-}
-</style>
 @stop

@@ -23,6 +23,8 @@
 {{-- Page specific JS --}}
 @yield('scripts')
 
+<script src="{{ asset('js/mobile-sidebar.js') }}?v=20260715b"></script>
+
 <script type="module" src="{{asset('/libs/ionicons/dist/ionicons/ionicons.esm.js')}}"></script>
 <script nomodule src="{{asset('/libs/ionicons/dist/ionicons/ionicons.js')}}"></script>
 

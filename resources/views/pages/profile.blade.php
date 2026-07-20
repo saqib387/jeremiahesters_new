@@ -22,6 +22,7 @@
             '/libs/photoswipe/dist/photoswipe-ui-default.min.js',
             '/js/plugins/media/mediaswipe.js',
             '/js/plugins/media/mediaswipe-loader.js',
+            '/js/LoginModal.js',
             '/js/messenger/messenger.js',
          ],$additionalAssets))->withFullUrl()
     !!}
@@ -33,6 +34,7 @@
             '/css/pages/profile.css',
             '/css/pages/checkout.css',
             '/css/pages/lists.css',
+            '/css/pages/auth.css',
             '/libs/swiper/swiper-bundle.min.css',
             '/libs/photoswipe/dist/photoswipe.css',
             '/libs/photoswipe/dist/default-skin/default-skin.css',
@@ -55,8 +57,14 @@
     @endif
 @stop
 
+@php
+    $isDarkTheme = Cookie::get('app_theme') == null
+        ? getSetting('site.default_user_theme') == 'dark'
+        : Cookie::get('app_theme') == 'dark';
+@endphp
+
 @section('content')
-    <div class="row">
+    <div class="row profile-page-v2 {{ $isDarkTheme ? 'profile-page-v2--dark' : 'profile-page-v2--light' }}">
         <div class="min-vh-100 col-12 col-md-8 border-right pr-md-0">
 
             <div class="">
@@ -500,8 +508,9 @@
         @include('elements.lists.list-add-user-dialog',['user_id' => $user->id, 'lists' => ListsHelper::getUserLists()])
         @include('elements.checkout.checkout-box')
         @include('elements.messenger.send-user-message',['receiver'=>$user])
+    @else
+        @include('elements.modal-login')
     @endif
-    {{-- Guest login modal (#login-dialog) is now included globally in layouts/generic.blade.php --}}
 
     @include('elements.profile.qr-code-dialog')
 
@@ -525,27 +534,32 @@
 
     <style>
         /* TikTok-style tabs - icons only */
+        .tiktok-style-tabs {
+            border-bottom: 1px solid var(--pf-border, rgba(255,255,255,0.08));
+        }
+
         .tiktok-style-tabs .nav-link {
             padding: 15px;
             font-size: 24px;
             border: none;
+            border-bottom: 2px solid transparent;
             background: transparent;
-            color: #8e8e8e;
-            transition: all 0.3s ease;
+            color: var(--pf-text-muted, #71717a);
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 60px;
+            min-height: 58px;
         }
         
-        .tiktok-style-tabs .nav-link.active {
-            color: #000;
-            border-bottom: 2px solid #000;
+        .profile-page-v2 .tiktok-style-tabs .nav-link.active {
+            color: var(--pf-accent, #cb0c9f);
+            border-bottom: 2px solid var(--pf-accent, #cb0c9f);
             background: transparent;
         }
         
-        .tiktok-style-tabs .nav-link:hover {
-            color: #000;
+        .profile-page-v2 .tiktok-style-tabs .nav-link:hover {
+            color: var(--pf-text, #f4f4f5);
             background: transparent;
         }
         
@@ -557,30 +571,31 @@
         .videos-grid-container,
         .reposts-grid-container {
             padding: 0;
-            background: #fff;
+            background: transparent;
         }
         
         .videos-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1px;
+            gap: 4px;
             margin: 0;
-            background: #fff;
+            background: transparent;
         }
         
         .video-grid-item {
             position: relative;
             aspect-ratio: 9/16;
-            background: #f8f9fa;
+            background: var(--pf-surface-muted, #1c1c24);
             cursor: pointer;
             overflow: hidden;
+            border-radius: 10px;
             transition: transform 0.2s ease;
             height: 0;
             padding-bottom: 177.78%; /* 16:9 aspect ratio = 56.25%, 9:16 = 177.78% */
         }
         
         .video-grid-item:hover {
-            transform: scale(1.02);
+            transform: translateY(-2px);
         }
         
         .video-thumbnail {

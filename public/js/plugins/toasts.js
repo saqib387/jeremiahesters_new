@@ -88,33 +88,38 @@
             hideAfter = `data-hide-after="${Math.floor(Date.now() / 1000) + (opts.delay / 1000)}"`;
         }
 
-        html = `<div id="${id}" class="toast ${globalToastStyles}" role="alert" aria-live="assertive" aria-atomic="true" ${delayOrAutohide} ${hideAfter}>`;
-        html += `<div class="toast-header ${classes.header.bg} ${classes.header.fg}">`;
+        let indicatorType = type === 'danger' ? 'error' : (type || 'info');
+        if (indicator && indicator.type) {
+            indicatorType = indicator.type === 'danger' ? 'error' : indicator.type;
+        }
+
+        html = `<div id="${id}" class="toast st-toast st-toast--${indicatorType} ${globalToastStyles}" role="alert" aria-live="assertive" aria-atomic="true" ${delayOrAutohide} ${hideAfter}>`;
+        html += `<div class="toast-header st-toast__header">`;
 
         if (img) {
             html += `<img src="${img.src}" class="mr-2 ${img.class || ''}" alt="${img.alt || 'Image'}">`;
         }
 
         if (indicator) {
-            html += `<div class="toast-indicator bg-gradient-${indicator.type} mr-2 rounded"></div>`;
+            html += `<div class="st-toast__icon st-toast__icon--${indicatorType}" aria-hidden="true"></div>`;
         }
 
-        html += `<strong class="mr-auto">${title}</strong>`;
+        html += `<strong class="st-toast__title mr-auto">${title}</strong>`;
 
         if (subtitle) {
-            html += `<small class="${classes.subtitle}">${subtitle}</small>`;
+            html += `<small class="st-toast__subtitle">${subtitle}</small>`;
         }
 
         if (dismissible) {
-            html += `<button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                        <span aria-hidden="true" class="${classes.dismiss}">&times;</span>
+            html += `<button type="button" class="st-toast__close close" data-dismiss="toast" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
                     </button>`;
         }
 
         html += `</div>`;
 
         if (content) {
-            html += `<div class="toast-body">
+            html += `<div class="toast-body st-toast__body">
                         ${content}
                     </div>`;
         }

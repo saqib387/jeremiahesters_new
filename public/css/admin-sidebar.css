@@ -1,0 +1,1262 @@
+/* JustFans Admin Sidebar — dark glass theme, YouTube-style rail */
+
+:root {
+    --jf-sidebar-mini: 72px;
+    --jf-sidebar-full: 256px;
+    --jf-sidebar-bg: #1e222d;
+    --jf-sidebar-bg-glass: rgba(30, 34, 45, 0.72);
+    --jf-sidebar-surface: rgba(255, 255, 255, 0.07);
+    --jf-sidebar-border: rgba(255, 255, 255, 0.1);
+    --jf-sidebar-text: #ffffff;
+    --jf-sidebar-muted: #8e9199;
+    --jf-sidebar-hover: rgba(255, 255, 255, 0.09);
+    --jf-sidebar-active: #cb0c9f;
+    --jf-sidebar-active-soft: rgba(203, 12, 159, 0.22);
+    --jf-sidebar-accent: #cb0c9f;
+    --jf-sidebar-accent-dark: #7928ca;
+    --jf-sidebar-accent-glow: rgba(203, 12, 159, 0.5);
+    /* iOS-style motion curves */
+    --jf-spring: cubic-bezier(0.34, 1.35, 0.64, 1);
+    --jf-spring-soft: cubic-bezier(0.25, 0.8, 0.25, 1);
+    --jf-ios-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    --jf-sidebar-speed: 0.52s;
+    --jf-sidebar-speed-fast: 0.28s;
+    --jf-sidebar-reveal: 0.55s;
+}
+
+@keyframes jfSidebarGlow {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(203, 12, 159, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(203, 12, 159, 0); }
+}
+
+@keyframes jfSidebarFadeIn {
+    from { opacity: 0; transform: translateY(6px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes jfSidebarLabelIn {
+    from { opacity: 0; transform: translateX(-8px); filter: blur(4px); }
+    to { opacity: 1; transform: translateX(0); filter: blur(0); }
+}
+
+@keyframes jfSidebarShimmer {
+    0% { background-position: -200% center; }
+    100% { background-position: 200% center; }
+}
+
+@keyframes jfSidebarSettingsIn {
+    from {
+        opacity: 0;
+        transform: scale(0.4) rotate(-120deg);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+    }
+}
+
+@keyframes jfSidebarOpenGlow {
+    0% {
+        box-shadow:
+            4px 0 40px rgba(0, 0, 0, 0.4),
+            inset -1px 0 0 rgba(255, 255, 255, 0.04);
+    }
+    45% {
+        box-shadow:
+            8px 0 52px rgba(203, 12, 159, 0.22),
+            6px 0 44px rgba(0, 0, 0, 0.45),
+            inset -1px 0 0 rgba(255, 255, 255, 0.06);
+    }
+    100% {
+        box-shadow:
+            6px 0 40px rgba(0, 0, 0, 0.45),
+            0 0 0 1px rgba(203, 12, 159, 0.1);
+    }
+}
+
+@keyframes jfSidebarFootIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Shell */
+.voyager .side-menu.jf-sidebar,
+.voyager .side-menu.jf-sidebar.ps {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: var(--jf-sidebar-mini) !important;
+    min-width: var(--jf-sidebar-mini) !important;
+    max-width: none !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: linear-gradient(
+        180deg,
+        rgba(34, 40, 49, 0.95) 0%,
+        rgba(22, 26, 35, 0.98) 55%,
+        rgba(28, 22, 38, 0.99) 82%,
+        rgba(36, 18, 42, 0.98) 100%
+    ) !important;
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border: none !important;
+    border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+    box-shadow:
+        4px 0 40px rgba(0, 0, 0, 0.4),
+        inset -1px 0 0 rgba(255, 255, 255, 0.04) !important;
+    z-index: 10050 !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    -webkit-tap-highlight-color: transparent;
+    transition:
+        width var(--jf-sidebar-speed) var(--jf-ios-ease),
+        box-shadow var(--jf-sidebar-speed) var(--jf-ios-ease) !important;
+}
+
+.voyager .side-menu.jf-sidebar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 160px;
+    background: radial-gradient(ellipse at 30% 0%, rgba(203, 12, 159, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.jf-sidebar__inner::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 180px;
+    background:
+        radial-gradient(ellipse at 50% 100%, rgba(203, 12, 159, 0.22) 0%, transparent 62%),
+        linear-gradient(to top, rgba(121, 40, 202, 0.12) 0%, rgba(22, 26, 35, 0.4) 45%, transparent 100%);
+    pointer-events: none;
+    z-index: 2;
+}
+
+.voyager .side-menu.jf-sidebar::before,
+.voyager .side-menu.jf-sidebar .navbar-header {
+    display: none !important;
+}
+
+.voyager .side-menu.jf-sidebar .ps__rail-x,
+.voyager .side-menu.jf-sidebar .ps__rail-y {
+    display: none !important;
+}
+
+.jf-sidebar__inner {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    width: var(--jf-sidebar-mini);
+    max-width: var(--jf-sidebar-mini);
+    transition:
+        width var(--jf-sidebar-speed) var(--jf-ios-ease),
+        max-width var(--jf-sidebar-speed) var(--jf-ios-ease);
+}
+
+.voyager .side-menu.jf-sidebar .ps,
+.voyager .side-menu.jf-sidebar .ps__content {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    overflow-x: hidden !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__inner,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__inner,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__inner,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__inner,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__inner {
+    width: var(--jf-sidebar-full);
+    max-width: var(--jf-sidebar-full);
+}
+
+/* Brand */
+.jf-sidebar__head {
+    flex-shrink: 0;
+    padding: 16px 12px 12px;
+    border-bottom: 1px solid var(--jf-sidebar-border);
+}
+
+.jf-sidebar__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none !important;
+    color: var(--jf-sidebar-text) !important;
+    min-height: 40px;
+    transition: opacity 0.2s ease;
+}
+
+.jf-sidebar__brand:hover {
+    opacity: 0.9;
+}
+
+.jf-sidebar__brand-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+    transition: transform 0.45s var(--jf-spring), box-shadow 0.45s var(--jf-spring-soft);
+}
+
+.jf-sidebar__brand:active .jf-sidebar__brand-icon {
+    transform: scale(0.92);
+    transition-duration: 0.12s;
+}
+
+.jf-sidebar__brand:hover .jf-sidebar__brand-icon {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px var(--jf-sidebar-accent-glow);
+}
+
+.jf-sidebar__brand-icon img {
+    width: 22px !important;
+    height: 22px !important;
+    object-fit: contain;
+    position: static !important;
+    margin: 0 !important;
+    filter: none;
+}
+
+.jf-sidebar__brand-text {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: var(--jf-sidebar-text);
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition:
+        opacity var(--jf-sidebar-speed) var(--jf-ios-ease),
+        max-width var(--jf-sidebar-speed) var(--jf-ios-ease);
+}
+
+/* Navigation */
+.jf-sidebar__nav {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 10px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(203, 12, 159, 0.35) transparent;
+    position: relative;
+}
+
+/* iOS sliding active pill (expanded mode) */
+.jf-sidebar__active-pill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 48px;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #d4119a 0%, #cb0c9f 45%, #9b1a8c 100%);
+    box-shadow:
+        0 4px 20px rgba(203, 12, 159, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: translateY(0);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    will-change: transform, opacity, width, height;
+    transition:
+        transform 0.52s var(--jf-spring),
+        opacity 0.28s var(--jf-ios-ease),
+        width 0.38s var(--jf-spring),
+        height 0.38s var(--jf-spring),
+        left 0.38s var(--jf-spring),
+        border-radius 0.38s var(--jf-spring);
+}
+
+.jf-sidebar__ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.35);
+    transform: scale(0);
+    animation: jfSidebarRipple 0.55s var(--jf-ios-ease) forwards;
+    pointer-events: none;
+    z-index: 2;
+}
+
+@keyframes jfSidebarRipple {
+    to {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+}
+
+.jf-sidebar__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.jf-sidebar__list li {
+    margin: 3px 0;
+    animation: jfSidebarFadeIn 0.4s var(--jf-ios-ease) both;
+}
+
+.jf-sidebar__list li:nth-child(1) { animation-delay: 0.03s; }
+.jf-sidebar__list li:nth-child(2) { animation-delay: 0.06s; }
+.jf-sidebar__list li:nth-child(3) { animation-delay: 0.09s; }
+.jf-sidebar__list li:nth-child(4) { animation-delay: 0.12s; }
+.jf-sidebar__list li:nth-child(5) { animation-delay: 0.15s; }
+.jf-sidebar__list li:nth-child(6) { animation-delay: 0.18s; }
+.jf-sidebar__list li:nth-child(7) { animation-delay: 0.21s; }
+.jf-sidebar__list li:nth-child(8) { animation-delay: 0.24s; }
+
+.jf-sidebar__divider {
+    height: 1px;
+    margin: 10px 10px;
+    background: var(--jf-sidebar-border);
+}
+
+.jf-sidebar__link {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    min-height: 48px;
+    height: 48px;
+    padding: 0 12px;
+    border-radius: 16px;
+    color: var(--jf-sidebar-muted) !important;
+    text-decoration: none !important;
+    transition:
+        background 0.42s var(--jf-ios-ease),
+        color 0.42s var(--jf-ios-ease),
+        transform 0.22s var(--jf-spring-soft),
+        box-shadow 0.42s var(--jf-ios-ease),
+        padding 0.52s var(--jf-ios-ease),
+        gap 0.52s var(--jf-ios-ease);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+    box-sizing: border-box;
+}
+
+.jf-sidebar__link:hover {
+    background: var(--jf-sidebar-hover);
+    color: var(--jf-sidebar-text) !important;
+}
+
+.jf-sidebar.is-pill-visible .jf-sidebar__active-pill {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.jf-sidebar.is-pill-visible .jf-sidebar__link.is-active,
+.jf-sidebar.is-pill-visible .jf-sidebar__link.is-active:hover {
+    background: linear-gradient(135deg, #d4119a 0%, #cb0c9f 45%, #9b1a8c 100%) !important;
+    box-shadow:
+        0 4px 20px rgba(203, 12, 159, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+    transform: none !important;
+}
+
+.jf-sidebar.is-pill-visible .jf-sidebar__link:hover:not(.is-active) {
+    transform: translateX(2px);
+}
+
+.jf-sidebar__link:active {
+    transform: scale(0.96) translateX(1px);
+    transition-duration: 0.1s;
+}
+
+.jf-sidebar__link.is-active {
+    color: #ffffff !important;
+    font-weight: 600;
+    background: transparent !important;
+    box-shadow: none;
+}
+
+/* Collapsed rail — tile active state (pill hidden) */
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link.is-active {
+    background: linear-gradient(145deg, #d4119a, #cb0c9f) !important;
+    box-shadow: 0 4px 18px rgba(203, 12, 159, 0.5);
+    animation: jfSidebarGlow 2.8s ease infinite;
+}
+
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link.is-active:active {
+    transform: scale(0.9);
+}
+
+.jf-sidebar__link-icon {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.25s var(--jf-ios-ease);
+}
+
+.jf-sidebar__link:hover:not(.is-active) .jf-sidebar__link-icon {
+    transform: scale(1.06);
+}
+
+.jf-sidebar__link.is-active .jf-sidebar__link-icon {
+    transform: none;
+}
+
+.jf-sidebar__link-icon i,
+.jf-sidebar__link-icon i::before {
+    font-family: voyager !important;
+    font-style: normal !important;
+    font-weight: normal !important;
+    font-size: 19px !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 1em !important;
+    height: 1em !important;
+    color: var(--jf-sidebar-muted) !important;
+    position: relative !important;
+    top: 0 !important;
+    left: 0 !important;
+    float: none !important;
+    display: block !important;
+    text-align: center !important;
+    -webkit-font-smoothing: antialiased;
+    transition: color 0.25s var(--jf-ios-ease);
+}
+
+/* Override Voyager side-menu icon offsets */
+.voyager .side-menu.jf-sidebar .jf-sidebar__link-icon i,
+.voyager .side-menu.jf-sidebar .admin-sidebar-link-icon i {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    margin-top: 0 !important;
+    text-align: center !important;
+}
+
+.jf-sidebar__link:hover .jf-sidebar__link-icon i,
+.jf-sidebar__link:hover .jf-sidebar__link-icon i::before {
+    color: var(--jf-sidebar-text) !important;
+}
+
+.jf-sidebar__link.is-active .jf-sidebar__link-icon i,
+.jf-sidebar__link.is-active .jf-sidebar__link-icon i::before {
+    color: #ffffff !important;
+}
+
+.jf-sidebar__link-label {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+    transition:
+        opacity var(--jf-sidebar-speed) var(--jf-ios-ease),
+        max-width var(--jf-sidebar-speed) var(--jf-ios-ease),
+        padding-left var(--jf-sidebar-speed) var(--jf-ios-ease);
+}
+
+.jf-sidebar__link.is-active .jf-sidebar__link-label {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Footer / profile glass card */
+.jf-sidebar__foot {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 3;
+    padding: 10px 8px 14px;
+    border-top: 1px solid var(--jf-sidebar-border);
+    overflow: visible;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open,
+.voyager .side-menu.jf-sidebar.is-user-menu-open.ps {
+    overflow: visible !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .ps__content {
+    overflow: visible !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__inner,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar.is-user-menu-open {
+    width: var(--jf-sidebar-full) !important;
+    min-width: var(--jf-sidebar-full) !important;
+    max-width: var(--jf-sidebar-full) !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__brand-text,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__user-meta,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__link-label {
+    opacity: 1 !important;
+    max-width: 180px !important;
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__settings-btn {
+    display: flex !important;
+    visibility: visible !important;
+    width: 36px !important;
+    height: 36px !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__user-card,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__user-card {
+    justify-content: flex-start;
+    padding: 8px 10px 8px 8px;
+    background: var(--jf-sidebar-surface);
+    border-color: var(--jf-sidebar-border);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__user-card:hover {
+    transform: none;
+}
+
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__head,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__head,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__nav,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__nav,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__foot,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__foot {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.jf-sidebar__user-card {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 0;
+    padding: 8px 10px 8px 8px;
+    border-radius: 16px;
+    min-height: 52px;
+    background: var(--jf-sidebar-surface);
+    border: 1px solid var(--jf-sidebar-border);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 4px 16px rgba(0, 0, 0, 0.15);
+    transition:
+        background 0.35s var(--jf-ios-ease),
+        border-color 0.35s var(--jf-ios-ease),
+        transform 0.35s var(--jf-spring),
+        box-shadow 0.35s var(--jf-ios-ease);
+}
+
+.jf-sidebar__user-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(203, 12, 159, 0.25);
+    transform: translateY(-2px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.1),
+        0 8px 24px rgba(0, 0, 0, 0.25),
+        0 0 0 1px rgba(203, 12, 159, 0.12);
+}
+
+.jf-sidebar__user-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+    padding: 2px 0;
+    text-decoration: none;
+    color: inherit;
+}
+
+a.jf-sidebar__user-main:hover,
+a.jf-sidebar__user-main:focus {
+    text-decoration: none;
+    color: inherit;
+}
+
+.jf-sidebar__user-main.is-active strong {
+    color: #fff;
+}
+
+.jf-sidebar__settings-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    margin-left: 6px;
+    padding: 0;
+    border-radius: var(--jf-icon-radius-sm, 8px);
+    border: none;
+    background: transparent;
+    color: var(--jf-sidebar-muted);
+    text-decoration: none;
+    cursor: pointer;
+    font: inherit;
+    transition:
+        background 0.25s var(--jf-ios-ease),
+        color 0.25s var(--jf-ios-ease),
+        transform 0.2s var(--jf-ios-ease),
+        opacity 0.25s var(--jf-ios-ease);
+}
+
+.jf-sidebar__user-menu {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.jf-sidebar__user-menu.is-open .jf-sidebar__settings-btn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--jf-sidebar-text);
+}
+
+.jf-sidebar__user-dropdown {
+    position: absolute;
+    right: 0;
+    bottom: calc(100% + 8px);
+    z-index: 10050;
+    min-width: 210px;
+    margin: 0;
+    padding: 6px;
+    list-style: none;
+    border-radius: 16px;
+    border: 1px solid var(--jf-sidebar-border);
+    background: rgba(24, 14, 38, 0.98);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    box-shadow:
+        0 12px 32px rgba(0, 0, 0, 0.42),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    opacity: 0;
+    visibility: hidden;
+    display: none;
+    transform: translateY(8px) scale(0.98);
+    transform-origin: bottom right;
+    transition:
+        opacity 0.24s var(--jf-ios-ease),
+        transform 0.24s var(--jf-ios-ease),
+        visibility 0.24s var(--jf-ios-ease);
+    pointer-events: none;
+}
+
+.jf-sidebar__user-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    display: block !important;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+    z-index: 100060;
+    position: fixed !important;
+    margin: 0;
+}
+
+.jf-sidebar__user-dropdown-link,
+.jf-sidebar__user-dropdown-logout-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 9px 12px;
+    border: none;
+    border-radius: var(--jf-icon-radius-sm, 8px);
+    background: transparent;
+    color: var(--jf-sidebar-text);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background 0.2s var(--jf-ios-ease),
+        color 0.2s var(--jf-ios-ease);
+}
+
+.jf-sidebar__user-dropdown-link:hover,
+.jf-sidebar__user-dropdown-link:focus,
+.jf-sidebar__user-dropdown-logout-btn:hover,
+.jf-sidebar__user-dropdown-logout-btn:focus {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    text-decoration: none;
+}
+
+.jf-sidebar__user-dropdown-link.is-active {
+    background: rgba(203, 12, 159, 0.18);
+    color: #fff;
+}
+
+.jf-sidebar__user-dropdown-link i,
+.jf-sidebar__user-dropdown-logout-btn i,
+.jf-sidebar__user-dropdown-link i::before,
+.jf-sidebar__user-dropdown-logout-btn i::before {
+    width: 16px;
+    flex-shrink: 0;
+    text-align: center;
+    font-family: voyager !important;
+    font-style: normal !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
+    color: inherit !important;
+    opacity: 0.9;
+}
+
+.jf-sidebar__user-dropdown-sep {
+    height: 1px;
+    margin: 4px 6px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.jf-sidebar__user-dropdown-logout-form {
+    margin: 0;
+}
+
+.jf-sidebar__user-dropdown-logout-btn {
+    color: #fda4af;
+}
+
+.jf-sidebar__user-dropdown-logout-btn:hover,
+.jf-sidebar__user-dropdown-logout-btn:focus {
+    background: rgba(244, 63, 94, 0.16);
+    color: #fecdd3;
+}
+
+.jf-sidebar__settings-btn:hover,
+.jf-sidebar__settings-btn:focus {
+    text-decoration: none;
+    color: var(--jf-sidebar-text);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.jf-sidebar__settings-btn.is-active {
+    background: linear-gradient(135deg, #cb0c9f, #7928ca);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(203, 12, 159, 0.35);
+}
+
+.jf-sidebar__settings-btn i,
+.jf-sidebar__settings-btn i::before {
+    font-family: voyager !important;
+    font-style: normal !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    color: inherit !important;
+}
+
+.jf-sidebar__settings-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: block;
+    color: inherit;
+}
+
+.jf-sidebar__user-main:active,
+.jf-sidebar__settings-btn:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
+}
+
+.jf-sidebar__avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 2px solid rgba(203, 12, 159, 0.35);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.jf-sidebar__user-meta {
+    min-width: 0;
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition:
+        opacity var(--jf-sidebar-speed) var(--jf-ios-ease),
+        max-width var(--jf-sidebar-speed) var(--jf-ios-ease);
+}
+
+.jf-sidebar__user-meta strong,
+.jf-sidebar__user-meta span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.jf-sidebar__user-meta strong {
+    font-size: 13px;
+    color: var(--jf-sidebar-text);
+    line-height: 1.35;
+}
+
+.jf-sidebar__user-meta span {
+    font-size: 11px;
+    color: var(--jf-sidebar-muted);
+}
+
+.jf-sidebar__logout-form {
+    margin: 0;
+}
+
+.jf-sidebar__logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    width: 100%;
+    min-height: 40px;
+    padding: 0 10px;
+    border: 1px solid var(--jf-sidebar-border);
+    border-radius: var(--jf-icon-radius-sm, 8px);
+    background: var(--jf-sidebar-surface);
+    color: var(--jf-sidebar-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition:
+        background 0.25s var(--jf-ios-ease),
+        color 0.25s var(--jf-ios-ease),
+        border-color 0.25s var(--jf-ios-ease),
+        transform 0.2s var(--jf-ios-ease);
+}
+
+.jf-sidebar__logout:hover {
+    background: rgba(203, 12, 159, 0.15);
+    color: var(--jf-sidebar-text);
+    border-color: rgba(203, 12, 159, 0.35);
+    transform: translateY(-1px);
+}
+
+.jf-sidebar__logout:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
+}
+
+.jf-sidebar__logout i,
+.jf-sidebar__logout i::before {
+    font-family: voyager !important;
+    font-style: normal !important;
+    color: inherit !important;
+    font-size: 16px !important;
+    margin: 0 !important;
+}
+
+.jf-sidebar__logout span {
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    transition:
+        opacity var(--jf-sidebar-speed) var(--jf-ios-ease),
+        max-width var(--jf-sidebar-speed) var(--jf-ios-ease);
+}
+
+/* Collapsed rail */
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) {
+    width: var(--jf-sidebar-mini) !important;
+    min-width: var(--jf-sidebar-mini) !important;
+}
+
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link-label,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__brand-text,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__user-meta,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__logout span {
+    display: none !important;
+    max-width: 0 !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__head,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__head {
+    padding: 16px 8px 12px;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__nav,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__nav {
+    padding: 10px 6px;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link {
+    justify-content: center;
+    align-items: center;
+    padding: 0;
+    width: 100%;
+    margin: 0;
+    gap: 0;
+    height: 48px;
+    min-height: 48px;
+}
+
+/* Collapsed active — magenta tile */
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link.is-active {
+    width: 48px !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 auto !important;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(203, 12, 159, 0.45);
+}
+
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__link:not(.is-active):hover {
+    transform: none;
+    background: var(--jf-sidebar-hover) !important;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__brand,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__brand,
+.voyager .side-menu.jf-sidebar .jf-sidebar__brand {
+    justify-content: center;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__user-card,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__user-card,
+.voyager .side-menu.jf-sidebar .jf-sidebar__user-card {
+    justify-content: center;
+    padding: 8px 6px;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__user-main,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__user-main {
+    flex: 0;
+    justify-content: center;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__settings-btn,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__settings-btn {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__settings-btn,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__settings-btn,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__settings-btn,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__settings-btn,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__settings-btn {
+    display: flex;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__foot,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__foot {
+    padding: 10px 6px 14px;
+}
+
+.voyager .side-menu.jf-sidebar:not(:hover):not(.is-expanded):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__logout,
+body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover):not(.is-user-menu-open) .jf-sidebar__logout {
+    width: 48px;
+    padding: 0;
+    margin: 0 auto;
+    background: transparent;
+    border-color: transparent;
+}
+
+/* Expanded */
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__brand-text,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__brand-text,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__brand-text,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__brand-text,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__brand-text {
+    opacity: 1;
+    max-width: 180px;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__link,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__link,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__link,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__link,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__link {
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    height: 48px;
+    min-height: 48px;
+    padding: 0 18px 0 12px;
+    gap: 10px;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__link.is-active,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__link.is-active,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__link.is-active,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__link.is-active,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__link.is-active {
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    margin: 0 !important;
+    border-radius: 12px;
+    animation: none !important;
+    background: linear-gradient(135deg, #d4119a 0%, #cb0c9f 45%, #9b1a8c 100%) !important;
+    box-shadow:
+        0 4px 20px rgba(203, 12, 159, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18) !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__link-label,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__link-label,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__link-label,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__link-label,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__link-label {
+    opacity: 1;
+    max-width: 180px;
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing {
+    animation: jfSidebarOpenGlow 0.72s var(--jf-ios-ease) both;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__link-label {
+    animation: jfSidebarLabelIn 0.55s var(--jf-spring) both;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__brand-text {
+    animation: jfSidebarLabelIn 0.55s var(--jf-spring) both;
+    animation-delay: 0.08s;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li {
+    animation: jfSidebarFadeIn 0.5s var(--jf-spring) both;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__user-card {
+    animation: jfSidebarFootIn 0.55s var(--jf-ios-ease) both;
+    animation-delay: 0.28s;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__user-meta {
+    animation: jfSidebarLabelIn 0.55s var(--jf-spring) both;
+    animation-delay: 0.34s;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__settings-btn {
+    animation: jfSidebarSettingsIn 0.58s var(--jf-spring) both;
+    animation-delay: 0.42s;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__logout span {
+    animation: jfSidebarLabelIn 0.55s var(--jf-spring) both;
+    animation-delay: 0.46s;
+}
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(1) { animation-delay: 0.06s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(2) { animation-delay: 0.10s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(3) { animation-delay: 0.14s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(4) { animation-delay: 0.18s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(5) { animation-delay: 0.22s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(6) { animation-delay: 0.26s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(7) { animation-delay: 0.30s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(8) { animation-delay: 0.34s; }
+
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(1) .jf-sidebar__link-label { animation-delay: 0.06s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(2) .jf-sidebar__link-label { animation-delay: 0.10s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(3) .jf-sidebar__link-label { animation-delay: 0.14s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(4) .jf-sidebar__link-label { animation-delay: 0.18s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(5) .jf-sidebar__link-label { animation-delay: 0.22s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(6) .jf-sidebar__link-label { animation-delay: 0.26s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(7) .jf-sidebar__link-label { animation-delay: 0.30s; }
+.voyager .side-menu.jf-sidebar.is-revealing .jf-sidebar__list li:nth-child(8) .jf-sidebar__link-label { animation-delay: 0.34s; }
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__brand,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__brand,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__brand,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__brand,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__brand {
+    justify-content: flex-start;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__user-card,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__user-card,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__user-card,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__user-card,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__user-card {
+    justify-content: flex-start;
+    padding: 8px 10px 8px 8px;
+    background: var(--jf-sidebar-surface);
+    border: 1px solid var(--jf-sidebar-border);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__user-main,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__user-main,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__user-main,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__user-main,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__user-main {
+    flex: 1;
+    justify-content: flex-start;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__user-meta,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__user-meta,
+.voyager .side-menu.jf-sidebar.is-hover .jf-sidebar__user-meta,
+.voyager .side-menu.jf-sidebar.is-user-menu-open .jf-sidebar__user-meta,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__user-meta {
+    opacity: 1;
+    max-width: 160px;
+    display: block !important;
+    visibility: visible !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__logout,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__logout,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__logout {
+    justify-content: flex-start;
+    gap: 10px;
+    padding: 0 12px;
+    width: 100%;
+    background: var(--jf-sidebar-surface);
+    border-color: var(--jf-sidebar-border);
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded .jf-sidebar__logout span,
+.voyager .app-container.expanded .side-menu.jf-sidebar .jf-sidebar__logout span,
+.voyager .side-menu.jf-sidebar:hover .jf-sidebar__logout span {
+    opacity: 1;
+    max-width: 120px;
+    display: inline !important;
+    visibility: visible !important;
+}
+
+.voyager .side-menu.jf-sidebar.is-expanded,
+.voyager .app-container.expanded .side-menu.jf-sidebar,
+.voyager .side-menu.jf-sidebar.is-hover,
+.voyager .side-menu.jf-sidebar.is-user-menu-open,
+.voyager .side-menu.jf-sidebar:hover {
+    width: var(--jf-sidebar-full) !important;
+    min-width: var(--jf-sidebar-full) !important;
+    box-shadow: 6px 0 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(203, 12, 159, 0.1) !important;
+}
+
+/* Content layout */
+@media (min-width: 769px) {
+    body.voyager .app-container .content-container .navbar-top {
+        left: var(--jf-sidebar-mini) !important;
+        width: calc(100% - var(--jf-sidebar-mini)) !important;
+        padding-left: 20px !important;
+        transition: left var(--jf-sidebar-speed) var(--jf-ios-ease),
+                    width var(--jf-sidebar-speed) var(--jf-ios-ease);
+    }
+
+    body.voyager .app-container.expanded .content-container .navbar-top {
+        left: var(--jf-sidebar-full) !important;
+        width: calc(100% - var(--jf-sidebar-full)) !important;
+        padding-left: 20px !important;
+    }
+
+    body.voyager .app-container .content-container .side-body,
+    body.voyager .app-container .content-container .container-fluid .side-body {
+        margin-left: var(--jf-sidebar-mini) !important;
+        transition: margin-left var(--jf-sidebar-speed) var(--jf-ios-ease);
+    }
+
+    body.voyager .app-container .app-footer {
+        left: var(--jf-sidebar-mini) !important;
+        transition: left var(--jf-sidebar-speed) var(--jf-ios-ease);
+    }
+
+    body.voyager .app-container.expanded .content-container .side-body,
+    body.voyager .app-container.expanded .content-container .container-fluid .side-body {
+        margin-left: var(--jf-sidebar-full) !important;
+    }
+
+    body.voyager .app-container.expanded .app-footer {
+        left: var(--jf-sidebar-full) !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .voyager .side-menu.jf-sidebar {
+        transform: translateX(-100%);
+        transition: transform var(--jf-sidebar-speed) var(--jf-ios-ease),
+                    width var(--jf-sidebar-speed) var(--jf-ios-ease) !important;
+    }
+
+    .voyager .app-container.expanded .side-menu.jf-sidebar {
+        transform: translateX(0);
+        width: var(--jf-sidebar-full) !important;
+        min-width: var(--jf-sidebar-full) !important;
+        box-shadow: 8px 0 40px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    body.voyager .app-container .content-container .side-body {
+        margin-left: 0 !important;
+    }
+
+    body.voyager .app-container .content-container .navbar-top {
+        padding-left: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .jf-sidebar__link,
+    .jf-sidebar__brand-text,
+    .jf-sidebar__link-label,
+    .jf-sidebar__list li,
+    .jf-sidebar__active-pill,
+    .jf-sidebar__ripple,
+    .voyager .side-menu.jf-sidebar {
+        animation: none !important;
+        transition: none !important;
+    }
+
+    body.voyager .app-container:not(.expanded) .side-menu.jf-sidebar:not(:hover):not(.is-hover) .jf-sidebar__link.is-active {
+        animation: none !important;
+    }
+}

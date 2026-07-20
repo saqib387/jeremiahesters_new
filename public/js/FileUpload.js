@@ -159,7 +159,7 @@ var FileUpload = {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 },
                 clickable: true, // Make the entire dropzone clickable
-                previewsContainer: ".dropzone-previews",
+                previewsContainer: ".messenger-dropzone-previews, .dropzone-previews",
                 maxFilesize: mediaSettings.max_file_upload_size, // MB
                 addRemoveLinks: true,
                 dictRemoveFile: "x",

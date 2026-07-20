@@ -9,31 +9,23 @@
                 </a>
             </div>
 
+            <div class="navbar-end navbar-desktop-only">
             {{-- Main Navigation --}}
             <div class="navbar-navigation">
-                @if(Auth::check())
-                    <div class="nav-links">
-                    @if(!getSetting('site.hide_create_post_menu'))
-                            <a href="{{ route('posts.create') }}" class="nav-link create-link">
-                                <div class="create-icon">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M12 5V19M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                                    </svg>
-                                </div>
-                                <span>{{ __('Create') }}</span>
-                            </a>
-                    @endif
-                        <a href="{{ route('feed') }}" class="nav-link feed-link">
-                            <div class="nav-icon">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <polyline points="9 22 9 12 15 12 15 22" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            </div>
-                            <span>{{ __('Feed') }}</span>
-                        </a>
-                    </div>
-                @endif
+                <div class="nav-links nav-links--text">
+                    @guest
+                        <a href="{{ route('feed') }}" class="nav-text-link {{ Route::currentRouteName() === 'feed' ? 'active' : '' }}">{{ __('Feed') }}</a>
+                        <a href="{{ route('custom-requests.marketplace') }}" class="nav-text-link {{ Route::currentRouteName() == 'custom-requests.marketplace' ? 'active' : '' }}">{{ __('Marketplace') }}</a>
+                        <a href="{{ route('contact') }}" class="nav-text-link {{ Route::currentRouteName() === 'contact' ? 'active' : '' }}">{{ __('Support') }}</a>
+                    @else
+                        @if(!getSetting('site.hide_create_post_menu'))
+                            <a href="{{ route('posts.create') }}" class="nav-text-link {{ Route::currentRouteName() === 'posts.create' ? 'active' : '' }}">{{ __('Create') }}</a>
+                        @endif
+                        <a href="{{ route('feed') }}" class="nav-text-link {{ Route::currentRouteName() === 'feed' ? 'active' : '' }}">{{ __('Feed') }}</a>
+                        <a href="{{ route('custom-requests.marketplace') }}" class="nav-text-link {{ Route::currentRouteName() == 'custom-requests.marketplace' ? 'active' : '' }}">{{ __('Marketplace') }}</a>
+                        <a href="{{ route('creator.dashboard') }}" class="nav-text-link {{ str_starts_with(Route::currentRouteName() ?? '', 'creator.') ? 'active' : '' }}">{{ __('Creator') }}</a>
+                    @endguest
+                </div>
             </div>
 
             {{-- Search Bar --}}
@@ -57,21 +49,25 @@
             <div class="navbar-actions">
                 @guest
                     <div class="auth-links">
-                    @if(Route::currentRouteName() !== 'profile')
-                            <a href="{{ route('login') }}" class="auth-link login-link"
-                               data-toggle="modal" data-target="#login-dialog"
-                               data-bs-toggle="modal" data-bs-target="#login-dialog"
-                               onclick="if(window.LoginModal){event.preventDefault();LoginModal.changeActiveTab('login');}">
-                                {{ __('Login') }}
+                        @if (Route::has('register') && Route::currentRouteName() !== 'profile')
+                            <a href="{{ route('register') }}" class="auth-link register-link">
+                                {{ __('Sign Up') }}
+                                <span class="auth-link__icon" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
                             </a>
-                        @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="auth-link register-link"
-                                   data-toggle="modal" data-target="#login-dialog"
-                                   data-bs-toggle="modal" data-bs-target="#login-dialog"
-                                   onclick="if(window.LoginModal){event.preventDefault();LoginModal.changeActiveTab('register');}">
-                                    {{ __('Sign Up') }}
-                                </a>
-                            @endif
+                        @endif
+                        @if(Route::currentRouteName() !== 'profile')
+                            <a href="{{ route('login') }}" class="auth-link login-link">
+                                {{ __('Login') }}
+                                <span class="auth-link__icon auth-link__icon--outline" aria-hidden="true">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                            </a>
                         @endif
                     </div>
                 @else
@@ -253,14 +249,14 @@
                                 </div>
                                 <span>{{__('My Profile')}}</span>
                             </a>
-                            <a class="dropdown-item" href="{{route('creator.dashboard')}}" style="background: linear-gradient(135deg, rgba(255,0,80,0.08) 0%, rgba(255,51,102,0.03) 100%);">
-                                <div class="item-icon" style="color: #FF0050;">
+                            <a class="dropdown-item dropdown-item--creator" href="{{route('creator.dashboard')}}">
+                                <div class="item-icon">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M3 3v18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         <path d="M18 9l-5 5-4-4-3 3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </div>
-                                <span style="color: #FF0050; font-weight: 600;">{{__('Creator Dashboard')}}</span>
+                                <span>{{__('Creator Dashboard')}}</span>
                             </a>
                             <a class="dropdown-item" href="{{route('my.settings')}}">
                                 <div class="item-icon">
@@ -318,70 +314,122 @@
                     </div>
                 @endguest
             </div>
+            </div>
+
+            <button type="button" class="navbar-mobile-trigger" aria-label="{{ __('Open menu') }}">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
         </div>
     </div>
 </nav>
 <script>
 // Enhanced dropdown functionality
 document.addEventListener('DOMContentLoaded', function() {
-    // Initialize all dropdowns
     const dropdowns = document.querySelectorAll('.dropdown');
-    
-    // Close dropdowns when clicking outside
+    const viewportPad = 12;
+
+    function resetDropdownPosition(menu) {
+        if (!menu) return;
+        menu.classList.remove('is-fixed');
+        menu.style.removeProperty('top');
+        menu.style.removeProperty('left');
+        menu.style.removeProperty('right');
+        menu.style.removeProperty('--dropdown-shift-x');
+    }
+
+    function fitDropdownToViewport(dropdown) {
+        const menu = dropdown.querySelector('.dropdown-menu');
+        const toggle = dropdown.querySelector('.dropdown-toggle, .user-toggle');
+        if (!menu || !toggle) return;
+
+        resetDropdownPosition(menu);
+
+        requestAnimationFrame(function() {
+            const toggleRect = toggle.getBoundingClientRect();
+            const menuWidth = menu.offsetWidth;
+            const menuHeight = menu.offsetHeight;
+            let left = toggleRect.right - menuWidth;
+            let top = toggleRect.bottom + 8;
+
+            if (left < viewportPad) {
+                left = viewportPad;
+            }
+            if (left + menuWidth > window.innerWidth - viewportPad) {
+                left = window.innerWidth - viewportPad - menuWidth;
+            }
+            if (top + menuHeight > window.innerHeight - viewportPad) {
+                top = Math.max(viewportPad, toggleRect.top - menuHeight - 8);
+            }
+
+            menu.classList.add('is-fixed');
+            menu.style.top = top + 'px';
+            menu.style.left = left + 'px';
+            menu.style.right = 'auto';
+        });
+    }
+
+    function closeAllDropdowns() {
+        dropdowns.forEach(function(dropdown) {
+            dropdown.classList.remove('show');
+            resetDropdownPosition(dropdown.querySelector('.dropdown-menu'));
+        });
+    }
+
     document.addEventListener('click', function(event) {
-        dropdowns.forEach(dropdown => {
+        dropdowns.forEach(function(dropdown) {
             const isClickInside = dropdown.contains(event.target);
             const isDropdownToggle = event.target.closest('.dropdown-toggle, .user-toggle');
-            
+
             if (!isClickInside && !isDropdownToggle) {
                 dropdown.classList.remove('show');
+                resetDropdownPosition(dropdown.querySelector('.dropdown-menu'));
             }
         });
     });
 
-    // Toggle dropdowns
     const dropdownToggles = document.querySelectorAll('.dropdown-toggle, .user-toggle');
-    dropdownToggles.forEach(toggle => {
+    dropdownToggles.forEach(function(toggle) {
         toggle.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            
+
             const dropdown = this.closest('.dropdown');
             const isCurrentlyOpen = dropdown.classList.contains('show');
-            
-            // Close all other dropdowns
-            dropdowns.forEach(otherDropdown => {
+
+            dropdowns.forEach(function(otherDropdown) {
                 if (otherDropdown !== dropdown) {
                     otherDropdown.classList.remove('show');
+                    resetDropdownPosition(otherDropdown.querySelector('.dropdown-menu'));
                 }
             });
-            
-            // Toggle current dropdown
+
             if (isCurrentlyOpen) {
                 dropdown.classList.remove('show');
+                resetDropdownPosition(dropdown.querySelector('.dropdown-menu'));
             } else {
                 dropdown.classList.add('show');
+                fitDropdownToViewport(dropdown);
             }
         });
     });
 
-    // Handle dropdown item clicks
+    window.addEventListener('resize', closeAllDropdowns);
+    window.addEventListener('scroll', closeAllDropdowns, true);
+
     document.addEventListener('click', function(event) {
         const dropdownItem = event.target.closest('.dropdown-item');
         if (dropdownItem && !dropdownItem.classList.contains('logout-item')) {
             const dropdown = dropdownItem.closest('.dropdown');
             if (dropdown) {
                 dropdown.classList.remove('show');
+                resetDropdownPosition(dropdown.querySelector('.dropdown-menu'));
             }
         }
     });
 
-    // Close dropdowns with Escape key
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
-            dropdowns.forEach(dropdown => {
-                dropdown.classList.remove('show');
-            });
+            closeAllDropdowns();
         }
     });
 
@@ -404,7 +452,7 @@ document.addEventListener('DOMContentLoaded', function() {
     window.addEventListener('scroll', function() {
         const currentScroll = window.pageYOffset;
         
-        if (currentScroll > lastScroll && currentScroll > 64) {
+        if (currentScroll > lastScroll && currentScroll > 72) {
             navbar.style.transform = 'translateY(-100%)';
         } else {
             navbar.style.transform = 'translateY(0)';

@@ -3,87 +3,96 @@
 @section('page_title', 'Realtime Dashboard Stats')
 
 @section('page_header')
-    <div class="container-fluid">
-        <h1 class="page-title">
-            <i class="voyager-activity"></i> Realtime Dashboard Stats
-        </h1>
-        <p class="page-description">Live operational counters used by the admin dashboard widgets.</p>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="voyager-activity"></i>
+                </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">Realtime Dashboard Stats</h1>
+                    <p class="jf-dash-page-header__desc">Live operational counters used by the admin dashboard widgets.</p>
+                </div>
+            </div>
+        </div>
     </div>
 @stop
 
 @section('content')
-    <div class="page-content browse container-fluid">
+    <div class="page-content browse container-fluid jf-dash-page jf-realtime-stats-page">
         @include('voyager::alerts')
         @include('admin.dashboard.partials.section-nav')
 
         @if($error)
-            <div class="alert alert-danger">{{ $error }}</div>
+            <div class="jf-realtime-stats-page__alert alert alert-danger">{{ $error }}</div>
         @endif
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="panel widget center bgimage" style="background-color:#e67e22;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['pending_distributions'] ?? 0) }}</h4>
-                        <p>Pending Distributions</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="panel widget center bgimage" style="background-color:#e74c3c;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['overdue_distributions'] ?? 0) }}</h4>
-                        <p>Overdue Distributions</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="panel widget center bgimage" style="background-color:#3498db;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['active_wallets'] ?? 0) }}</h4>
-                        <p>Active Wallets</p>
-                    </div>
-                </div>
-            </div>
+        <div class="jf-realtime-stats-page__grid">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-alarm-clock',
+                    'variant' => 'amber',
+                    'label' => 'Pending Distributions',
+                    'value' => number_format($stats['pending_distributions'] ?? 0),
+                    'footer' => 'Awaiting processing',
+                ])
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-warning',
+                    'variant' => 'rose',
+                    'label' => 'Overdue Distributions',
+                    'value' => number_format($stats['overdue_distributions'] ?? 0),
+                    'footer' => 'Needs attention',
+                ])
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-wallet',
+                    'variant' => 'blue',
+                    'label' => 'Active Wallets',
+                    'value' => number_format($stats['active_wallets'] ?? 0),
+                    'footer' => 'Currently active',
+                ])
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-dollar',
+                    'variant' => 'green',
+                    'label' => 'Total Wallet Balance USD',
+                    'value' => '$' . number_format($stats['total_wallet_balance_usd'] ?? 0, 2),
+                    'footer' => 'USD equivalent',
+                ])
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-activity',
+                    'variant' => 'purple',
+                    'label' => 'Platform Health Score',
+                    'value' => number_format($stats['platform_health_score'] ?? 0) . '%',
+                    'footer' => 'Live platform status',
+                ])
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-people',
+                    'variant' => 'blue',
+                    'label' => 'New Users Today',
+                    'value' => number_format($stats['new_users_today'] ?? 0),
+                    'footer' => 'Registered today',
+                ])
         </div>
 
-        <div class="row">
-            <div class="col-md-4">
-                <div class="panel panel-bordered">
-                    <div class="panel-body text-center">
-                        <h3>${{ number_format($stats['total_wallet_balance_usd'] ?? 0, 2) }}</h3>
-                        <p class="text-muted">Total Wallet Balance USD</p>
+        <div class="row jf-dash-cards-row">
+            <div class="col-md-12">
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--refresh">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--blue"><i class="voyager-refresh"></i></span>
+                            <span>Refresh Details</span>
+                        </h3>
+                    </div>
+                    <div class="panel-body jf-dash-card__body">
+                        <div class="jf-realtime-stats-page__meta">
+                            <p class="jf-realtime-stats-page__meta-item">
+                                <span class="jf-realtime-stats-page__meta-label">Last updated</span>
+                                <span class="jf-realtime-stats-page__meta-value">{{ $stats['last_updated'] ?? now()->format('H:i:s') }}</span>
+                            </p>
+                            <p class="jf-realtime-stats-page__meta-note">
+                                This page is the browser-facing version of the realtime stats endpoint. JavaScript requests still receive JSON.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="panel panel-bordered">
-                    <div class="panel-body text-center">
-                        <h3>{{ number_format($stats['platform_health_score'] ?? 0) }}%</h3>
-                        <p class="text-muted">Platform Health Score</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="panel panel-bordered">
-                    <div class="panel-body text-center">
-                        <h3>{{ number_format($stats['new_users_today'] ?? 0) }}</h3>
-                        <p class="text-muted">New Users Today</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="panel panel-bordered">
-            <div class="panel-heading">
-                <h3 class="panel-title"><i class="voyager-clock"></i> Refresh Details</h3>
-            </div>
-            <div class="panel-body">
-                <p><strong>Last updated:</strong> {{ $stats['last_updated'] ?? now()->format('H:i:s') }}</p>
-                <p class="text-muted">This page is the browser-facing version of the realtime stats endpoint. JavaScript requests still receive JSON.</p>
             </div>
         </div>
     </div>

@@ -1,26 +1,627 @@
-.profile-cover-bg{
-    height:200px;
+/* ============================================
+   CREATOR PROFILE — neutral flat
+   Brand accent: #cb0c9f / #830866
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+.profile-page-v2 {
+    --pf-brand: #830866;
+    --pf-accent: #cb0c9f;
+    --pf-success: #22c55e;
+    --pf-danger: #f43f5e;
+    --pf-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --pf-font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family: var(--pf-font);
 }
 
-.card-img{
-    border-radius: 0px!important;
+.profile-page-v2--dark {
+    --pf-text: #f4f4f5;
+    --pf-text-secondary: #a1a1aa;
+    --pf-text-muted: #71717a;
+    --pf-page-bg: #09090b;
+    --pf-surface: #18181e;
+    --pf-surface-muted: #1c1c24;
+    --pf-border: rgba(255, 255, 255, 0.08);
+    --pf-pill-bg: rgba(255, 255, 255, 0.04);
+    --pf-pill-hover: rgba(255, 255, 255, 0.09);
+    --pf-avatar-ring: #09090b;
 }
 
-@media (max-width: 767px) {
-    .avatar-holder, .avatar-holder img{
-        width: 130px;
-        height: 130px;
-    }
-}
-.description-content p{
-    margin-bottom: .5rem;
-}
-.description-content p:last-child{
-    margin-bottom: 5px;
+.profile-page-v2--light {
+    --pf-text: #111827;
+    --pf-text-secondary: #6b7280;
+    --pf-text-muted: #9ca3af;
+    --pf-page-bg: #f4f4f7;
+    --pf-surface: #ffffff;
+    --pf-surface-muted: #f1f1f4;
+    --pf-border: rgba(15, 23, 42, 0.08);
+    --pf-pill-bg: #f4f4f7;
+    --pf-pill-hover: #e9e9ef;
+    --pf-avatar-ring: #ffffff;
 }
 
-.description-content p{
+/* ---- layout / surfaces ---- */
+.profile-page-v2 {
+    background: var(--pf-page-bg);
+    color: var(--pf-text);
+}
+
+.profile-page-v2 .border-right {
+    border-right: 1px solid var(--pf-border) !important;
+}
+
+.profile-page-v2 .bg-separator,
+.profile-page-v2 .border-top,
+.profile-page-v2 .border-bottom {
+    border-color: var(--pf-border) !important;
+}
+
+.profile-page-v2 .bg-separator {
+    height: 8px;
+    background: var(--pf-page-bg);
+    border-top: 1px solid var(--pf-border);
+    border-bottom: 1px solid var(--pf-border);
+}
+
+/* ---- cover ---- */
+.profile-page-v2 .profile-cover-bg {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: var(--pf-surface-muted);
+}
+
+.profile-page-v2 .profile-cover-bg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.profile-page-v2 .profile-cover-bg::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 60%;
+    background: linear-gradient(180deg, transparent 0%, var(--pf-page-bg) 100%);
+    pointer-events: none;
+}
+
+/* ---- avatar + action bar ---- */
+.profile-page-v2 .avatar-holder {
+    margin-top: -56px;
+    position: relative;
+}
+
+.profile-page-v2 .avatar-holder img {
+    width: 116px;
+    height: 116px;
+    object-fit: cover;
+    border: 4px solid var(--pf-avatar-ring);
+    box-shadow: 0 0 0 1px var(--pf-border);
+}
+
+.profile-page-v2 .avatar-holder + div {
+    margin-top: 8px;
+}
+
+/* action pills */
+.profile-page-v2 .p-pill {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: var(--pf-pill-bg) !important;
+    border: 1px solid var(--pf-border) !important;
+    color: var(--pf-accent) !important;
+    font-size: 18px;
+    transition: background 0.2s ease, transform 0.15s ease;
+    box-shadow: none !important;
+}
+
+.profile-page-v2 .p-pill:hover {
+    background: var(--pf-pill-hover) !important;
+    transform: translateY(-1px);
+}
+
+.profile-page-v2 .p-pill ion-icon {
+    color: var(--pf-accent);
+}
+
+/* text-labelled pill (edit profile) */
+.profile-page-v2 .p-pill-text {
+    width: auto;
+    border-radius: 999px;
+    padding: 0 16px;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--pf-text) !important;
+}
+
+.profile-page-v2 .p-pill-text ion-icon {
+    color: var(--pf-text);
+}
+
+/* ---- name / username ---- */
+.profile-page-v2 h5.text-bold {
+    font-family: var(--pf-font-display);
+    font-weight: 800;
+    font-size: 22px;
+    color: var(--pf-text);
+    letter-spacing: -0.01em;
+    margin-bottom: 2px;
+}
+
+.profile-page-v2 h6.text-muted {
+    color: var(--pf-text-muted) !important;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.profile-page-v2 h6.text-muted .text-bold {
+    font-weight: 600;
+}
+
+/* ---- description ---- */
+.profile-page-v2 .profile-description-holder {
+    color: var(--pf-text-secondary);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.profile-page-v2 .description-content,
+.profile-page-v2 .description-content p {
+    color: var(--pf-text-secondary);
+}
+
+/* ---- meta row (join date / location / website) ---- */
+.profile-page-v2 .profile-description-holder + div,
+.profile-page-v2 .container .d-flex.flex-column.flex-md-row {
+    color: var(--pf-text-muted);
+    font-size: 13px;
+}
+
+.profile-page-v2 .container .d-flex.flex-column.flex-md-row ion-icon {
+    color: var(--pf-accent);
+}
+
+.profile-page-v2 a {
+    color: var(--pf-accent);
+}
+
+/* ---- subscription / follow block ---- */
+.profile-page-v2 .subscription-holder h6 {
+    color: var(--pf-text-muted);
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+}
+
+.profile-page-v2 .subscription-holder .btn-primary,
+.profile-page-v2 .manage-follow-button {
+    background: var(--pf-accent) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    font-weight: 700 !important;
+    font-size: 15px;
+    padding: 14px 20px;
+    color: #fff !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease;
+}
+
+.profile-page-v2 .subscription-holder .btn-primary:hover,
+.profile-page-v2 .manage-follow-button:hover {
+    background: var(--pf-brand) !important;
+}
+
+/* “following” state — muted ghost button */
+.profile-page-v2 .manage-follow-button.following,
+.profile-page-v2 .manage-follow-button[data-following="true"] {
+    background: var(--pf-pill-bg) !important;
+    color: var(--pf-text) !important;
+    border: 1px solid var(--pf-border) !important;
+}
+
+/* ---- content states ---- */
+.profile-page-v2 .no-videos-placeholder,
+.profile-page-v2 .marketplace-content {
+    color: var(--pf-text-muted);
+}
+
+.profile-page-v2 .no-videos-placeholder h5,
+.profile-page-v2 .marketplace-content h5 {
+    color: var(--pf-text-secondary);
+    font-weight: 700;
+}
+
+.profile-page-v2 .no-videos-placeholder ion-icon,
+.profile-page-v2 .marketplace-content ion-icon {
+    color: var(--pf-text-muted);
+}
+
+/* ---- sidebar widgets ---- */
+.profile-page-v2 .col-md-4 {
+    background: var(--pf-page-bg);
+}
+
+/* legacy helpers */
+.card-img {
+    border-radius: 0 !important;
+}
+
+.description-content p {
     margin-bottom: 0.3rem;
 }
 
+.description-content p:last-child {
+    margin-bottom: 5px;
+}
 
+@media (max-width: 767px) {
+    .profile-page-v2 .avatar-holder,
+    .profile-page-v2 .avatar-holder img {
+        width: 104px;
+        height: 104px;
+    }
+
+    .profile-page-v2 .profile-cover-bg {
+        height: 170px;
+    }
+}
+
+/* ============================================
+   PROFILE POPUPS — neutral flat
+   Add-to-list / QR / Message
+   ============================================ */
+
+.pf-modal-dialog {
+    max-width: 440px;
+    margin: 1rem auto;
+}
+
+.pf-modal {
+    --pfm-brand: #830866;
+    --pfm-accent: #cb0c9f;
+    --pfm-font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --pfm-font-display: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --pfm-radius: 14px;
+    border: 1px solid var(--pfm-border) !important;
+    border-radius: var(--pfm-radius) !important;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.45) !important;
+    font-family: var(--pfm-font);
+    background: var(--pfm-surface) !important;
+    color: var(--pfm-text);
+}
+
+.pf-modal--dark {
+    --pfm-surface: #18181e;
+    --pfm-surface-2: #1c1c24;
+    --pfm-surface-hover: #20202a;
+    --pfm-input-bg: #111114;
+    --pfm-border: rgba(255, 255, 255, 0.08);
+    --pfm-text: #f4f4f5;
+    --pfm-text-2: #a1a1aa;
+    --pfm-text-muted: #71717a;
+}
+
+.pf-modal--light {
+    --pfm-surface: #ffffff;
+    --pfm-surface-2: #f8f8fa;
+    --pfm-surface-hover: #f1f1f4;
+    --pfm-input-bg: #ffffff;
+    --pfm-border: rgba(9, 9, 11, 0.08);
+    --pfm-text: #18181b;
+    --pfm-text-2: #52525b;
+    --pfm-text-muted: #71717a;
+}
+
+.pf-modal__header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 18px 20px 14px;
+    background: var(--pfm-surface) !important;
+    border-bottom: 1px solid var(--pfm-border) !important;
+}
+
+.pf-modal__header-text {
+    min-width: 0;
+    flex: 1;
+}
+
+.pf-modal__title {
+    font-family: var(--pfm-font-display);
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--pfm-text) !important;
+    margin: 0 0 4px;
+}
+
+.pf-modal__sub {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--pfm-text-2);
+    line-height: 1.4;
+}
+
+.pf-modal__close {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--pfm-text-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    padding: 0;
+}
+
+.pf-modal--light .pf-modal__close {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.pf-modal__close:hover {
+    background: rgba(255, 255, 255, 0.12);
+    color: var(--pfm-text);
+}
+
+.pf-modal--light .pf-modal__close:hover {
+    background: rgba(0, 0, 0, 0.08);
+}
+
+.pf-modal__body {
+    padding: 16px 20px;
+    background: var(--pfm-surface) !important;
+    color: var(--pfm-text);
+}
+
+.pf-modal__body--center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 24px 20px;
+}
+
+.pf-modal__empty {
+    text-align: center;
+    color: var(--pfm-text-muted);
+    font-size: 0.9rem;
+    padding: 20px 8px;
+}
+
+.pf-modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 20px 18px;
+    background: var(--pfm-surface) !important;
+    border-top: 1px solid var(--pfm-border) !important;
+}
+
+.pf-modal__footer .new-message-has-contacts,
+.pf-modal__footer .new-message-no-contacts {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Buttons */
+.pf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    box-shadow: none !important;
+}
+
+.pf-btn--primary {
+    background: var(--pfm-accent) !important;
+    color: #fff !important;
+    border-color: var(--pfm-accent) !important;
+}
+
+.pf-btn--primary:hover {
+    background: var(--pfm-brand) !important;
+    border-color: var(--pfm-brand) !important;
+    color: #fff !important;
+}
+
+.pf-btn--ghost {
+    background: transparent !important;
+    color: var(--pfm-text) !important;
+    border-color: var(--pfm-border) !important;
+}
+
+.pf-btn--ghost:hover {
+    background: var(--pfm-surface-hover) !important;
+}
+
+/* List options */
+.pf-list-options {
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-right: 2px;
+}
+
+.pf-list-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--pfm-border);
+    background: var(--pfm-surface-2);
+    cursor: pointer;
+    margin: 0;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.pf-list-option:hover {
+    background: var(--pfm-surface-hover);
+    border-color: rgba(203, 12, 159, 0.35);
+}
+
+.pf-list-option__check {
+    position: absolute !important;
+    opacity: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    pointer-events: none;
+    margin: 0 !important;
+}
+
+.pf-list-option__box {
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    margin-top: 1px;
+    border-radius: 6px;
+    border: 2px solid var(--pfm-text-muted);
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: transparent;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.pf-list-option__box svg {
+    opacity: 0;
+    transform: scale(0.7);
+    transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.pf-list-option__check:checked + .pf-list-option__box {
+    background: var(--pfm-accent);
+    border-color: var(--pfm-accent);
+    color: #fff;
+}
+
+.pf-list-option__check:checked + .pf-list-option__box svg {
+    opacity: 1;
+    transform: scale(1);
+    color: #fff;
+}
+
+.pf-list-option__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.pf-list-option__name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--pfm-text) !important;
+    line-height: 1.3;
+}
+
+.pf-list-option__sub {
+    font-size: 0.8rem;
+    color: var(--pfm-text-muted) !important;
+}
+
+/* QR frame */
+.pf-qr-frame {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pf-qr-frame #qrcode,
+.pf-qr-frame #qrcode img,
+.pf-qr-frame #qrcode canvas {
+    display: block;
+    max-width: 220px;
+    height: auto;
+}
+
+/* Message fields */
+.pf-field {
+    margin-bottom: 14px;
+}
+
+.pf-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pfm-text-2);
+    margin-bottom: 6px;
+}
+
+.pf-modal .pf-input,
+.pf-modal textarea.pf-input,
+.pf-modal .form-control.pf-input {
+    width: 100% !important;
+    background: var(--pfm-input-bg) !important;
+    border: 1px solid var(--pfm-border) !important;
+    border-radius: 10px !important;
+    color: var(--pfm-text) !important;
+    padding: 11px 14px !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+    outline: none !important;
+    resize: none !important;
+}
+
+.pf-modal .pf-input:focus,
+.pf-modal textarea.pf-input:focus {
+    border-color: rgba(203, 12, 159, 0.55) !important;
+}
+
+.pf-modal .pf-input::placeholder {
+    color: var(--pfm-text-muted) !important;
+}
+
+.pf-textarea {
+    min-height: 110px;
+}
+
+/* Hide stuck Bootstrap tooltips while any modal is open */
+.modal-open .tooltip {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Soften Bootstrap modal chrome leftovers */
+.pf-modal-root .modal-header,
+.pf-modal-root .modal-body,
+.pf-modal-root .modal-footer {
+    border: none;
+    background: transparent;
+}
+
+.pf-modal-root .close {
+    display: none;
+}

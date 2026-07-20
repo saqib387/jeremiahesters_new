@@ -7,6 +7,8 @@
 @include('elements.impersonation-header')
 @include('elements.global-announcement')
 @include('template.header')
+@include('template.mobile-sidebar')
+@include('template.partials.mobile-app-bar')
 <div class="flex-fill">
     @yield('content')
 </div>

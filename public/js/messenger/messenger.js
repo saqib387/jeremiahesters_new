@@ -13,33 +13,138 @@
 $(function () {
 
     if(messengerVars.bootFullMessenger){
-        messenger.boot();
         messenger.fetchContacts();
+        messenger.boot();
         messenger.initAutoScroll();
         messenger.initMarkAsSeen();
         messenger.resetTextAreaHeight();
         if(messengerVars.lastContactID !== false && messengerVars.lastContactID !== 0){
-            messenger.fetchConversation(messengerVars.lastContactID);
+            if (isMessengerMobile()) {
+                setMessengerLayoutMode(false);
+                $('.conversation-content').html(noMessagesLabel());
+                $('.conversation-writeup').addClass('hidden');
+                $('.conversation-header').addClass('d-none');
+            } else {
+                messenger.fetchConversation(messengerVars.lastContactID);
+            }
         }
         else{
             $('.conversation-content').html(noMessagesLabel());
+            setMessengerLayoutMode(false);
         }
-        FileUpload.initDropZone('.dropzone','/attachment/upload/message', mediaSettings.use_chunked_uploads);
+        FileUpload.initDropZone('#messenger-dropzone-hook','/attachment/upload/message', mediaSettings.use_chunked_uploads);
         messenger.initSelectizeUserList();
     }
     messenger.initNewConversationUI();
+    messenger.initContactsSearch();
+    messenger.initListFilter();
+    messenger.initMobileNavigation();
+    if (isMessengerMobile()) {
+        destroyConversationsScrollbar();
+    }
 });
 
 /**
- * Adjusts conversation content to fill device height
+ * Viewport space used above the main content shell (app bar, banners, etc.)
+ */
+function getMessengerChromeHeight() {
+    var shell = document.querySelector('.flex-fill');
+    if (shell && shell.getBoundingClientRect) {
+        return Math.max(0, shell.getBoundingClientRect().top);
+    }
+
+    var height = 0;
+    var appBar = document.querySelector('.mobile-app-bar');
+    var bottomNav = document.querySelector('.mobile-bottom-nav');
+
+    if (appBar) {
+        var appBarStyle = window.getComputedStyle(appBar);
+        if (appBarStyle.display !== 'none' && appBar.offsetHeight) {
+            height += appBar.offsetHeight;
+        }
+    }
+
+    if (bottomNav) {
+        var bottomNavStyle = window.getComputedStyle(bottomNav);
+        if (bottomNavStyle.display !== 'none' && bottomNav.offsetHeight) {
+            height += bottomNav.offsetHeight;
+        }
+    }
+
+    return height;
+}
+
+/**
+ * Fit messenger to viewport without doubling panel heights on mobile
  */
 function adjustMinHeight() {
-    var headerHeight = $('.mobile-bottom-nav').outerHeight();
-    var viewportHeight = window.innerHeight;
-    var elements = $('.conversations-wrapper, .conversation-wrapper');
-    elements.each(function() {
-        $(this).css('height', (viewportHeight - headerHeight) + 'px');
-    });
+    var available = window.innerHeight - getMessengerChromeHeight();
+    var isMobile = window.matchMedia('(max-width: 767px)').matches;
+    var $shell = $('body > .flex-fill').first();
+    if (!$shell.length) {
+        $shell = $('.flex-fill').first();
+    }
+    var $page = $('.messenger-page');
+    var $messenger = $('.container.messenger');
+    var $wrappers = $('.conversations-wrapper, .conversation-wrapper');
+    var $content = $('.conversation-content');
+
+    if (isMobile) {
+        $shell.css({ height: available + 'px', maxHeight: available + 'px', overflow: 'hidden' });
+        $page.css({ height: '100%', maxHeight: '100%' });
+        $messenger.css({ height: '100%', maxHeight: '100%' });
+        $wrappers.css({ height: '', minHeight: '', maxHeight: '' });
+        $content.css({ height: '', maxHeight: '', overflow: '' });
+        document.documentElement.classList.add('messenger-mobile-lock');
+        document.body.classList.add('messenger-mobile-lock');
+    } else {
+        $shell.css({ height: '', maxHeight: '', overflow: '' });
+        $page.css({ height: '', maxHeight: '' });
+        $messenger.css({ height: '', maxHeight: '' });
+        $content.css({ height: '', maxHeight: '', overflow: '' });
+        $wrappers.each(function () {
+            $(this).css('height', available + 'px');
+        });
+        document.documentElement.classList.remove('messenger-mobile-lock');
+        document.body.classList.remove('messenger-mobile-lock');
+    }
+}
+
+function isMessengerMobile() {
+    return window.matchMedia('(max-width: 767px)').matches;
+}
+
+function setMessengerLayoutMode(hasChat) {
+    var $messenger = $('.container.messenger');
+    if (!$messenger.length) {
+        return;
+    }
+    $messenger.toggleClass('messenger--has-chat', !!hasChat);
+    $messenger.toggleClass('messenger--list-only', !hasChat);
+    document.body.classList.toggle('messenger-mobile-chat', isMessengerMobile() && !!hasChat);
+    if (hasChat) {
+        $('.conversation-writeup').removeClass('hidden');
+    }
+    adjustMinHeight();
+}
+
+function updateMobileChatHeader() {
+    if (!isMessengerMobile()) {
+        return;
+    }
+
+    const user = messenger.state.activeConversationUser;
+    const $avatar = $('.conversation-header-avatar');
+    const $name = $('.conversation-header-user');
+
+    if (user && messenger.state.activeConversationUserID) {
+        if ($avatar.length && user.avatar) {
+            $avatar.attr('src', user.avatar);
+        }
+        if ($name.length && user.name) {
+            $name.text(user.name);
+        }
+    }
 }
 
 // Adjust on page load
@@ -64,6 +169,7 @@ var messenger = {
         newConversationMode: false,
         newConversationSelectAllToggle: false,
         isSendingMessage: false,
+        contactListFilter: 'all',
     },
 
     pusher: null,
@@ -73,32 +179,49 @@ var messenger = {
      * Boots up the main messenger functions
      */
     boot: function(){
-        Pusher.logToConsole = typeof messengerVars.pusherDebug !== 'undefined' ? messengerVars.pusherDebug : false;
-        let params = {
-            authorizer: PusherBatchAuthorizer,
-            authDelay: 200,
-            authEndpoint: app.baseUrl + '/my/messenger/authorizeUser',
-            auth: {
-                headers: {
-                    'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+        const socketKey = socketsDriver === 'soketi'
+            ? (typeof soketi !== 'undefined' ? soketi.key : null)
+            : (typeof pusher !== 'undefined' ? pusher.key : null);
+
+        if (!socketKey) {
+            return false;
+        }
+
+        try {
+            Pusher.logToConsole = typeof messengerVars.pusherDebug !== 'undefined' ? messengerVars.pusherDebug : false;
+            let params = {
+                authorizer: PusherBatchAuthorizer,
+                authDelay: 200,
+                authEndpoint: app.baseUrl + '/my/messenger/authorizeUser',
+                auth: {
+                    headers: {
+                        'X-CSRF-Token': $('meta[name="csrf-token"]').attr('content')
+                    }
                 }
+            };
+            if(socketsDriver === 'soketi'){
+                params.wsHost = soketi.host;
+                params.wsPort = soketi.port;
+                params.forceTLS = soketi.useTSL ? true : false;
             }
-        };
-        if(socketsDriver === 'soketi'){
-            params.wsHost = soketi.host;
-            params.wsPort = soketi.port;
-            params.forceTLS = soketi.useTSL ? true : false;
+            else{
+                params.cluster = messengerVars.pusherCluster;
+            }
+            messenger.pusher = new Pusher(socketKey, params);
+            return true;
+        } catch (error) {
+            messenger.pusher = null;
+            return false;
         }
-        else{
-            params.cluster = messengerVars.pusherCluster;
-        }
-        messenger.pusher = new Pusher(socketsDriver === 'soketi' ? soketi.key : pusher.key, params);
     },
 
     /**
      * Instantiates pusher sockets for each conversation (batched)
      */
     initLiveSockets: function(){
+        if (!messenger.pusher) {
+            return;
+        }
         // TODO: Optimization: When fetchContacts is call, only re-init sockets for required channels
         $.each(messenger.state.contacts, function (k,v) {
             const minID = Math.min(v.receiverID,v.senderID);
@@ -152,8 +275,11 @@ var messenger = {
                     callback();
                 }
                 else{
-                    // messenger.state.contacts = result.data
+                    $('.conversations-list').html(noContactsLabel());
                 }
+            },
+            error: function () {
+                $('.conversations-list').html(noContactsLabel());
             }
         });
     },
@@ -164,8 +290,12 @@ var messenger = {
     makeContactsHeaderResponsive: function(){
         const breakPoint = bootstrapDetectBreakpoint();
         if(breakPoint.name === 'xs'){
-            initConversationsScrollbar();
-            $('.conversations-list').addClass('border-top');
+            destroyConversationsScrollbar();
+            $('.conversations-list').css({
+                'overflow-y': 'auto',
+                'max-height': ''
+            });
+            $('.conversations-list').removeClass('border-top');
         }
         else{
             destroyConversationsScrollbar();
@@ -198,6 +328,7 @@ var messenger = {
                     messenger.state.activeConversationUserID = userID;
                     messenger.setActiveContact(userID);
                     messenger.reloadConversationHeader();
+                    setMessengerLayoutMode(true);
                     if(app.feedDisableRightClickOnMedia !== null){
                         messenger.disableMesagesRightClick();
                     }
@@ -390,6 +521,7 @@ var messenger = {
             $('.conversations-list').html(noContactsLabel());
         }
         $('.contact-'+messenger.state.activeConversationUserID).addClass('contact-active');
+        messenger.applyContactListFilters();
     },
 
     /**
@@ -415,6 +547,7 @@ var messenger = {
             $('.conversation-header-avatar').attr('src',avatar);
             $('.conversation-header-user').html(name);
             $('.conversation-profile-link').attr('href',profile);
+            updateMobileChatHeader();
 
             $('.details-holder .unfollow-btn').unbind('click');
             $('.details-holder .block-btn').unbind('click');
@@ -483,7 +616,15 @@ var messenger = {
      */
     reloadConversation: function () {
         let conversationHtml = '';
+        let lastDayKey = null;
         $.each( messenger.state.conversation, function( key, value ) {
+            if (typeof msgDayKey === 'function' && value.created_at) {
+                const dayKey = msgDayKey(value.created_at);
+                if (dayKey && dayKey !== lastDayKey) {
+                    conversationHtml += messageDateSeparator(value.created_at);
+                    lastDayKey = dayKey;
+                }
+            }
             conversationHtml += messageElement(value);
         });
         $('.conversation-content').html(conversationHtml);
@@ -523,14 +664,33 @@ var messenger = {
      * @param el
      */
     textAreaAdjust: function(el) {
-        el.style.height = (el.scrollHeight > el.clientHeight) ? (el.scrollHeight)+"px" : "40px";
+        const styles = window.getComputedStyle(el);
+        const minHeight = parseFloat(styles.minHeight) || 42;
+        const maxHeight = parseFloat(styles.maxHeight) || 120;
+        el.style.height = 'auto';
+        const scrollHeight = el.scrollHeight;
+        const nextHeight = Math.min(Math.max(scrollHeight, minHeight), maxHeight);
+        el.style.height = nextHeight + 'px';
+        if (scrollHeight > maxHeight) {
+            el.classList.add('is-scrollable');
+            el.style.overflowY = 'auto';
+        } else {
+            el.classList.remove('is-scrollable');
+            el.style.overflowY = 'hidden';
+        }
     },
 
     /**
      * Resets the send new message text area height
      */
     resetTextAreaHeight: function(){
-        $(".messageBoxInput").css('height',45);
+        const $input = $(".messageBoxInput");
+        $input.each(function () {
+            const minHeight = parseFloat(window.getComputedStyle(this).minHeight) || 42;
+            this.style.height = minHeight + 'px';
+            this.style.overflowY = 'hidden';
+            this.classList.remove('is-scrollable');
+        });
     },
 
     /**
@@ -845,6 +1005,120 @@ var messenger = {
 
 
 
+    },
+
+    /**
+     * Filters visible contacts from the search field and list filter
+     */
+    initContactsSearch: function () {
+        $(document).on('input', '#messenger-contacts-search', function () {
+            messenger.applyContactListFilters();
+        });
+    },
+
+    /**
+     * Inits the contacts list filter dropdown
+     */
+    initListFilter: function () {
+        $(document).on('click', '#messenger-list-filter-btn', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const $menu = $('#messenger-list-filter-menu');
+            const isOpen = $menu.hasClass('is-open');
+            messenger.closeListFilterMenu();
+            if (!isOpen) {
+                $menu.removeAttr('hidden').addClass('is-open');
+                $(this).attr('aria-expanded', 'true');
+            }
+        });
+
+        $(document).on('click', '.messenger-list-filter-option', function (e) {
+            e.preventDefault();
+            const filter = $(this).data('filter');
+            messenger.state.contactListFilter = filter;
+            $('.messenger-list-filter-option').removeClass('is-active').attr('aria-selected', 'false');
+            $(this).addClass('is-active').attr('aria-selected', 'true');
+            $('.messenger-list-filter__label').text($(this).text().trim());
+            messenger.closeListFilterMenu();
+            messenger.applyContactListFilters();
+        });
+
+        $(document).on('click', function () {
+            messenger.closeListFilterMenu();
+        });
+
+        $(document).on('click', '.messenger-list-filter-wrap', function (e) {
+            e.stopPropagation();
+        });
+    },
+
+    closeListFilterMenu: function () {
+        $('#messenger-list-filter-menu').attr('hidden', true).removeClass('is-open');
+        $('#messenger-list-filter-btn').attr('aria-expanded', 'false');
+    },
+
+    /**
+     * Mobile back navigation and header search shortcut
+     */
+    initMobileNavigation: function () {
+        $(document).on('click', '#messenger-conversation-back', function (e) {
+            e.preventDefault();
+            messenger.backToList();
+        });
+
+        $(document).on('click', '#mobile-app-bar-search-open', function () {
+            if (!window.location.pathname.includes('/my/messenger')) {
+                return;
+            }
+            const $search = $('#messenger-contacts-search');
+            if ($search.length) {
+                $search.trigger('focus');
+            }
+        });
+    },
+
+    /**
+     * Returns to the full-screen contact list on mobile
+     */
+    backToList: function () {
+        messenger.state.activeConversationUserID = null;
+        messenger.state.activeConversationUser = null;
+        messenger.state.conversation = [];
+        $('.contact-box').removeClass('contact-active active');
+        $('.conversation-header').addClass('d-none');
+        $('.conversation-content').html(noMessagesLabel());
+        $('.conversation-writeup').addClass('hidden');
+        setMessengerLayoutMode(false);
+    },
+
+    applyContactListFilters: function () {
+        const query = ($('#messenger-contacts-search').val() || '').toLowerCase().trim();
+        const filter = messenger.state.contactListFilter || 'all';
+        let visibleCount = 0;
+
+        $('.conversations-list .contact-box').each(function () {
+            const $box = $(this);
+            const $row = $box.closest('[class*="col-"]').length ? $box.closest('[class*="col-"]') : $box;
+            const name = $box.find('.contact-name').text().toLowerCase();
+            const message = $box.find('.contact-message').text().toLowerCase();
+            const matchesSearch = !query || name.includes(query) || message.includes(query);
+            const isUnread = String($box.data('contact-unread')) === '1';
+            const matchesFilter = filter === 'all' || (filter === 'unread' && isUnread);
+            const visible = matchesSearch && matchesFilter;
+            $row.toggle(visible);
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+
+        const $emptyFilter = $('.messenger-list-empty-filter');
+        if (visibleCount === 0 && $('.conversations-list .contact-box').length > 0) {
+            if (!$emptyFilter.length) {
+                $('.conversations-list').append(`<p class="messenger-list-empty-filter">${trans('No conversations match your filters.')}</p>`);
+            }
+        } else {
+            $emptyFilter.remove();
+        }
     },
 
     /**

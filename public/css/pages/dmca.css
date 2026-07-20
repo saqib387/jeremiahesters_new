@@ -1,0 +1,376 @@
+/* ============================================
+   DMCA page — glass theme (light & dark)
+   Brand: #830866 / #cb0c9f
+   ============================================ */
+
+.dmca-page {
+    --dmca-brand: #830866;
+    --dmca-brand-light: #a10a7f;
+    --dmca-brand-neon: #cb0c9f;
+    --dmca-brand-glow: rgba(131, 8, 102, 0.35);
+    --dmca-radius-sm: 8px;
+    --dmca-radius-md: 12px;
+    --dmca-radius-lg: 16px;
+    --dmca-radius-xl: 20px;
+    --dmca-glass-blur: 20px;
+    --dmca-ease: cubic-bezier(0.32, 0.72, 0, 1);
+    position: relative;
+    isolation: isolate;
+    min-height: calc(100vh - 64px);
+    overflow-x: clip;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--dmca-text-primary);
+}
+
+.dmca-page--dark {
+    --dmca-text-primary: #f4f4f5;
+    --dmca-text-secondary: #a1a1aa;
+    --dmca-text-muted: #71717a;
+    --dmca-page-bg: #09090b;
+    --dmca-orb-1: transparent;
+    --dmca-orb-2: transparent;
+    --dmca-glass-elevated: #18181e;
+    --dmca-glass-muted: #1c1c24;
+    --dmca-glass-border: rgba(255, 255, 255, 0.08);
+    --dmca-glass-highlight: rgba(255, 255, 255, 0.04);
+    --dmca-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 8px 24px rgba(0, 0, 0, 0.15);
+    --dmca-hero-gradient: #18181e;
+    --dmca-agent-bg: #1c1c24;
+    --dmca-warning-bg: rgba(244, 63, 94, 0.1);
+    --dmca-warning-border: rgba(244, 63, 94, 0.22);
+    --dmca-warning-text: #fda4af;
+    --dmca-info-bg: rgba(56, 189, 248, 0.1);
+    --dmca-info-border: rgba(56, 189, 248, 0.22);
+    --dmca-info-text: #7dd3fc;
+}
+
+.dmca-page--light {
+    --dmca-text-primary: #111827;
+    --dmca-text-secondary: #6b7280;
+    --dmca-text-muted: #9ca3af;
+    --dmca-page-bg: #f4f4f7;
+    --dmca-orb-1: transparent;
+    --dmca-orb-2: transparent;
+    --dmca-glass-elevated: #ffffff;
+    --dmca-glass-muted: #f8f8fa;
+    --dmca-glass-border: rgba(15, 23, 42, 0.08);
+    --dmca-glass-highlight: #ffffff;
+    --dmca-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px rgba(15, 23, 42, 0.04);
+    --dmca-hero-gradient: #ffffff;
+    --dmca-agent-bg: #f8f8fa;
+    --dmca-warning-bg: rgba(244, 63, 94, 0.06);
+    --dmca-warning-border: rgba(225, 29, 72, 0.18);
+    --dmca-warning-text: #be123c;
+    --dmca-info-bg: rgba(56, 189, 248, 0.06);
+    --dmca-info-border: rgba(2, 132, 199, 0.16);
+    --dmca-info-text: #0369a1;
+}
+
+.dmca-page {
+    background: var(--dmca-page-bg);
+}
+
+.dmca-page__glow {
+    display: none;
+}
+
+.dmca-page__scroll {
+    position: relative;
+    z-index: 1;
+    min-height: calc(100vh - 64px);
+}
+
+.dmca-page__inner {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 20px 16px 40px;
+    box-sizing: border-box;
+}
+
+.dmca-page__hero {
+    margin-bottom: 16px;
+    padding: 22px 20px;
+    border-radius: var(--dmca-radius-xl);
+    border: 1px solid var(--dmca-glass-border);
+    background: var(--dmca-hero-gradient);
+    box-shadow: var(--dmca-shadow), inset 0 1px 0 var(--dmca-glass-highlight);
+    backdrop-filter: blur(var(--dmca-glass-blur));
+    -webkit-backdrop-filter: blur(var(--dmca-glass-blur));
+    text-align: center;
+}
+
+.dmca-page__hero-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+    background: rgba(203, 12, 159, 0.12);
+    border: 1px solid rgba(203, 12, 159, 0.22);
+    color: var(--dmca-brand-neon);
+    box-shadow: none;
+}
+
+.dmca-page__hero-icon .ion-icon-wrapper {
+    color: var(--dmca-brand-neon) !important;
+}
+
+.dmca-page .ion-icon-wrapper {
+    contain: none !important;
+    overflow: visible !important;
+}
+
+.dmca-btn .ion-icon-wrapper {
+    color: inherit !important;
+}
+
+.dmca-btn--primary .ion-icon-wrapper {
+    color: #fff !important;
+}
+
+.dmca-page__title {
+    margin: 0 0 8px;
+    font-size: clamp(1.35rem, 4vw, 1.75rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: var(--dmca-text-primary);
+}
+
+.dmca-page__subtitle {
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.5;
+    color: var(--dmca-text-secondary);
+}
+
+.dmca-page__content {
+    border-radius: var(--dmca-radius-xl);
+    border: 1px solid var(--dmca-glass-border);
+    background: var(--dmca-glass-elevated);
+    box-shadow: var(--dmca-shadow), inset 0 1px 0 var(--dmca-glass-highlight);
+    backdrop-filter: blur(var(--dmca-glass-blur));
+    -webkit-backdrop-filter: blur(var(--dmca-glass-blur));
+    overflow: hidden;
+}
+
+.dmca-section {
+    padding: 22px 20px;
+    border-bottom: 1px solid var(--dmca-glass-border);
+}
+
+.dmca-section:last-child {
+    border-bottom: none;
+}
+
+.dmca-section__title {
+    margin: 0 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--dmca-glass-border);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--dmca-text-primary);
+}
+
+.dmca-section__text {
+    margin: 0 0 14px;
+    font-size: 0.9375rem;
+    line-height: 1.7;
+    color: var(--dmca-text-secondary);
+}
+
+.dmca-section__text:last-child {
+    margin-bottom: 0;
+}
+
+.dmca-section__list {
+    margin: 0 0 16px;
+    padding-left: 1.25rem;
+    font-size: 0.9375rem;
+    line-height: 1.65;
+    color: var(--dmca-text-secondary);
+}
+
+.dmca-section__list li + li {
+    margin-top: 10px;
+}
+
+.dmca-agent-card {
+    margin: 16px 0;
+    padding: 18px;
+    border-radius: var(--dmca-radius-lg);
+    border: 1px solid var(--dmca-glass-border);
+    border-left: 3px solid var(--dmca-brand-neon);
+    background: var(--dmca-agent-bg);
+    box-shadow: none;
+}
+
+.dmca-agent-card__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dmca-text-primary);
+}
+
+.dmca-agent-card__title .ion-icon-wrapper {
+    color: var(--dmca-brand-neon) !important;
+}
+
+.dmca-page--light .dmca-agent-card__title .ion-icon-wrapper {
+    color: var(--dmca-brand) !important;
+}
+
+.dmca-agent-card__row {
+    margin: 0 0 6px;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--dmca-text-secondary);
+}
+
+.dmca-agent-card__row strong {
+    color: var(--dmca-text-primary);
+    font-weight: 600;
+}
+
+.dmca-callout {
+    margin: 18px 0;
+    padding: 16px;
+    border-radius: var(--dmca-radius-md);
+    border: 1px solid transparent;
+}
+
+.dmca-callout__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 8px;
+    font-size: 0.9375rem;
+    font-weight: 700;
+}
+
+.dmca-callout__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+}
+
+.dmca-callout--warning {
+    background: var(--dmca-warning-bg);
+    border-color: var(--dmca-warning-border);
+}
+
+.dmca-callout--warning .dmca-callout__title,
+.dmca-callout--warning .dmca-callout__text {
+    color: var(--dmca-warning-text);
+}
+
+.dmca-callout--info {
+    background: var(--dmca-info-bg);
+    border-color: var(--dmca-info-border);
+}
+
+.dmca-callout--info .dmca-callout__title,
+.dmca-callout--info .dmca-callout__text {
+    color: var(--dmca-info-text);
+}
+
+.dmca-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 18px;
+}
+
+.dmca-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    padding: 0 22px;
+    border-radius: var(--dmca-radius-md);
+    font-size: 0.9375rem;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: transform 0.2s var(--dmca-ease), box-shadow 0.2s var(--dmca-ease), background 0.2s var(--dmca-ease);
+}
+
+.dmca-btn--primary {
+    background: var(--dmca-brand-neon);
+    border: none;
+    color: #fff !important;
+    box-shadow: 0 4px 14px rgba(203, 12, 159, 0.22);
+}
+
+.dmca-btn--primary:hover {
+    transform: translateY(-1px);
+    background: #b00a8f;
+    box-shadow: 0 6px 18px rgba(203, 12, 159, 0.28);
+    color: #fff !important;
+}
+
+.dmca-btn--secondary {
+    background: var(--dmca-glass-muted);
+    border: 1px solid var(--dmca-glass-border);
+    color: var(--dmca-text-primary) !important;
+    box-shadow: inset 0 1px 0 var(--dmca-glass-highlight);
+}
+
+.dmca-btn--secondary:hover {
+    border-color: rgba(203, 12, 159, 0.35);
+    background: rgba(203, 12, 159, 0.1);
+    color: var(--dmca-text-primary) !important;
+}
+
+.dmca-page__footer {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: var(--dmca-radius-lg);
+    border: 1px solid var(--dmca-glass-border);
+    background: var(--dmca-glass-muted);
+    font-size: 0.8125rem;
+    color: var(--dmca-text-muted);
+    text-align: center;
+}
+
+@media (max-width: 767px) {
+    .dmca-page {
+        min-height: calc(100vh - 56px);
+    }
+
+    .dmca-page__scroll {
+        min-height: calc(100vh - 56px);
+    }
+
+    .dmca-page__inner {
+        padding: 12px 12px 28px;
+    }
+
+    .dmca-section {
+        padding: 18px 16px;
+    }
+
+    .dmca-actions {
+        flex-direction: column;
+    }
+
+    .dmca-btn {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dmca-btn {
+        transition: none !important;
+    }
+
+    .dmca-btn--primary:hover {
+        transform: none !important;
+    }
+}

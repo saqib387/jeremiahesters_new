@@ -8,12 +8,16 @@
     @include('elements.feed.post-list-management')
     @include('elements.photoswipe-container')
 @else
-    <div class="d-flex justify-content-center align-items-center">
-        <div class="col-10">
-            <img src="{{asset('/img/no-content-available.svg')}}">
+    @if(isset($emptyVariant) && $emptyVariant === 'bookmarks')
+        @include('elements.bookmarks.bookmarks-empty-hero')
+    @else
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="col-10">
+                <img src="{{asset('/img/no-content-available.svg')}}">
+            </div>
         </div>
-    </div>
-    <div class="d-flex justify-content-center align-items-center">
-        <h5 class="text-center mb-2 mt-2">{{__('No posts available')}}</h5>
-    </div>
+        <div class="d-flex justify-content-center align-items-center">
+            <h5 class="text-center mb-2 mt-2">{{__('No posts available')}}</h5>
+        </div>
+    @endif
 @endif

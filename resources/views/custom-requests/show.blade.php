@@ -707,7 +707,7 @@
 }
 
 .hero-background {
-    background: linear-gradient(135deg, #830866 0%, #a10a7f 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     position: relative;
     min-height: 250px;
 }
@@ -782,7 +782,7 @@
     background: #f8f9fa;
     padding: 1.5rem;
     border-radius: 10px;
-    border-left: 4px solid #830866;
+    border-left: 4px solid #667eea;
 }
 
 /* Progress Hero */
@@ -915,7 +915,7 @@
 
 /* Modal Styles */
 .bg-gradient {
-    background: linear-gradient(135deg, #830866 0%, #a10a7f 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .request-preview-card {
@@ -1027,7 +1027,7 @@
 
 /* Voting Section */
 .voting-section .card-header {
-    background: linear-gradient(135deg, #830866 0%, #a10a7f 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 16px 16px 0 0;
 }
 

@@ -3,20 +3,29 @@
 @section('page_title', __('voyager::generic.viewing').' '.__('voyager::generic.settings'))
 
 @section('css')
-    <link href="{{ asset('css/admin-settings.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/admin-settings.css') }}?v=20260707a" rel="stylesheet">
     <link rel="stylesheet" href="{{asset('/libs/@simonwep/pickr/dist/themes/nano.min.css')}}">
 @stop
 
 @section('page_header')
-    <h1 class="page-title">
-        <i class="voyager-settings"></i> {{ __('voyager::generic.settings') }}
-    </h1>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="voyager-settings"></i>
+                </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">{{ __('voyager::generic.settings') }}</h1>
+                </div>
+            </div>
+        </div>
+    </div>
 @stop
 
 @section('content')
 
 
-    <div class="page-content settings container-fluid">
+    <div class="page-content settings container-fluid jf-dash-page jf-settings-page">
 
         @if(isset($storageErrorMessage) && $storageErrorMessage !== false)
             <div class="storage-incorrect-bucket-config tab-additional-info">
@@ -40,14 +49,14 @@
             </div>
         @endif
 
-        <form action="{{ route('voyager.settings.update') }}" method="POST" enctype="multipart/form-data" class="save-settings-form">
+        <form action="{{ route('voyager.settings.update') }}" method="POST" enctype="multipart/form-data" class="save-settings-form jf-settings-form">
             {{ method_field("PUT") }}
             {{ csrf_field() }}
             <input type="hidden" name="setting_tab" class="setting_tab" value="{{ $active }}" />
-            <div class="panel">
+            <div class="panel jf-dash-card jf-settings-card">
 
-                <div class="page-content settings container-fluid">
-                    <ul class="nav nav-tabs">
+                <div class="jf-settings-card__inner">
+                    <ul class="nav nav-tabs jf-settings-tabs">
                         <?php
                         $categoriesOrder = [
                             'Site',
@@ -92,7 +101,7 @@
                         </li>
                     </ul>
 
-                    <div class="tab-content">
+                    <div class="tab-content jf-settings-tab-content">
 
                         @include('vendor.voyager.settings.lcode')
 
@@ -443,7 +452,12 @@
                 </div>
 
             </div>
-            <button type="submit" class="btn btn-primary pull-right">{{ __('voyager::settings.save') }}</button>
+            <div class="jf-settings-form__footer">
+                <button type="submit" class="jf-dash-btn jf-dash-btn--green jf-settings-save-btn">
+                    <i class="voyager-check"></i>
+                    <span class="jf-pill-label">{{ __('voyager::settings.save') }}</span>
+                </button>
+            </div>
         </form>
 
         <div class="clearfix"></div>

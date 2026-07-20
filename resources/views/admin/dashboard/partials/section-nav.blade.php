@@ -1,17 +1,45 @@
-<div class="btn-group" style="margin-bottom: 20px;">
-    <a href="{{ route('voyager.dashboard') }}" class="btn btn-default">
-        <i class="voyager-dashboard"></i> Overview
-    </a>
-    <a href="{{ route('voyager.dashboard.realtime-stats') }}" class="btn btn-{{ Route::currentRouteName() === 'voyager.dashboard.realtime-stats' ? 'primary' : 'default' }}">
-        <i class="voyager-activity"></i> Realtime Stats
-    </a>
-    <a href="{{ route('voyager.dashboard.chart-data') }}" class="btn btn-{{ Route::currentRouteName() === 'voyager.dashboard.chart-data' ? 'primary' : 'default' }}">
-        <i class="voyager-bar-chart"></i> Chart Data
-    </a>
-    <a href="{{ route('voyager.dashboard.top-performers') }}" class="btn btn-{{ Route::currentRouteName() === 'voyager.dashboard.top-performers' ? 'primary' : 'default' }}">
-        <i class="voyager-trophy"></i> Top Performers
-    </a>
-    <a href="{{ route('voyager.dashboard.system-health') }}" class="btn btn-{{ Route::currentRouteName() === 'voyager.dashboard.system-health' ? 'primary' : 'default' }}">
-        <i class="voyager-tools"></i> System Health
-    </a>
-</div>
+@php
+    $current = Route::currentRouteName();
+    $tabs = [
+        [
+            'route' => 'voyager.dashboard',
+            'label' => 'Overview',
+            'icon' => 'voyager-dashboard',
+            'accent' => 'purple',
+        ],
+        [
+            'route' => 'voyager.dashboard.realtime-stats',
+            'label' => 'Realtime Stats',
+            'icon' => 'voyager-activity',
+            'accent' => 'green',
+        ],
+        [
+            'route' => 'voyager.dashboard.chart-data',
+            'label' => 'Chart Data',
+            'icon' => 'voyager-bar-chart',
+            'accent' => 'blue',
+        ],
+        [
+            'route' => 'voyager.dashboard.top-performers',
+            'label' => 'Top Performers',
+            'icon' => 'voyager-trophy',
+            'accent' => 'amber',
+        ],
+        [
+            'route' => 'voyager.dashboard.system-health',
+            'label' => 'System Health',
+            'icon' => 'voyager-tools',
+            'accent' => 'rose',
+        ],
+    ];
+@endphp
+
+<nav class="jf-dash-nav" aria-label="Dashboard sections">
+    @foreach ($tabs as $tab)
+        <a href="{{ route($tab['route']) }}"
+           class="jf-dash-nav__item jf-dash-nav__item--{{ $tab['accent'] }} {{ $current === $tab['route'] ? 'is-active' : '' }}">
+            <i class="{{ $tab['icon'] }}"></i>
+            <span class="jf-pill-label">{{ $tab['label'] }}</span>
+        </a>
+    @endforeach
+</nav>

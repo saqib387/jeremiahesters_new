@@ -34,8 +34,8 @@
     <!-- Few Dynamic Styles -->
     <style type="text/css">
         .voyager .side-menu .navbar-header {
-            background:{{ config('voyager.primary_color','#22A7F0') }};
-            border-color:{{ config('voyager.primary_color','#22A7F0') }};
+            background: transparent;
+            border-color: transparent;
         }
         .widget .btn-primary{
             border-color:{{ config('voyager.primary_color','#22A7F0') }};

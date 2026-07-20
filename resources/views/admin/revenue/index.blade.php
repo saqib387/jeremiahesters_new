@@ -3,16 +3,20 @@
 @section('page_title', 'Revenue Management')
 
 @section('page_header')
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-8">
-                <h1 class="page-title">
-                    <i class="voyager-dollar"></i> Revenue Management
-                </h1>
+    <div class="container-fluid jf-dash-page-header">
+        <div class="jf-dash-page-header__inner">
+            <div class="jf-dash-page-header__brand">
+                <div class="jf-dash-page-header__icon" aria-hidden="true">
+                    <i class="voyager-dollar"></i>
+                </div>
+                <div class="jf-dash-page-header__text">
+                    <h1 class="jf-dash-page-header__title">Revenue Management</h1>
+                </div>
             </div>
-            <div class="col-md-4 text-right">
-                <a href="{{ route('voyager.revenue.export', request()->query()) }}" class="btn btn-success">
-                    <i class="voyager-download"></i> <span>Export CSV</span>
+            <div class="jf-dash-page-header__actions">
+                <a href="{{ route('voyager.revenue.export', request()->query()) }}" class="jf-dash-btn jf-dash-btn--green">
+                    <i class="voyager-download"></i>
+                    <span class="jf-pill-label">Export CSV</span>
                 </a>
             </div>
         </div>
@@ -20,82 +24,82 @@
 @stop
 
 @section('content')
-    <div class="page-content browse container-fluid">
+    <div class="page-content browse container-fluid jf-dash-page jf-revenue-page">
         @include('voyager::alerts')
 
         <!-- Statistics Cards -->
-        <div class="row">
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#3498db;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['total_revenue_shares']) }}</h4>
-                        <p>Total Shares</p>
-                    </div>
-                </div>
+        <div class="row jf-revenue-stat-row">
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-receipt',
+                    'accent' => '#4f8cff',
+                    'label' => 'Total Shares',
+                    'value' => number_format($stats['total_revenue_shares']),
+                ])
             </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#2ecc71;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['distributed_shares']) }}</h4>
-                        <p>Distributed</p>
-                    </div>
-                </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-check',
+                    'accent' => '#22c55e',
+                    'label' => 'Distributed',
+                    'value' => number_format($stats['distributed_shares']),
+                ])
             </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#f39c12;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['pending_shares']) }}</h4>
-                        <p>Pending</p>
-                    </div>
-                </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-alarm-clock',
+                    'accent' => '#f59e0b',
+                    'label' => 'Pending',
+                    'value' => number_format($stats['pending_shares']),
+                ])
             </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#e74c3c;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>{{ number_format($stats['overdue_shares']) }}</h4>
-                        <p>Overdue</p>
-                    </div>
-                </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-exclamation',
+                    'accent' => '#ef4444',
+                    'label' => 'Overdue',
+                    'value' => number_format($stats['overdue_shares']),
+                ])
             </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#9b59b6;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>${{ number_format($stats['total_distributed_amount'], 2) }}</h4>
-                        <p>Distributed Amount</p>
-                    </div>
-                </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-credit-cards',
+                    'accent' => '#7928ca',
+                    'label' => 'Distributed Amount',
+                    'value' => '$' . number_format($stats['total_distributed_amount'], 2),
+                ])
             </div>
-            <div class="col-md-2">
-                <div class="panel widget center bgimage" style="background-color:#1abc9c;">
-                    <div class="dimmer"></div>
-                    <div class="panel-content">
-                        <h4>${{ number_format($stats['pending_amount'], 2) }}</h4>
-                        <p>Pending Amount</p>
-                    </div>
-                </div>
+            <div class="col-md-2 col-sm-4 col-xs-6">
+                @include('admin.dashboard.partials.stat-card', [
+                    'icon' => 'voyager-dollar',
+                    'accent' => '#f472b6',
+                    'label' => 'Pending Amount',
+                    'value' => '$' . number_format($stats['pending_amount'], 2),
+                ])
             </div>
         </div>
 
-        <!-- Filters and Search -->
+        <!-- Filters -->
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-bordered">
-                    <div class="panel-body">
-                        <form method="GET" action="{{ route('voyager.revenue.index') }}" class="form-inline">
-                            <div class="form-group">
-                                <input type="text" 
-                                       name="search" 
-                                       class="form-control" 
-                                       placeholder="Search users, cryptocurrencies, transactions..." 
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--filters">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--purple"><i class="voyager-search"></i></span>
+                            <span>Search &amp; Filters</span>
+                        </h3>
+                    </div>
+                    <div class="panel-body jf-dash-card__body">
+                        <form method="GET" action="{{ route('voyager.revenue.index') }}" class="jf-revenue-filter">
+                            <div class="jf-revenue-filter__field">
+                                <input type="text"
+                                       name="search"
+                                       class="form-control"
+                                       placeholder="Search users, cryptocurrencies, transactions..."
                                        value="{{ request('search') }}">
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-revenue-filter__field">
                                 <select name="status" class="form-control">
                                     <option value="">All Status</option>
                                     <option value="distributed" {{ request('status') == 'distributed' ? 'selected' : '' }}>Distributed</option>
@@ -103,8 +107,8 @@
                                     <option value="overdue" {{ request('status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-revenue-filter__field">
                                 <select name="cryptocurrency_id" class="form-control">
                                     <option value="">All Cryptocurrencies</option>
                                     @foreach($cryptocurrencies as $crypto)
@@ -114,17 +118,17 @@
                                     @endforeach
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-revenue-filter__field">
                                 <select name="amount_range" class="form-control">
                                     <option value="">All Amounts</option>
-                                    <option value="small" {{ request('amount_range') == 'small' ? 'selected' : '' }}>Small (< $100)</option>
-                                    <option value="medium" {{ request('amount_range') == 'medium' ? 'selected' : '' }}>Medium ($100 - $1,000)</option>
-                                    <option value="large" {{ request('amount_range') == 'large' ? 'selected' : '' }}>Large (> $1,000)</option>
+                                    <option value="small" {{ request('amount_range') == 'small' ? 'selected' : '' }}>Small (&lt; $100)</option>
+                                    <option value="medium" {{ request('amount_range') == 'medium' ? 'selected' : '' }}>Medium ($100 – $1,000)</option>
+                                    <option value="large" {{ request('amount_range') == 'large' ? 'selected' : '' }}>Large (&gt; $1,000)</option>
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-revenue-filter__field">
                                 <select name="sort_by" class="form-control">
                                     <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Sort by Created</option>
                                     <option value="revenue_amount" {{ request('sort_by') == 'revenue_amount' ? 'selected' : '' }}>Sort by Revenue</option>
@@ -132,21 +136,24 @@
                                     <option value="percentage" {{ request('sort_by') == 'percentage' ? 'selected' : '' }}>Sort by Percentage</option>
                                 </select>
                             </div>
-                            
-                            <div class="form-group">
+
+                            <div class="jf-revenue-filter__field">
                                 <select name="sort_dir" class="form-control">
                                     <option value="desc" {{ request('sort_dir') == 'desc' ? 'selected' : '' }}>Descending</option>
                                     <option value="asc" {{ request('sort_dir') == 'asc' ? 'selected' : '' }}>Ascending</option>
                                 </select>
                             </div>
-                            
-                            <button type="submit" class="btn btn-primary">
-                                <i class="voyager-search"></i> Filter
-                            </button>
-                            
-                            <a href="{{ route('voyager.revenue.index') }}" class="btn btn-default">
-                                <i class="voyager-refresh"></i> Clear
-                            </a>
+
+                            <div class="jf-revenue-filter__actions">
+                                <button type="submit" class="jf-dash-btn jf-dash-btn--blue">
+                                    <i class="voyager-search"></i>
+                                    <span class="jf-pill-label">Filter</span>
+                                </button>
+                                <a href="{{ route('voyager.revenue.index') }}" class="jf-dash-btn jf-dash-btn--purple">
+                                    <i class="voyager-refresh"></i>
+                                    <span class="jf-pill-label">Clear</span>
+                                </a>
+                            </div>
                         </form>
                     </div>
                 </div>
@@ -156,19 +163,25 @@
         <!-- Revenue Shares Table -->
         <div class="row">
             <div class="col-md-12">
-                <div class="panel panel-bordered">
-                    <div class="panel-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
+                <div class="panel panel-bordered jf-dash-card jf-dash-card--revenue-table revenue-table-panel">
+                    <div class="panel-heading jf-dash-card__head">
+                        <h3 class="panel-title jf-dash-card__title">
+                            <span class="jf-dash-card__title-icon jf-dash-card__title-icon--rose"><i class="voyager-dollar"></i></span>
+                            <span>All Revenue Shares</span>
+                        </h3>
+                    </div>
+                    <div class="panel-body jf-dash-card__body revenue-table-panel-body">
+                        <div class="table-responsive revenue-table-responsive">
+                            <table class="table table-hover jf-tokens-table jf-revenue-table">
                                 <thead>
                                     <tr>
                                         <th>ID</th>
                                         <th>User</th>
                                         <th>Cryptocurrency</th>
-                                        <th>Transaction ID</th>
-                                        <th>Percentage</th>
-                                        <th>Revenue Amount</th>
-                                        <th>Distribution Amount</th>
+                                        <th>Transaction</th>
+                                        <th>Share</th>
+                                        <th>Revenue</th>
+                                        <th>Distribution</th>
                                         <th>Status</th>
                                         <th>Priority</th>
                                         <th>Created</th>
@@ -177,15 +190,13 @@
                                 </thead>
                                 <tbody>
                                     @forelse($revenues as $revenue)
-                                        <tr class="{{ $revenue->is_overdue ? 'warning' : '' }}">
-                                            <td>
-                                                <strong>#{{ $revenue->id }}</strong>
-                                            </td>
+                                        <tr class="{{ $revenue->is_overdue ? 'jf-revenue-row--overdue' : '' }}">
+                                            <td><strong>#{{ $revenue->id }}</strong></td>
                                             <td>
                                                 @if($revenue->user)
-                                                    <div>
-                                                        <strong>{{ $revenue->user->name }}</strong><br>
-                                                        <small class="text-muted">{{ $revenue->user->email }}</small>
+                                                    <div class="jf-wallet-user">
+                                                        <strong class="jf-wallet-user__name">{{ $revenue->user->name }}</strong>
+                                                        <span class="jf-wallet-user__email">{{ $revenue->user->email }}</span>
                                                     </div>
                                                 @else
                                                     <span class="text-muted">Unknown User</span>
@@ -193,18 +204,21 @@
                                             </td>
                                             <td>
                                                 @if($revenue->cryptocurrency)
-                                                    <div class="media">
+                                                    <div class="jf-token-cell">
                                                         @if($revenue->cryptocurrency->logo)
-                                                            <div class="media-left">
-                                                                <img src="{{ Storage::url($revenue->cryptocurrency->logo) }}" 
-                                                                     alt="{{ $revenue->cryptocurrency->name }}" 
-                                                                     class="media-object" 
-                                                                     style="width: 30px; height: 30px; border-radius: 50%;">
+                                                            <div class="jf-token-cell__avatar jf-token-cell__avatar--sm">
+                                                                <img src="{{ Storage::url($revenue->cryptocurrency->logo) }}" alt="{{ $revenue->cryptocurrency->name }}">
+                                                            </div>
+                                                        @else
+                                                            <div class="jf-token-cell__avatar jf-token-cell__avatar--sm jf-token-cell__avatar--placeholder">
+                                                                <i class="voyager-trophy"></i>
                                                             </div>
                                                         @endif
-                                                        <div class="media-body">
-                                                            <strong>{{ $revenue->cryptocurrency->name }}</strong><br>
-                                                            <small class="text-muted">{{ $revenue->cryptocurrency->symbol }}</small>
+                                                        <div class="jf-token-cell__body">
+                                                            <span class="jf-token-cell__name">{{ $revenue->cryptocurrency->name }}</span>
+                                                            <div class="jf-token-cell__meta">
+                                                                <span>{{ $revenue->cryptocurrency->symbol }}</span>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 @else
@@ -213,72 +227,77 @@
                                             </td>
                                             <td>
                                                 @if($revenue->transaction_id)
-                                                    <code>{{ substr($revenue->transaction_id, 0, 10) }}...</code>
+                                                    <code class="jf-wallet-address" title="{{ $revenue->transaction_id }}">{{ substr($revenue->transaction_id, 0, 10) }}…</code>
                                                 @else
                                                     <span class="text-muted">N/A</span>
                                                 @endif
                                             </td>
-                                            <td>
-                                                <strong>{{ $revenue->formatted_percentage }}</strong>
-                                            </td>
+                                            <td><strong>{{ $revenue->formatted_percentage }}</strong></td>
                                             <td>
                                                 <strong>{{ $revenue->formatted_revenue_amount }}</strong>
                                                 @if($revenue->cryptocurrency)
-                                                    <small class="text-muted">{{ $revenue->cryptocurrency->symbol }}</small>
+                                                    <span class="jf-token-cell__meta">{{ $revenue->cryptocurrency->symbol }}</span>
                                                 @endif
-                                                <br>
-                                                <small class="text-success">{{ $revenue->formatted_revenue_amount_usd }}</small>
+                                                <div class="jf-revenue-usd">{{ $revenue->formatted_revenue_amount_usd }}</div>
                                             </td>
                                             <td>
                                                 <strong>{{ $revenue->formatted_distribution_amount }}</strong>
                                                 @if($revenue->cryptocurrency)
-                                                    <small class="text-muted">{{ $revenue->cryptocurrency->symbol }}</small>
+                                                    <span class="jf-token-cell__meta">{{ $revenue->cryptocurrency->symbol }}</span>
                                                 @endif
-                                                <br>
-                                                <small class="text-success">{{ $revenue->formatted_distribution_amount_usd }}</small>
+                                                <div class="jf-revenue-usd">{{ $revenue->formatted_distribution_amount_usd }}</div>
                                             </td>
                                             <td>
-                                                <span class="label {{ $revenue->status_badge_class }}">
-                                                    {{ $revenue->status_text }}
-                                                </span>
+                                                @php
+                                                    $statusClass = $revenue->is_distributed ? 'jf-token-badge--success' : ($revenue->is_overdue ? 'jf-token-badge--danger' : 'jf-token-badge--warning');
+                                                @endphp
+                                                <span class="jf-token-badge {{ $statusClass }}">{{ $revenue->status_text }}</span>
                                                 @if($revenue->is_overdue)
-                                                    <br><small class="text-danger"><i class="voyager-exclamation"></i> Overdue</small>
+                                                    <div class="jf-revenue-overdue"><i class="voyager-exclamation"></i> Overdue</div>
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="{{ $revenue->priority_color }}">
-                                                    <strong>{{ ucfirst($revenue->priority_level) }}</strong>
-                                                </span>
+                                                @php
+                                                    $priorityClass = match($revenue->priority_level) {
+                                                        'high' => 'jf-token-badge--danger',
+                                                        'medium' => 'jf-token-badge--warning',
+                                                        'low' => 'jf-token-badge--network',
+                                                        'completed' => 'jf-token-badge--success',
+                                                        default => 'jf-token-badge--network',
+                                                    };
+                                                @endphp
+                                                <span class="jf-token-badge {{ $priorityClass }}">{{ ucfirst($revenue->priority_level) }}</span>
                                             </td>
                                             <td>
                                                 {{ $revenue->created_at ? $revenue->created_at->format('M d, Y') : 'N/A' }}
-                                                <br>
-                                                <small class="text-muted">{{ $revenue->time_since_created }}</small>
+                                                <div class="jf-token-cell__meta">{{ $revenue->time_since_created }}</div>
                                             </td>
                                             <td>
-                                                <div class="btn-group-horizontal">
-                                                    <a href="#" 
-                                                       onclick="showRevenueDetails({{ $revenue->id }}); return false;" 
-                                                       data-toggle="modal" 
-                                                       data-target="#revenueModal"
-                                                       class="btn btn-sm btn-info"
-                                                       title="View Details">
-                                                        <i class="voyager-eye"></i> Details
-                                                    </a>
-                                                    
+                                                <div class="jf-revenue-actions">
+                                                    <button type="button"
+                                                            onclick="showRevenueDetails({{ $revenue->id }}); return false;"
+                                                            data-toggle="modal"
+                                                            data-target="#revenueModal"
+                                                            class="jf-dash-btn jf-dash-btn--blue jf-revenue-actions-btn"
+                                                            title="View Details">
+                                                        <i class="voyager-eye"></i>
+                                                        <span class="jf-pill-label">Details</span>
+                                                    </button>
                                                     @if($revenue->is_distributed)
-                                                        <a href="{{ route('voyager.revenue.mark-pending', $revenue->id) }}" 
+                                                        <a href="{{ route('voyager.revenue.mark-pending', $revenue->id) }}"
                                                            onclick="return confirm('Are you sure you want to mark this as pending?')"
-                                                           class="btn btn-sm btn-warning"
+                                                           class="jf-dash-btn jf-dash-btn--amber jf-revenue-actions-btn"
                                                            title="Mark as Pending">
-                                                            <i class="voyager-refresh"></i> Pending
+                                                            <i class="voyager-refresh"></i>
+                                                            <span class="jf-pill-label">Pending</span>
                                                         </a>
                                                     @else
-                                                        <a href="{{ route('voyager.revenue.mark-distributed', $revenue->id) }}" 
+                                                        <a href="{{ route('voyager.revenue.mark-distributed', $revenue->id) }}"
                                                            onclick="return confirm('Are you sure you want to mark this as distributed?')"
-                                                           class="btn btn-sm btn-success"
+                                                           class="jf-dash-btn jf-dash-btn--green jf-revenue-actions-btn"
                                                            title="Mark as Distributed">
-                                                            <i class="voyager-check"></i> Distribute
+                                                            <i class="voyager-check"></i>
+                                                            <span class="jf-pill-label">Distribute</span>
                                                         </a>
                                                     @endif
                                                 </div>
@@ -286,18 +305,17 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="11" class="text-center">
-                                                <p>No revenue shares found.</p>
+                                            <td colspan="11">
+                                                <div class="jf-dash-card__empty">No revenue shares found.</div>
                                             </td>
                                         </tr>
                                     @endforelse
                                 </tbody>
                             </table>
                         </div>
-                        
-                        <!-- Pagination -->
+
                         @if($revenues->hasPages())
-                            <div class="text-center">
+                            <div class="jf-tokens-pagination">
                                 {{ $revenues->appends(request()->query())->links() }}
                             </div>
                         @endif
@@ -308,7 +326,7 @@
     </div>
 
     <!-- Revenue Details Modal -->
-    <div class="modal fade" id="revenueModal" tabindex="-1" role="dialog">
+    <div class="modal fade jf-wallets-modal jf-revenue-modal" id="revenueModal" tabindex="-1" role="dialog">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -319,7 +337,7 @@
                 </div>
                 <div class="modal-body" id="revenueModalBody">
                     <div class="text-center">
-                        <i class="voyager-refresh" style="font-size: 24px;"></i>
+                        <i class="voyager-refresh"></i>
                         <p>Loading revenue details...</p>
                     </div>
                 </div>
@@ -334,78 +352,101 @@
 @section('javascript')
 <script>
 function showRevenueDetails(revenueId) {
-    // Reset modal content
     $('#revenueModalBody').html(`
         <div class="text-center">
-            <i class="voyager-refresh" style="font-size: 24px;"></i>
+            <i class="voyager-refresh"></i>
             <p>Loading revenue details...</p>
         </div>
     `);
-    
-    // Fetch revenue details
+
     $.get('{{ route("voyager.revenue.details", ":id") }}'.replace(':id', revenueId))
         .done(function(data) {
+            const detailTable = (rows) => `
+                <table class="jf-wallet-details-table">
+                    ${rows.map(([label, value]) => `<tr><td>${label}</td><td>${value}</td></tr>`).join('')}
+                </table>
+            `;
+
             let priorityBadge = '';
-            switch(data.priority_level) {
+            switch (data.priority_level) {
                 case 'high':
-                    priorityBadge = '<span class="label label-danger">High Priority</span>';
+                    priorityBadge = '<span class="jf-token-badge jf-token-badge--danger">High Priority</span>';
                     break;
                 case 'medium':
-                    priorityBadge = '<span class="label label-warning">Medium Priority</span>';
+                    priorityBadge = '<span class="jf-token-badge jf-token-badge--warning">Medium Priority</span>';
                     break;
                 case 'low':
-                    priorityBadge = '<span class="label label-info">Low Priority</span>';
+                    priorityBadge = '<span class="jf-token-badge jf-token-badge--network">Low Priority</span>';
                     break;
                 case 'completed':
-                    priorityBadge = '<span class="label label-success">Completed</span>';
+                    priorityBadge = '<span class="jf-token-badge jf-token-badge--success">Completed</span>';
                     break;
+                default:
+                    priorityBadge = '<span class="jf-token-badge jf-token-badge--network">' + (data.priority_level || 'N/A') + '</span>';
             }
-            
+
+            const statusBadge = data.is_distributed
+                ? '<span class="jf-token-badge jf-token-badge--success">' + data.status_text + '</span>'
+                : '<span class="jf-token-badge jf-token-badge--warning">' + data.status_text + '</span>';
+
             const html = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>User Information</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Name:</strong></td><td>${data.user_name}</td></tr>
-                            <tr><td><strong>Email:</strong></td><td>${data.user_email}</td></tr>
-                        </table>
-                        
-                        <h5>Cryptocurrency</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Name:</strong></td><td>${data.cryptocurrency_name}</td></tr>
-                            <tr><td><strong>Symbol:</strong></td><td>${data.cryptocurrency_symbol}</td></tr>
-                        </table>
-                        
-                        <h5>Transaction</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Transaction ID:</strong></td><td>${data.transaction_id}</td></tr>
-                            <tr><td><strong>Percentage:</strong></td><td>${data.percentage}</td></tr>
-                        </table>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Revenue Information</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Revenue Amount:</strong></td><td>${data.revenue_amount} ${data.cryptocurrency_symbol}<br><small class="text-success">${data.revenue_amount_usd}</small></td></tr>
-                            <tr><td><strong>Distribution Amount:</strong></td><td>${data.distribution_amount} ${data.cryptocurrency_symbol}<br><small class="text-success">${data.distribution_amount_usd}</small></td></tr>
-                            <tr><td><strong>Status:</strong></td><td><span class="label ${data.is_distributed ? 'label-success' : 'label-warning'}">${data.status_text}</span></td></tr>
-                            <tr><td><strong>Priority:</strong></td><td>${priorityBadge}</td></tr>
-                        </table>
-                        
-                        <h5>Timestamps</h5>
-                        <table class="table table-bordered">
-                            <tr><td><strong>Created:</strong></td><td>${data.created_at}<br><small class="text-muted">${data.time_since_created}</small></td></tr>
-                            <tr><td><strong>Distributed:</strong></td><td>${data.distributed_at}<br><small class="text-muted">${data.time_since_distributed}</small></td></tr>
-                        </table>
-                        
-                        ${data.is_overdue ? `
-                        <div class="alert alert-warning">
-                            <strong><i class="voyager-exclamation"></i> Overdue:</strong> This revenue share is overdue for distribution.
+                <div class="jf-wallet-details">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">User Information</h5>
+                                ${detailTable([
+                                    ['Name', data.user_name],
+                                    ['Email', data.user_email]
+                                ])}
+                            </div>
+
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Cryptocurrency</h5>
+                                ${detailTable([
+                                    ['Name', data.cryptocurrency_name],
+                                    ['Symbol', data.cryptocurrency_symbol]
+                                ])}
+                            </div>
+
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Transaction</h5>
+                                ${detailTable([
+                                    ['Transaction ID', data.transaction_id || 'N/A'],
+                                    ['Percentage', data.percentage]
+                                ])}
+                            </div>
                         </div>
-                        ` : ''}
+                        <div class="col-md-6">
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Revenue Information</h5>
+                                ${detailTable([
+                                    ['Revenue Amount', data.revenue_amount + ' ' + data.cryptocurrency_symbol + '<div class="jf-revenue-usd">' + data.revenue_amount_usd + '</div>'],
+                                    ['Distribution Amount', data.distribution_amount + ' ' + data.cryptocurrency_symbol + '<div class="jf-revenue-usd">' + data.distribution_amount_usd + '</div>'],
+                                    ['Status', statusBadge],
+                                    ['Priority', priorityBadge]
+                                ])}
+                            </div>
+
+                            <div class="jf-wallet-details__section">
+                                <h5 class="jf-wallet-details__heading">Timestamps</h5>
+                                ${detailTable([
+                                    ['Created', data.created_at + '<div class="jf-token-cell__meta">' + data.time_since_created + '</div>'],
+                                    ['Distributed', data.distributed_at + '<div class="jf-token-cell__meta">' + data.time_since_distributed + '</div>']
+                                ])}
+                            </div>
+
+                            ${data.is_overdue ? `
+                            <div class="jf-revenue-modal-alert">
+                                <i class="voyager-exclamation"></i>
+                                <span>This revenue share is overdue for distribution.</span>
+                            </div>
+                            ` : ''}
+                        </div>
                     </div>
                 </div>
             `;
-            
+
             $('#revenueModalBody').html(html);
         })
         .fail(function() {
@@ -417,41 +458,4 @@ function showRevenueDetails(revenueId) {
         });
 }
 </script>
-
-<style>
-/* Simple button styling */
-.btn-group-horizontal {
-    display: inline-block;
-}
-
-.btn-group-horizontal .btn {
-    margin-right: 5px;
-}
-
-.btn-group-horizontal .btn:last-child {
-    margin-right: 0;
-}
-
-/* Overdue row highlighting */
-.table > tbody > tr.warning > td {
-    background-color: #fcf8e3;
-}
-
-/* Priority colors */
-.text-danger {
-    color: #d9534f !important;
-}
-
-.text-warning {
-    color: #f0ad4e !important;
-}
-
-.text-info {
-    color: #5bc0de !important;
-}
-
-.text-success {
-    color: #5cb85c !important;
-}
-</style>
 @stop

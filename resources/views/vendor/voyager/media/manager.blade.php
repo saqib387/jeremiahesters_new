@@ -1,5 +1,5 @@
 @section('media-manager')
-<div>
+<div class="jf-media-manager">
     <div v-if="hidden_element" :id="'dd_'+this._uid" class="dd">
         <ol id="files" class="dd-list">
             <li v-for="file in getSelectedFiles()" class="dd-item" :data-url="file">
@@ -40,7 +40,7 @@
             <div v-if="isExpanded"><i class="voyager-double-up"></i> {{ __('voyager::generic.close') }}</div>
         </div>
     </div>
-    <div id="toolbar" v-if="showToolbar" :style="isExpanded ? 'display:block' : 'display:none'">
+    <div id="toolbar" class="jf-media-toolbar" v-if="showToolbar" :style="isExpanded ? 'display:flex' : 'display:none'">
         <div class="btn-group offset-right">
             <button type="button" class="btn btn-primary" id="upload" v-if="allowUpload">
                 <i class="voyager-upload"></i>
@@ -77,9 +77,9 @@
     <div id="uploadProgress" class="progress active progress-striped" v-if="allowUpload">
         <div class="progress-bar progress-bar-success" style="width: 0"></div>
     </div>
-    <div id="content" :style="isExpanded ? 'display:block' : 'display:none'">
-        <div class="breadcrumb-container">
-            <ol class="breadcrumb filemanager">
+    <div id="content" class="jf-media-content" :style="isExpanded ? 'display:block' : 'display:none'">
+        <div class="breadcrumb-container jf-media-breadcrumb-wrap">
+            <ol class="breadcrumb filemanager jf-media-breadcrumb">
                 <li class="media_breadcrumb" v-on:click="setCurrentPath(-1)">
                     <span class="arrow"></span>
                     <strong>{{ __('voyager::media.library') }}</strong>
@@ -90,9 +90,9 @@
                 </li>
             </ol>
         </div>
-        <div class="flex">
-            <div id="left">
-                <ul id="files">
+        <div class="flex jf-media-layout">
+            <div id="left" class="jf-media-files-pane">
+                <ul id="files" class="jf-media-files">
                     <li v-for="(file) in files" v-on:click="selectFile(file, $event)" v-on:dblclick="openFile(file)" v-if="filter(file)">
                         <div :class="'file_link ' + (isFileSelected(file) ? 'selected' : '')">
                             <div class="link_icon">
@@ -140,7 +140,7 @@
                     <h3><i class="voyager-meh"></i> {{ __('voyager::media.no_files_in_folder') }}</h3>
                 </div>
             </div>
-            <div id="right">
+            <div id="right" class="jf-media-details-pane">
                 <div class="right_details">
                     <div v-if="selected_files.length > 1" class="right_none_selected">
                         <i class="voyager-list"></i>
@@ -225,7 +225,7 @@
     </div>
 
     <!-- Image Modal -->
-    <div class="modal fade" :id="'imagemodal_'+this._uid" v-if="selected_file && fileIs(selected_file, 'image')">
+    <div class="modal fade jf-wallets-modal jf-media-modal" :id="'imagemodal_'+this._uid" v-if="selected_file && fileIs(selected_file, 'image')">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -245,22 +245,25 @@
     <!-- End Image Modal -->
 
     <!-- New Folder Modal -->
-    <div class="modal fade modal-info" :id="'create_dir_modal_'+this._uid">
-        <div class="modal-dialog">
+    <div class="modal fade modal-info jf-wallets-modal jf-media-modal jf-media-folder-modal" :id="'create_dir_modal_'+this._uid">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                    <h4 class="modal-title"><i class="voyager-folder"></i> {{ __('voyager::media.add_new_folder') }}</h4>
+                    <h4 class="modal-title jf-media-folder-modal__title">
+                        <span class="jf-media-folder-modal__icon" aria-hidden="true"><i class="voyager-folder"></i></span>
+                        <span>{{ __('voyager::media.add_new_folder') }}</span>
+                    </h4>
                 </div>
 
                 <div class="modal-body">
-                    <input name="new_folder_name" placeholder="{{ __('voyager::media.new_folder_name') }}" class="form-control" value="" v-model="modals.new_folder.name" />
+                    <label class="jf-media-folder-modal__label" :for="'new_folder_name_'+_uid">{{ __('voyager::media.new_folder_name') }}</label>
+                    <input :id="'new_folder_name_'+_uid" name="new_folder_name" placeholder="{{ __('voyager::media.new_folder_name') }}" class="form-control jf-media-folder-modal__input" value="" v-model="modals.new_folder.name" />
                 </div>
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
-                    <button type="button" class="btn btn-info" v-on:click="createFolder">{{ __('voyager::media.create_new_folder') }}
-                    </button>
+                    <button type="button" class="btn btn-info jf-media-folder-modal__submit" v-on:click="createFolder">{{ __('voyager::media.create_new_folder') }}</button>
                 </div>
             </div>
         </div>
@@ -268,7 +271,7 @@
     <!-- End New Folder Modal -->
 
     <!-- Delete File Modal -->
-    <div class="modal fade modal-danger" :id="'confirm_delete_modal_'+this._uid" v-if="allowDelete">
+    <div class="modal fade modal-danger jf-wallets-modal jf-media-modal" :id="'confirm_delete_modal_'+this._uid" v-if="allowDelete">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -297,18 +300,21 @@
     <!-- End Delete File Modal -->
 
     <!-- Move Files Modal -->
-    <div class="modal fade modal-warning" :id="'move_files_modal_'+this._uid" v-if="allowMove">
-        <div class="modal-dialog">
+    <div class="modal fade modal-warning jf-wallets-modal jf-media-modal jf-media-move-modal" :id="'move_files_modal_'+this._uid" v-if="allowMove">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal"
                             aria-hidden="true">&times;</button>
-                    <h4 class="modal-title"><i class="voyager-move"></i> {{ __('voyager::media.move_file_folder') }}</h4>
+                    <h4 class="modal-title jf-media-move-modal__title">
+                        <span class="jf-media-move-modal__icon" aria-hidden="true"><i class="voyager-move"></i></span>
+                        <span>{{ __('voyager::media.move_file_folder') }}</span>
+                    </h4>
                 </div>
 
                 <div class="modal-body">
-                    <h4>{{ __('voyager::media.destination_folder') }}</h4>
-                    <select class="form-control" v-model="modals.move_files.destination">
+                    <label class="jf-media-move-modal__label" :for="'move_destination_'+_uid">{{ __('voyager::media.destination_folder') }}</label>
+                    <select :id="'move_destination_'+_uid" class="form-control jf-media-move-modal__select" v-model="modals.move_files.destination">
                         <option value="" disabled>{{ __('voyager::media.destination_folder') }}</option>
                         <option v-if="current_folder != basePath && showFolders" value="/../">../</option>
                         <option v-for="file in files" v-if="file.type == 'folder' && !selected_files.includes(file)" :value="current_folder+'/'+file.name">@{{ file.name }}</option>
@@ -317,7 +323,7 @@
 
                 <div class="modal-footer">
                     <button type="button" class="btn btn-default" data-dismiss="modal">{{ __('voyager::generic.cancel') }}</button>
-                    <button type="button" class="btn btn-warning" v-on:click="moveFiles">{{ __('voyager::generic.move') }}</button>
+                    <button type="button" class="btn btn-warning jf-media-move-modal__submit" v-on:click="moveFiles">{{ __('voyager::generic.move') }}</button>
                 </div>
             </div>
         </div>
@@ -325,7 +331,7 @@
     <!-- End Move File Modal -->
 
     <!-- Crop Image Modal -->
-    <div class="modal fade modal-warning" :id="'crop_modal_'+this._uid" v-if="allowCrop">
+    <div class="modal fade modal-warning jf-wallets-modal jf-media-modal" :id="'crop_modal_'+this._uid" v-if="allowCrop">
         <div class="modal-dialog">
             <div class="modal-content">
 

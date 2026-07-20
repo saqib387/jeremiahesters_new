@@ -2,11 +2,7 @@
 @section('page_title', $list->name)
 
 @section('styles')
-    {!!
-        Minify::stylesheet([
-            '/css/pages/lists.css'
-         ])->withFullUrl()
-    !!}
+    <link rel="stylesheet" href="{{ asset('css/pages/lists.css') }}?v=20260712c">
 @stop
 
 @section('scripts')
@@ -18,48 +14,64 @@
 @stop
 
 @section('content')
-    <div class="row">
-        <div class="min-vh-100 border-right col-12 pr-md-0">
-            <div class="pt-4 pl-4 px-3 d-flex justify-content-between pb-3 border-bottom">
-                <h5 class="mb-0 text-truncate text-bold {{(Cookie::get('app_theme') == null ? (getSetting('site.default_user_theme') == 'dark' ? '' : 'text-dark-r') : (Cookie::get('app_theme') == 'dark' ? '' : 'text-dark-r'))}}">{{__($list->name)}}</h5>
+@php
+    $listsDark = Cookie::get('app_theme') == null
+        ? getSetting('site.default_user_theme') == 'dark'
+        : Cookie::get('app_theme') == 'dark';
+    $listsEmpty = count($list->members) === 0;
+    $isMemberManageable = $list->type !== \App\Model\UserList::FOLLOWERS_TYPE;
+@endphp
+<div class="lists-page lists-page--show lists-page--{{ $listsDark ? 'dark' : 'light' }}{{ $listsEmpty ? ' lists-page--empty' : '' }}">
+    <div class="lists-page__scroll">
+        <div class="lists-page__inner">
+            <header class="lists-page__header lists-page__header--show d-none d-md-flex">
+                <h1 class="lists-page__title lists-page__title--show">{{ __($list->name) }}</h1>
                 @if($list->isManageable)
-                    <div class="mr-2">
-                        <div class="dropdown {{GenericHelper::getSiteDirection() == 'rtl' ? 'dropright' : 'dropleft'}}">
-                            <a class="btn btn-outline-primary btn-sm dropdown-toggle px-3 mb-0" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
-                                @include('elements.icon',['icon'=>'ellipsis-horizontal-outline'])
-                            </a>
-                            <div class="dropdown-menu">
-                                <!-- Dropdown menu links -->
-                                <a class="dropdown-item" href="javascript:void(0);" onclick="Lists.showListEditDialog('edit')">{{__('Rename list')}}</a>
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" onclick="Lists.showListClearConfirmation()">{{__('Clear list')}}</a>
-                                <a class="dropdown-item" href="javascript:void(0);" onclick="Lists.showListDeleteConfirmation()">{{__('Delete list')}}</a>
-                            </div>
+                    <div class="lists-page__menu dropdown {{ GenericHelper::getSiteDirection() == 'rtl' ? 'dropright' : 'dropleft' }}">
+                        <button type="button" class="lists-page__menu-btn dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" aria-label="{{ __('List options') }}">
+                            @include('elements.icon',['icon'=>'ellipsis-horizontal-outline','centered'=>true,'variant'=>'small','classes'=>'ls-icon ls-icon--menu'])
+                        </button>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="Lists.showListEditDialog('edit')">{{ __('Rename list') }}</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#" onclick="Lists.showListClearConfirmation()">{{ __('Clear list') }}</a>
+                            <a class="dropdown-item text-danger" href="javascript:void(0);" onclick="Lists.showListDeleteConfirmation()">{{ __('Delete list') }}</a>
                         </div>
                     </div>
                 @endif
-            </div>
-            <div class="mx-4 pt-2">
-                <div class="list-wrapper mt-2">
-                    @if(count($list->members))
-                        <div class="row">
-                            @foreach($list->members as $member)
-                                <div class="col-12 col-md-6 col-xl-4">
-                                    @include('elements.feed.suggestion-card',['profile' => $member, 'isListMode' => true, 'isListManageable' => ($list->type == \App\Model\UserList::FOLLOWERS_TYPE ? false : true)])
-                                </div>
-                            @endforeach
+            </header>
+
+            @if(!$listsEmpty)
+                <p class="lists-page__meta d-none d-md-block">{{ trans_choice('people', count($list->members), ['number' => count($list->members)]) }}</p>
+            @endif
+
+            <div class="lists-page__content lists-page__content--show">
+                @if(count($list->members))
+                    <div class="lists-members list-wrapper">
+                        @foreach($list->members as $member)
+                            @include('elements.lists.list-member-card', [
+                                'profile' => $member,
+                                'isListMode' => true,
+                                'isListManageable' => $isMemberManageable,
+                            ])
+                        @endforeach
+                    </div>
+                @else
+                    <div class="lists-empty lists-empty--show">
+                        <div class="lists-empty__icon" aria-hidden="true">
+                            @include('elements.icon',['icon'=>'people-outline','centered'=>true,'variant'=>'medium','classes'=>'ls-icon ls-icon--empty'])
                         </div>
-                    @else
-                        <p class="pl-0 pt-2">{{__('No profiles available')}}</p>
-                    @endif
-                </div>
-
+                        <h2 class="lists-empty__title">{{ __('No profiles available') }}</h2>
+                        <p class="lists-empty__text">{{ __('Members you add to this list will appear here.') }}</p>
+                        <a href="{{ route('my.lists.all') }}" class="lists-empty__cta lists-empty__cta--link">{{ __('Back to lists') }}</a>
+                    </div>
+                @endif
             </div>
-
         </div>
     </div>
-    @include('elements.lists.list-update-dialog',['mode'=>'edit'])
-    @include('elements.lists.list-delete-dialog')
-    @include('elements.lists.list-member-delete-dialog')
-    @include('elements.lists.list-clear-dialog')
+</div>
+@include('elements.lists.list-update-dialog',['mode'=>'edit'])
+@include('elements.lists.list-delete-dialog')
+@include('elements.lists.list-member-delete-dialog')
+@include('elements.lists.list-clear-dialog')
 @stop

@@ -10,10 +10,10 @@
             '/libs/dropzone/dist/dropzone.css',
             '/libs/photoswipe/dist/photoswipe.css',
             '/libs/photoswipe/dist/default-skin/default-skin.css',
-            '/css/pages/messenger.css',
             '/css/pages/checkout.css'
          ])->withFullUrl()
     !!}
+    <link rel="stylesheet" href="{{ asset('css/pages/messenger.css') }}?v=20260713a">
 @stop
 
 @section('scripts')
@@ -36,6 +36,11 @@
 @stop
 
 @section('content')
+    @php
+        $messengerDark = Cookie::get('app_theme') == null
+            ? getSetting('site.default_user_theme') == 'dark'
+            : Cookie::get('app_theme') == 'dark';
+    @endphp
     @include('elements.uploaded-file-preview-template')
     @include('elements.photoswipe-container')
     @include('elements.report-user-or-post',['reportStatuses' => ListsHelper::getReportTypes()])
@@ -45,30 +50,45 @@
     @include('elements.checkout.checkout-box')
     @include('elements.attachments-uploading-dialog')
     @include('elements.messenger.locked-message-no-attachments-dialog')
-    <div class="row no-gutters">
+    <div class="messenger-page messenger-page--{{ $messengerDark ? 'dark' : 'light' }}">
+        <div class="messenger-page__glow messenger-page__glow--tl" aria-hidden="true"></div>
+        <div class="messenger-page__glow messenger-page__glow--br" aria-hidden="true"></div>
+    <div class="row no-gutters messenger-page__inner">
         <div class="col-12">
-            <div class="container messenger">
+            <div class="container messenger {{ $lastContactID ? 'messenger--has-chat' : 'messenger--list-only' }}">
                 <div class="row no-gutters h-100">
                     <div class="col-12 col-md-4 col-lg-3 conversations-wrapper">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0 text-truncate {{(Cookie::get('app_theme') == null ? (getSetting('site.default_user_theme') == 'dark' ? '' : 'text-dark-r') : (Cookie::get('app_theme') == 'dark' ? '' : 'text-dark-r'))}}">{{__('Messages')}}</h5>
-                            <span data-toggle="tooltip" title="" class="pointer-cursor"
-                                  @if(!count($availableContacts))
-                                    data-original-title="{{trans_choice('Before sending a new message, please subscribe to a creator a follow a free profile.',['user' => 0])}}"
-                                  @else
-                                    data-original-title="{{trans_choice('Send a new message',['user' => 0])}}"
-                                  @endif
-                            >
-                                <a title="" class="pointer-cursor new-conversation-toggle" data-original-title="{{trans_choice('Send a new message',['user' => 0])}}">
-                                    <div class="h5 mb-0">@include('elements.icon',['icon'=>'create-outline','variant'=>'medium'])</div>
-                                </a>
-                            </span>
+                        <div class="conversations-header d-none d-md-flex justify-content-between align-items-center">
+                            <h5 class="conversations-title mb-0 text-truncate">{{ __('Messages') }}</h5>
+                            <a href="javascript:void(0)" class="pointer-cursor new-conversation-toggle" aria-label="{{ trans_choice('Send a new message', ['user' => 0]) }}">
+                                <span class="new-conversation-toggle__icon" aria-hidden="true">
+                                    @include('elements.icon',['icon'=>'create-outline','variant'=>'medium'])
+                                </span>
+                            </a>
                         </div>
+
+                        <div class="messenger-list-toolbar">
+                            <div class="messenger-list-filter-wrap">
+                                <button type="button" class="messenger-list-filter" id="messenger-list-filter-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="messenger-list-filter-menu">
+                                    <span class="messenger-list-filter__label">{{ __('All messages') }}</span>
+                                    @include('elements.icon', ['icon' => 'chevron-down-outline', 'variant' => 'small', 'centered' => true, 'classes' => 'messenger-list-filter__chevron'])
+                                </button>
+                                <div class="messenger-list-filter-menu" id="messenger-list-filter-menu" role="listbox" hidden>
+                                    <button type="button" class="messenger-list-filter-option is-active" data-filter="all" role="option" aria-selected="true">{{ __('All messages') }}</button>
+                                    <button type="button" class="messenger-list-filter-option" data-filter="unread" role="option" aria-selected="false">{{ __('Unread') }}</button>
+                                </div>
+                            </div>
+                            <div class="messenger-list-search">
+                                <span class="messenger-list-search__icon" aria-hidden="true">
+                                    @include('elements.icon', ['icon' => 'search-outline', 'variant' => 'small', 'centered' => true])
+                                </span>
+                                <input type="search" class="messenger-list-search__input" id="messenger-contacts-search" placeholder="{{ __('Search messages...') }}" autocomplete="off" enterkeyhint="search">
+                            </div>
+                        </div>
+
                         <div class="conversations-list">
                             @if($lastContactID == false)
-                                <div class="d-flex justify-content-center align-items-center" style="min-height: 200px;">
-                                    <span class="text-muted text-center px-3">{{__('Click the text bubble to send a new message.')}}</span>
-                                </div>
+                                @include('elements.messenger.messenger-empty-hero')
                             @else
                                 @include('elements.preloading.messenger-contact-box', ['limit'=>3])
                             @endif
@@ -80,9 +100,10 @@
                         @include('elements.messenger.messenger-new-conversation-header')
                         @include('elements.preloading.messenger-conversation-header-box')
                         @include('elements.preloading.messenger-conversation-box')
-                        <div class="conversation-content flex-fill">
+                        <div class="conversation-content">
                         </div>
-                        <div class="dropzone-previews dropzone w-100"></div>
+                        <div id="messenger-dropzone-hook" class="messenger-dropzone-hook" aria-hidden="true"></div>
+                        <div class="messenger-dropzone-previews dropzone-previews w-100"></div>
                         <div class="conversation-writeup {{!$lastContactID ? 'hidden' : ''}}">
                             <div class="messenger-buttons-wrapper">
                                 <div class="dropup">
@@ -118,7 +139,7 @@
                                 <div class="input-group messageBoxInput-wrapper">
                                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                                     <input type="hidden" name="receiverID" id="receiverID" value="">
-                                    <textarea name="message" class="form-control messageBoxInput dropzone" placeholder="{{__('Write a message..')}}" onkeyup="messenger.textAreaAdjust(this)" rows="1"></textarea>
+                                    <textarea name="message" class="form-control messageBoxInput" placeholder="{{__('Write a message..')}}" onkeyup="messenger.textAreaAdjust(this)" rows="1"></textarea>
                                 </div>
                             </form>
                             <div class="messenger-buttons-wrapper">
@@ -143,6 +164,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
     @include('elements.standard-dialog',[
     'dialogName' => 'message-delete-dialog',

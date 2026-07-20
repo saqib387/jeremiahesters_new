@@ -1,199 +1,111 @@
 @extends('layouts.generic')
 
+@section('page_title', __('Live Streams'))
+
+@section('styles')
+    {!!
+        Minify::stylesheet([
+            '/css/pages/streams-index.css'
+         ])->withFullUrl()
+    !!}
+    <link rel="stylesheet" href="{{ asset('css/pages/streams-index.css') }}?v=20260712b">
+@stop
+
+@section('scripts')
+    {!!
+        Minify::javascript([
+            '/js/pages/streams-index.js'
+         ])->withFullUrl()
+    !!}
+@stop
+
 @section('content')
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header d-flex justify-content-between align-items-center bg-white">
-                    <h2 class="mb-0">Live Streams</h2>
+    @php
+        $streamsDark = Cookie::get('app_theme') == null
+            ? getSetting('site.default_user_theme') == 'dark'
+            : Cookie::get('app_theme') == 'dark';
+    @endphp
+    <div class="streams-page streams-page--{{ $streamsDark ? 'dark' : 'light' }}">
+        <div class="streams-page__scroll">
+            <div class="streams-page__inner">
+                <header class="streams-header">
+                    <div class="streams-header__text">
+                        <h1 class="streams-header__title d-none d-md-block">{{ __('Live Streams') }}</h1>
+                        <p class="streams-header__subtitle">{{ __('Watch creators go live or start your own broadcast') }}</p>
+                    </div>
                     @auth
-                        <a href="{{ route('streams.create') }}" class="btn btn-primary">
-                            <i class="fas fa-video me-2"></i>
-                            Start Streaming
+                        <a href="{{ route('streams.create') }}" class="streams-btn streams-btn--primary streams-header__cta">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+                            <span class="streams-header__cta-label">{{ __('Go Live') }}</span>
                         </a>
                     @endauth
-                </div>
+                </header>
 
-                <div class="card-body">
+                <section class="streams-panel" aria-label="{{ __('Live streams list') }}">
                     @if($streams->count() > 0)
-                        <div class="row">
+                        <div class="streams-grid">
                             @foreach($streams as $stream)
-                                <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
-                                    <div class="card h-100 stream-card shadow-sm">
-                                        <div class="card-body p-0">
-                                            <div class="stream-preview position-relative">
-                                                @if($stream->thumbnail)
-                                                    <img src="{{ asset('storage/' . $stream->thumbnail) }}" class="w-100" style="height: 200px; object-fit: cover;" alt="{{ $stream->title }}">
-                                                @else
-                                                    <div class="bg-dark d-flex justify-content-center align-items-center" style="height: 200px;">
-                                                        <i class="fas fa-video fa-3x text-light opacity-50"></i>
-                                                    </div>
-                                                @endif
-                                                @if($stream->is_live)
-                                                    <span class="badge bg-danger position-absolute top-0 end-0 m-2 live-badge">LIVE</span>
-                                                @endif
-                                                @if($stream->requires_subscription)
-                                                    <span class="badge bg-primary position-absolute top-0 start-0 m-2">
-                                                        <i class="fas fa-lock me-1"></i> Subscribers
-                                                    </span>
-                                                @endif
-                                                @if($stream->price > 0)
-                                                    <span class="badge bg-success position-absolute bottom-0 start-0 m-2">
-                                                        ${{ number_format($stream->price, 2) }}
-                                                    </span>
-                                                @endif
-                                                <a href="{{ route('streams.watch', $stream) }}" class="stream-overlay position-absolute top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center">
-                                                    <div class="play-button">
-                                                        <i class="fas fa-play"></i>
-                                                    </div>
-                                                </a>
-                                            </div>
-                                            <div class="p-3">
-                                                <div class="d-flex align-items-center mb-2">
-                                                    <img src="{{ $stream->user->avatar ?? asset('img/default-avatar.png') }}" alt="{{ $stream->user->name }}" class="rounded-circle me-2" width="32" height="32">
-                                                    <div>
-                                                        <h6 class="mb-0 text-truncate">{{ $stream->user->name }}</h6>
-                                                        <small class="text-muted">{{ '@' . $stream->user->username }}</small>
-                                                    </div>
-                                                </div>
-                                                <h5 class="card-title mb-1 text-truncate">{{ $stream->title }}</h5>
-                                                <p class="card-text small text-muted mb-0">
-                                                    <i class="fas fa-eye me-1"></i> {{ $stream->viewer_count ?? 0 }} viewers
-                                                    <span class="ms-2">
-                                                        <i class="fas fa-clock me-1"></i> 
-                                                        {{ $stream->started_at ? $stream->started_at->diffForHumans() : 'Not started' }}
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @include('elements.streams.stream-card', ['stream' => $stream])
                             @endforeach
                         </div>
-                        
-                        <div class="d-flex justify-content-center mt-4">
+                        <div class="streams-pagination">
                             {{ $streams->links() }}
                         </div>
                     @else
-                        <div class="text-center py-5">
-                            <img src="{{ asset('img/no-streams.svg') }}" alt="No streams" class="mb-4" style="max-width: 200px; opacity: 0.5;">
-                            <h3>No Live Streams Available</h3>
-                            <p class="text-muted">Check back later or start your own stream!</p>
+                        <div class="streams-empty">
+                            <div class="streams-empty__icon" aria-hidden="true">
+                                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/>
+                                    <rect x="2" y="6" width="14" height="12" rx="2"/>
+                                </svg>
+                            </div>
+                            <p class="streams-empty__title">{{ __('No live streams right now') }}</p>
+                            <p class="streams-empty__hint">{{ __('Check back later or be the first to go live!') }}</p>
                             @auth
-                                <a href="{{ route('streams.create') }}" class="btn btn-primary mt-2">
-                                    <i class="fas fa-video me-2"></i>
-                                    Start Streaming
+                                <a href="{{ route('streams.create') }}" class="streams-btn streams-btn--primary streams-empty__cta">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+                                    {{ __('Start Streaming') }}
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="btn btn-primary mt-2">
-                                    <i class="fas fa-sign-in-alt me-2"></i>
-                                    Login to Stream
+                                <a href="{{ route('login') }}" class="streams-btn streams-btn--primary streams-empty__cta">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13.8 12H3"/></svg>
+                                    {{ __('Login to Stream') }}
                                 </a>
                             @endauth
                         </div>
                     @endif
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="row mt-4">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <h4 class="mb-0">How to Start Streaming</h4>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4 mb-4 mb-md-0">
-                            <div class="text-center">
-                                <div class="mb-3">
-                                    <i class="fas fa-laptop fa-3x text-primary"></i>
-                                </div>
-                                <h5>1. Set Up Your Stream</h5>
-                                <p class="text-muted">Create a new stream and get your unique streaming key</p>
+                </section>
+
+                <section class="streams-guide" aria-label="{{ __('How to start streaming') }}">
+                    <h2 class="streams-guide__title">{{ __('How to Start Streaming') }}</h2>
+                    <div class="streams-guide__steps">
+                        <div class="streams-guide__step">
+                            <div class="streams-guide__step-icon" aria-hidden="true">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
                             </div>
+                            <div class="streams-guide__step-num">1</div>
+                            <h3 class="streams-guide__step-title">{{ __('Set Up Your Stream') }}</h3>
+                            <p class="streams-guide__step-text">{{ __('Create a new stream and get your unique streaming key') }}</p>
                         </div>
-                        <div class="col-md-4 mb-4 mb-md-0">
-                            <div class="text-center">
-                                <div class="mb-3">
-                                    <i class="fas fa-cogs fa-3x text-primary"></i>
-                                </div>
-                                <h5>2. Configure Your Software</h5>
-                                <p class="text-muted">Use OBS, Streamlabs or any RTMP compatible software</p>
+                        <div class="streams-guide__step">
+                            <div class="streams-guide__step-icon" aria-hidden="true">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
                             </div>
+                            <div class="streams-guide__step-num">2</div>
+                            <h3 class="streams-guide__step-title">{{ __('Configure Your Software') }}</h3>
+                            <p class="streams-guide__step-text">{{ __('Use OBS, Streamlabs or any RTMP compatible software') }}</p>
                         </div>
-                        <div class="col-md-4">
-                            <div class="text-center">
-                                <div class="mb-3">
-                                    <i class="fas fa-broadcast-tower fa-3x text-primary"></i>
-                                </div>
-                                <h5>3. Go Live</h5>
-                                <p class="text-muted">Start broadcasting and connect with your audience</p>
+                        <div class="streams-guide__step">
+                            <div class="streams-guide__step-icon" aria-hidden="true">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9M19.1 4.9C23 8.8 23 15.1 19.1 19"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
                             </div>
+                            <div class="streams-guide__step-num">3</div>
+                            <h3 class="streams-guide__step-title">{{ __('Go Live') }}</h3>
+                            <p class="streams-guide__step-text">{{ __('Start broadcasting and connect with your audience') }}</p>
                         </div>
                     </div>
-                </div>
+                </section>
             </div>
         </div>
     </div>
-</div>
-
-@push('styles')
-<style>
-    .stream-card {
-        transition: transform 0.2s ease;
-        border: none;
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    
-    .stream-card:hover {
-        transform: translateY(-5px);
-    }
-    
-    .stream-overlay {
-        background: rgba(0, 0, 0, 0.4);
-        opacity: 0;
-        transition: opacity 0.3s ease;
-    }
-    
-    .stream-card:hover .stream-overlay {
-        opacity: 1;
-    }
-    
-    .play-button {
-        width: 60px;
-        height: 60px;
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-    
-    .play-button i {
-        color: #4A6CF7;
-        font-size: 24px;
-        margin-left: 4px;
-    }
-    
-    .live-badge {
-        animation: pulse 1.5s infinite;
-    }
-    
-    @keyframes pulse {
-        0% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0.5;
-        }
-        100% {
-            opacity: 1;
-        }
-    }
-</style>
-@endpush
-@endsection 
+@stop

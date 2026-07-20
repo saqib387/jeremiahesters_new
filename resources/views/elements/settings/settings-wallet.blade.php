@@ -17,15 +17,21 @@
 </div>
 
 {{-- Actual form --}}
-<div>
+<div class="wallet-settings">
     @include('elements/message-alert', ['classes' =>'mb-2'])
 
-    <div class="alert alert-primary text-white font-weight-bold" role="alert">
-        <div class="d-flex"><h3 class="font-weight-bold wallet-total-amount">{{\App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount(number_format(Auth::user()->wallet ? Auth::user()->wallet->total : 0, 2, '.', ''))}}</h3> <small class="ml-2"></small> </div>
-        <p class="mb-0">{{__('Available funds. You can deposit more money or become a creator to earn more.')}}</p>
+    <div class="wallet-settings__balance" role="status">
+        <div class="wallet-settings__balance-top">
+            <span class="wallet-settings__balance-label">{{ __('Available balance') }}</span>
+            <div class="wallet-settings__balance-icon" aria-hidden="true">
+                @include('elements.icon', ['icon' => 'wallet', 'variant' => 'small', 'centered' => true])
+            </div>
+        </div>
+        <div class="wallet-settings__balance-amount wallet-total-amount">{{\App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount(number_format(Auth::user()->wallet ? Auth::user()->wallet->total : 0, 2, '.', ''))}}</div>
+        <p class="wallet-settings__balance-desc">{{__('Deposit funds or become a creator to start earning.')}}</p>
     </div>
 
-    <div class="mt-3 inline-border-tabs">
+    <div class="wallet-settings__tabs inline-border-tabs">
         <nav class="nav nav-pills nav-justified">
             @foreach(\App\Providers\SettingsServiceProvider::allowWithdrawals(Auth::user()) ? ['deposit', 'withdraw'] : ['deposit'] as $tab)
                 <a class="nav-item nav-link {{$activeTab == $tab ? 'active' : ''}}" href="{{route('my.settings',['type' => 'wallet', 'active' => $tab])}}">

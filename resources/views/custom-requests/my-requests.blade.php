@@ -303,7 +303,7 @@
 <style>
 /* Text Gradient */
 .text-gradient {
-    background: linear-gradient(135deg, #830866 0%, #a10a7f 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -324,15 +324,15 @@
 }
 
 .nav-link-custom:hover {
-    color: #830866;
-    background-color: rgba(131, 8, 102, 0.1);
-    border-bottom-color: rgba(131, 8, 102, 0.3);
+    color: #667eea;
+    background-color: rgba(102, 126, 234, 0.1);
+    border-bottom-color: rgba(102, 126, 234, 0.3);
 }
 
 .nav-link-custom.active {
-    color: #830866;
+    color: #667eea;
     background-color: #fff;
-    border-bottom-color: #830866;
+    border-bottom-color: #667eea;
     font-weight: 600;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -386,7 +386,7 @@
 }
 
 .title-link:hover {
-    color: #830866 !important;
+    color: #667eea !important;
     text-decoration: none;
 }
 
@@ -403,7 +403,7 @@
 }
 
 .progress-bar-modern {
-    background: linear-gradient(135deg, #830866 0%, #a10a7f 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 10px;
     transition: width 0.6s ease;
 }
@@ -474,12 +474,12 @@
 .pagination-wrapper .page-link {
     border-radius: 8px !important;
     border: none;
-    color: #830866;
+    color: #667eea;
     font-weight: 500;
 }
 
 .pagination-wrapper .page-item.active .page-link {
-    background: linear-gradient(135deg, #830866 0%, #a10a7f 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border: none;
 }
 

@@ -208,6 +208,9 @@ const observer = new IntersectionObserver((entries) => {
             
             // Mouse wheel navigation
             document.addEventListener('wheel', e => {
+                if (document.body.classList.contains('comments-open') ||
+                    document.body.classList.contains('mobile-sidebar-open') ||
+                    document.body.classList.contains('mobile-search-open')) return;
                 if (isScrolling) return;
                 e.preventDefault();
                 
@@ -216,9 +219,12 @@ const observer = new IntersectionObserver((entries) => {
                 
                 isScrolling = true;
                 setTimeout(() => isScrolling = false, 800);
-            });
+            }, { passive: false });
             
             function handleSwipe() {
+                if (document.body.classList.contains('comments-open') ||
+                    document.body.classList.contains('mobile-sidebar-open') ||
+                    document.body.classList.contains('mobile-search-open')) return;
                 const swipeDistance = touchStartY - touchEndY;
                 if (Math.abs(swipeDistance) < 50) return;
                 
@@ -354,30 +360,138 @@ const observer = new IntersectionObserver((entries) => {
                 });
             });
             
-            // Comments sidebar functionality
+            // Comments bottom sheet functionality
             const commentsSidebar = document.getElementById('comments-sidebar');
+            const commentsOverlay = document.getElementById('comments-overlay');
             const closeCommentsBtn = document.querySelector('.close-comments');
-            
+
+            function openComments() {
+                commentsSidebar.classList.add('active');
+                if (commentsOverlay) commentsOverlay.classList.add('active');
+                document.body.classList.add('comments-open');
+                const videoFeed = document.querySelector('.video-feed');
+                if (videoFeed) {
+                    videoFeed.dataset.lockedScrollTop = String(videoFeed.scrollTop);
+                    videoFeed.style.overflow = 'hidden';
+                }
+            }
+
+            function closeComments() {
+                commentsSidebar.classList.remove('active');
+                if (commentsOverlay) commentsOverlay.classList.remove('active');
+                document.body.classList.remove('comments-open');
+                const videoFeed = document.querySelector('.video-feed');
+                if (videoFeed) {
+                    videoFeed.style.overflow = '';
+                    if (videoFeed.dataset.lockedScrollTop != null) {
+                        videoFeed.scrollTop = parseFloat(videoFeed.dataset.lockedScrollTop) || 0;
+                    }
+                }
+            }
+
+            const blockFeedScroll = function(e) {
+                if (!document.body.classList.contains('comments-open')) return;
+                const inCommentsList = e.target.closest && e.target.closest('.comments-list');
+                const inCommentInput = e.target.closest && (
+                    e.target.closest('.comment-form') ||
+                    e.target.closest('#comment-input')
+                );
+                if (inCommentsList || inCommentInput) return;
+                e.preventDefault();
+            };
+            document.addEventListener('wheel', blockFeedScroll, { passive: false, capture: true });
+            document.addEventListener('touchmove', blockFeedScroll, { passive: false, capture: true });
+
             document.querySelectorAll('.comment-btn').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    commentsSidebar.classList.add('active');
+                    openComments();
                     const videoId = this.getAttribute('data-video-id');
                     loadComments(videoId);
                 });
             });
-            
-            closeCommentsBtn.addEventListener('click', function() {
-                commentsSidebar.classList.remove('active');
+
+            if (closeCommentsBtn) {
+                closeCommentsBtn.addEventListener('click', closeComments);
+            }
+            if (commentsOverlay) {
+                commentsOverlay.addEventListener('click', closeComments);
+            }
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && commentsSidebar.classList.contains('active')) {
+                    closeComments();
+                }
             });
-            
-            // Close sidebar when clicking outside
+
+            // Drag-to-close (Instagram-style) on the grabber / header
+            if (commentsSidebar) {
+                let dragStartY = 0;
+                let dragCurrentY = 0;
+                let isDragging = false;
+
+                const dragStart = function(e) {
+                    // Ignore drags that begin on the close button
+                    if (e.target.closest('.close-comments')) return;
+                    isDragging = true;
+                    dragStartY = e.touches ? e.touches[0].clientY : e.clientY;
+                    dragCurrentY = dragStartY;
+                    commentsSidebar.classList.add('dragging');
+                };
+
+                const dragMove = function(e) {
+                    if (!isDragging) return;
+                    const y = e.touches ? e.touches[0].clientY : e.clientY;
+                    dragCurrentY = y;
+                    const delta = Math.max(0, y - dragStartY); // only allow dragging down
+                    commentsSidebar.style.transform = 'translateY(' + delta + 'px)';
+                    if (e.cancelable) e.preventDefault();
+                };
+
+                const dragEnd = function() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    commentsSidebar.classList.remove('dragging');
+                    commentsSidebar.style.transform = '';
+
+                    const delta = dragCurrentY - dragStartY;
+                    const threshold = Math.min(140, commentsSidebar.offsetHeight * 0.25);
+                    if (delta > threshold) {
+                        closeComments();
+                    }
+                };
+
+                document.querySelectorAll('[data-comments-drag]').forEach(function(handle) {
+                    handle.addEventListener('mousedown', dragStart);
+                    handle.addEventListener('touchstart', dragStart, { passive: true });
+                });
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('touchmove', dragMove, { passive: false });
+                document.addEventListener('mouseup', dragEnd);
+                document.addEventListener('touchend', dragEnd);
+                document.addEventListener('touchcancel', dragEnd);
+            }
+
+            // Quick emoji reactions -> prefill composer
+            document.querySelectorAll('.reaction-emoji').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const input = document.getElementById('comment-input');
+                    if (input) {
+                        input.value += this.getAttribute('data-emoji');
+                        input.focus();
+                    }
+                });
+            });
+
+            // Toggle like heart on individual comments (client-side only)
             document.addEventListener('click', function(e) {
-                if (commentsSidebar.classList.contains('active') && 
-                    !commentsSidebar.contains(e.target) && 
-                    !e.target.closest('.comment-btn')) {
-                    commentsSidebar.classList.remove('active');
+                const like = e.target.closest('.comment-like');
+                if (!like) return;
+                like.classList.toggle('liked');
+                const countEl = like.querySelector('span');
+                if (countEl) {
+                    let n = parseInt(countEl.textContent) || 0;
+                    countEl.textContent = like.classList.contains('liked') ? n + 1 : Math.max(0, n - 1);
                 }
             });
             
@@ -661,35 +775,6 @@ const observer = new IntersectionObserver((entries) => {
                 }
             });
             
-            // ===== Header Menu Functionality =====
-            const headerMenuBtn = document.getElementById('header-menu-btn');
-            const headerModal = document.getElementById('header-modal');
-            const headerModalClose = document.querySelector('.header-modal-close');
-            
-            if (headerMenuBtn && headerModal) {
-                headerMenuBtn.addEventListener('click', function() {
-                    headerModal.classList.add('active');
-                });
-            }
-            
-            if (headerModalClose) {
-                headerModalClose.addEventListener('click', function() {
-                    headerModal.classList.remove('active');
-                });
-            }
-            
-            // Close modal when clicking outside
-            if (headerModal) {
-                document.addEventListener('click', function(e) {
-                    if (headerModal.classList.contains('active') && 
-                        e.target === headerModal) {
-                        headerModal.classList.remove('active');
-                    }
-                });
-            }
-
-
-
 // 🔥 ADD THIS NEW FUNCTION FOR VIEWS TRACKING
 function incrementVideoViews(videoId) {
     console.log('📈 Incrementing views for video:', videoId);
@@ -864,9 +949,18 @@ function incrementVideoViews(videoId) {
                             <div class="comment-item">
                                 <div class="comment-avatar-initials" style="background: ${getRandomColor()};">${getUserInitials(comment.user.name)}</div>
                                 <div class="comment-content">
-                                    <strong>${comment.user.name}</strong>
+                                    <div class="comment-head">
+                                        <strong>${comment.user.name}</strong>
+                                        <span class="comment-time">${formatTime(comment.created_at)}</span>
+                                    </div>
                                     <p>${comment.content}</p>
-                                    <span class="comment-time">${formatTime(comment.created_at)}</span>
+                                    <div class="comment-actions">
+                                        <span class="comment-reply">Reply</span>
+                                    </div>
+                                </div>
+                                <div class="comment-like">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                                    <span>0</span>
                                 </div>
                             </div>
                         `).join('');
@@ -930,7 +1024,6 @@ function incrementVideoViews(videoId) {
                     if (comment && currentVideoIdForComments) {
                         // Disable button to prevent double submission
                         postCommentBtn.disabled = true;
-                        postCommentBtn.textContent = 'Posting...';
                         
                         // Make API call to post comment
                         fetch(`/videos/${currentVideoIdForComments}/comments`, {
@@ -953,9 +1046,18 @@ function incrementVideoViews(videoId) {
                                 newComment.innerHTML = `
                                     <div class="comment-avatar-initials" style="background: ${getRandomColor()};">${getUserInitials(data.comment.user.name)}</div>
                                     <div class="comment-content">
-                                        <strong>${data.comment.user.name}</strong>
+                                        <div class="comment-head">
+                                            <strong>${data.comment.user.name}</strong>
+                                            <span class="comment-time">Just now</span>
+                                        </div>
                                         <p>${data.comment.content}</p>
-                                        <span class="comment-time">Just now</span>
+                                        <div class="comment-actions">
+                                            <span class="comment-reply">Reply</span>
+                                        </div>
+                                    </div>
+                                    <div class="comment-like">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21l8.8-8.6a5.5 5.5 0 0 0 0-7.8z"/></svg>
+                                        <span>0</span>
                                     </div>
                                 `;
                                 
@@ -988,7 +1090,6 @@ function incrementVideoViews(videoId) {
                         .finally(() => {
                             // Re-enable button
                             postCommentBtn.disabled = false;
-                            postCommentBtn.textContent = 'Post';
                         });
                     }
                 });
@@ -1008,48 +1109,19 @@ function incrementVideoViews(videoId) {
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     
-    <!-- Comments Close Button in Header (appears when comments are open) -->
-    <button id="comments-close-header" class="comments-close-header">
-        <i class="fas fa-times"></i>
-    </button>
-
-    <!-- Transparent Header -->
-{{--    <div class="transparent-header">--}}
-{{--        <button id="header-menu-btn" class="header-menu-btn">--}}
-{{--            <i class="fas fa-bars"></i>--}}
-{{--        </button>--}}
-{{--        <button id="search-btn" class="search-btn">--}}
-{{--            <i class="fas fa-search"></i>--}}
-{{--        </button>--}}
-{{--    </div>--}}
-
-    <!-- Header Menu Modal -->
-    <div class="header-modal" id="header-modal">
-        <div class="header-modal-content">
-            <div class="header-modal-header">
-                <h3>Menu</h3>
-                <button class="header-modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="header-menu-items">
-                <a href="/feed" class="header-menu-item">
-                    <i class="fas fa-home"></i>
-                    <span>Home</span>
-                </a>
-                <a href="/profile" class="header-menu-item">
-                    <i class="fas fa-user"></i>
-                    <span>Profile</span>
-                </a>
-                <a href="/posts/create" class="header-menu-item">
-                    <i class="fas fa-video"></i>
-                    <span>Video</span>
-                </a>
-            </div>
-        </div>
+    <!-- Top overlay controls (mobile sidebar + search) -->
+    <div class="top-header">
+        <button id="header-menu-btn" class="header-menu-btn" type="button" aria-label="{{ __('Menu') }}">
+            <i class="fas fa-bars"></i>
+        </button>
+        <button id="search-btn" class="search-btn" type="button" aria-label="{{ __('Search') }}">
+            <i class="fas fa-search"></i>
+        </button>
     </div>
 
-    <!-- Search Modal -->
+    <!-- Mobile menu handled by template/mobile-sidebar -->
+
+    <!-- Search Modal (legacy — hidden) -->
     <div class="search-modal" id="search-modal">
         <div class="search-modal-content">
             <div class="search-modal-header">
@@ -1071,10 +1143,11 @@ function incrementVideoViews(videoId) {
     <!-- Profile Modal -->
     <div class="profile-modal" id="profile-modal">
         <div class="profile-modal-content">
+            <div class="profile-grabber"></div>
             <div class="profile-modal-header">
                 <h3>Profile</h3>
-                <button class="profile-modal-close">
-                    <i class="fas fa-times"></i>
+                <button class="profile-modal-close" type="button" aria-label="Close">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
                 </button>
             </div>
             <div class="profile-info">
@@ -1087,13 +1160,13 @@ function incrementVideoViews(videoId) {
                 </div>
             </div>
             <div class="profile-actions">
-                <button class="profile-action-btn view-profile-btn" id="view-profile-btn">
-                    <i class="fas fa-user"></i>
+                <button class="profile-action-btn view-profile-btn" id="view-profile-btn" type="button">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     <span>View Profile</span>
                 </button>
-                <button class="profile-action-btn share-profile-btn" id="share-profile-btn">
-                    <i class="fas fa-share-alt"></i>
-                    <span>Share Profile</span>
+                <button class="profile-action-btn share-profile-btn" id="share-profile-btn" type="button">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    <span>Share</span>
                 </button>
             </div>
         </div>
@@ -1191,24 +1264,40 @@ function incrementVideoViews(videoId) {
             @endif
         </div>
 
-        <!-- Comments Sidebar -->
+        <!-- Comments Bottom Sheet -->
+        <div class="comments-overlay" id="comments-overlay"></div>
         <div class="comments-sidebar" id="comments-sidebar">
-            <div class="comments-header">
+            <div class="comments-grabber" data-comments-drag></div>
+            <div class="comments-header" data-comments-drag>
                 <h3>Comments</h3>
-                <button class="close-comments">
-                    <i class="fas fa-times"></i>
+                <button class="close-comments" aria-label="Close comments">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
                 </button>
             </div>
-            
+
             <div class="comments-list" id="comments-list">
                 <div class="no-comments">
                     <p>No comments yet. Be the first to comment!</p>
                 </div>
             </div>
-            
+
+            <div class="comment-reactions">
+                <button type="button" class="reaction-emoji" data-emoji="❤️">❤️</button>
+                <button type="button" class="reaction-emoji" data-emoji="🙌">🙌</button>
+                <button type="button" class="reaction-emoji" data-emoji="🔥">🔥</button>
+                <button type="button" class="reaction-emoji" data-emoji="👏">👏</button>
+                <button type="button" class="reaction-emoji" data-emoji="😢">😢</button>
+                <button type="button" class="reaction-emoji" data-emoji="😍">😍</button>
+                <button type="button" class="reaction-emoji" data-emoji="😮">😮</button>
+                <button type="button" class="reaction-emoji" data-emoji="😂">😂</button>
+            </div>
+
             <div class="comment-form">
-                <input type="text" id="comment-input" placeholder="Add a comment..." maxlength="500">
-                <button id="post-comment">Post</button>
+                <div class="comment-form__avatar">{{ strtoupper(substr(optional(Auth::user())->name ?? 'U', 0, 1)) }}</div>
+                <input type="text" id="comment-input" placeholder="What do you think of this?" maxlength="500">
+                <button id="post-comment" aria-label="Post comment">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="5"/><polyline points="6 11 12 5 18 11"/></svg>
+                </button>
             </div>
         </div>
     </div>
@@ -1275,6 +1364,32 @@ function incrementVideoViews(videoId) {
             overflow: hidden !important;
         }
         
+        /* Legacy modals replaced by mobile-sidebar */
+        .header-modal,
+        .search-modal {
+            display: none !important;
+        }
+
+        /* Top header overlay (Fanfix-style triggers) */
+        .top-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1002;
+            padding: 15px 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.55), transparent);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .top-header .header-menu-btn,
+        .top-header .search-btn {
+            pointer-events: auto;
+        }
+
         /* Transparent Header Styles */
         .transparent-header {
             position: fixed;
@@ -1291,32 +1406,62 @@ function incrementVideoViews(videoId) {
         
         .header-menu-btn,
         .search-btn {
-            background: rgba(255, 255, 255, 0.15);
+            position: relative;
+            background: transparent;
             border: none;
             color: #fff;
             font-size: 18px;
             cursor: pointer;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease, filter 0.25s ease;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            overflow: visible;
+        }
+
+        .header-menu-btn::before,
+        .search-btn::before {
+            display: none;
+        }
+
+        .header-menu-btn i,
+        .search-btn i,
+        .header-menu-btn svg,
+        .search-btn svg {
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
         }
         
         .header-menu-btn:hover,
         .search-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.05);
+            background: transparent;
+            border: none;
+            transform: scale(1.08);
+            box-shadow: none;
+        }
+
+        .header-menu-btn:hover i,
+        .search-btn:hover i,
+        .header-menu-btn:hover svg,
+        .search-btn:hover svg {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+        }
+
+        .header-menu-btn:active,
+        .search-btn:active {
+            transform: scale(0.94);
         }
         
         /* Bottom Modal Styles */
         .header-modal,
-        .search-modal,
-        .profile-modal {
+        .search-modal {
             position: fixed;
             bottom: 0;
             left: 0;
@@ -1329,15 +1474,13 @@ function incrementVideoViews(videoId) {
         }
         
         .header-modal.active,
-        .search-modal.active,
-        .profile-modal.active {
+        .search-modal.active {
             opacity: 1;
             visibility: visible;
         }
         
         .header-modal-content,
-        .search-modal-content,
-        .profile-modal-content {
+        .search-modal-content {
             background: #fff;
             border-radius: 20px 20px 0 0;
             padding: 0;
@@ -1349,14 +1492,12 @@ function incrementVideoViews(videoId) {
         }
         
         .header-modal.active .header-modal-content,
-        .search-modal.active .search-modal-content,
-        .profile-modal.active .profile-modal-content {
+        .search-modal.active .search-modal-content {
             transform: translateY(0);
         }
         
         .header-modal-header,
-        .search-modal-header,
-        .profile-modal-header {
+        .search-modal-header {
             padding: 20px 20px 16px 20px;
             border-bottom: 1px solid #eee;
             display: flex;
@@ -1368,8 +1509,7 @@ function incrementVideoViews(videoId) {
         
         /* Add drag handle to bottom modals */
         .header-modal-header::before,
-        .search-modal-header::before,
-        .profile-modal-header::before {
+        .search-modal-header::before {
             content: '';
             position: absolute;
             top: 8px;
@@ -1382,8 +1522,7 @@ function incrementVideoViews(videoId) {
         }
         
         .header-modal-header h3,
-        .search-modal-header h3,
-        .profile-modal-header h3 {
+        .search-modal-header h3 {
             margin: 0;
             color: #333;
             font-size: 18px;
@@ -1391,8 +1530,7 @@ function incrementVideoViews(videoId) {
         }
         
         .header-modal-close,
-        .search-modal-close,
-        .profile-modal-close {
+        .search-modal-close {
             background: rgba(0, 0, 0, 0.05);
             border: none;
             font-size: 18px;
@@ -1409,8 +1547,7 @@ function incrementVideoViews(videoId) {
         }
         
         .header-modal-close:hover,
-        .search-modal-close:hover,
-        .profile-modal-close:hover {
+        .search-modal-close:hover {
             background: rgba(0, 0, 0, 0.1);
             color: #333;
             transform: scale(1.05);
@@ -1536,95 +1673,194 @@ function incrementVideoViews(videoId) {
             color: #666;
         }
         
-        /* Profile Modal Styles */
-        .profile-info {
-            padding: 30px 20px 20px;
-            background: #fff;
-            text-align: center;
+        /* Profile Modal — neutral flat dark */
+        .profile-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1003;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
         }
-        
-        .profile-avatar {
+
+        .profile-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .profile-modal .profile-modal-content {
+            background: #1c1c1e !important;
+            border-radius: 20px 20px 0 0 !important;
+            padding: 0 !important;
+            width: 100%;
+            max-width: 480px;
+            max-height: 70vh;
+            overflow: hidden;
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: none;
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.45);
+        }
+
+        .profile-modal.active .profile-modal-content {
+            transform: translateY(0);
+        }
+
+        .profile-grabber {
+            width: 40px;
+            height: 4px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.25);
+            margin: 10px auto 0;
+            flex-shrink: 0;
+        }
+
+        .profile-modal .profile-modal-header {
+            padding: 14px 16px 14px !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
             display: flex;
             justify-content: center;
-            margin-bottom: 20px;
+            align-items: center;
+            background: transparent !important;
+            position: relative;
         }
-        
-        .profile-avatar-initials {
-            width: 80px;
-            height: 80px;
+
+        .profile-modal .profile-modal-header::before {
+            display: none !important;
+        }
+
+        .profile-modal .profile-modal-header h3 {
+            margin: 0;
+            color: #f5f5f7 !important;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .profile-modal .profile-modal-close {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.08) !important;
+            border: none;
+            cursor: pointer;
+            color: #f5f5f7 !important;
+            padding: 0;
             border-radius: 50%;
-            border: 3px solid #fff;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 24px;
+            transition: background 0.2s ease;
+        }
+
+        .profile-modal .profile-modal-close:hover {
+            background: rgba(255, 255, 255, 0.14) !important;
+            color: #fff !important;
+            transform: translateY(-50%);
+        }
+
+        .profile-info {
+            padding: 28px 20px 24px;
+            background: transparent;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .profile-avatar-initials {
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            border: 2px solid rgba(203, 12, 159, 0.45);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 28px;
             color: white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            box-shadow: none;
+            letter-spacing: 0.02em;
         }
-        
+
         .profile-details h3 {
-            margin: 0 0 8px 0;
-            font-size: 22px;
-            font-weight: 600;
-            color: #333;
+            margin: 0 0 6px 0;
+            font-size: 20px;
+            font-weight: 700;
+            color: #f5f5f7;
+            letter-spacing: -0.01em;
         }
-        
+
         .profile-details p {
             margin: 0;
-            font-size: 16px;
-            color: #666;
+            font-size: 14px;
+            color: #8e8e93;
+            font-weight: 500;
         }
-        
+
         .profile-actions {
-            padding: 20px;
-            background: #fff;
+            padding: 0 16px calc(20px + env(safe-area-inset-bottom));
+            background: transparent;
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
-        
+
         .profile-action-btn {
             flex: 1;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            padding: 16px 20px;
+            gap: 8px;
+            padding: 14px 16px;
             border: none;
             border-radius: 12px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.2s ease, opacity 0.2s ease;
             text-decoration: none;
+            box-shadow: none !important;
         }
-        
+
+        .profile-action-btn svg {
+            flex-shrink: 0;
+        }
+
         .view-profile-btn {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            background: #cb0c9f !important;
+            color: #fff !important;
         }
-        
+
         .view-profile-btn:hover {
-            background: linear-gradient(135deg, #5a6fd8, #6a4190);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            background: #830866 !important;
+            transform: none;
+            box-shadow: none !important;
         }
-        
+
         .share-profile-btn {
-            background: linear-gradient(135deg, #ff6b6b, #ff8a80);
-            color: #fff;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            background: rgba(255, 255, 255, 0.08) !important;
+            color: #f5f5f7 !important;
+            border: 1px solid rgba(255, 255, 255, 0.12);
         }
-        
+
         .share-profile-btn:hover {
-            background: linear-gradient(135deg, #ff5252, #ff6b6b);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(255, 82, 82, 0.4);
+            background: rgba(255, 255, 255, 0.14) !important;
+            transform: none;
+            box-shadow: none !important;
         }
-        
+
         .profile-action-btn i {
-            font-size: 18px;
+            font-size: 16px;
         }
         
         /* Notification Styles */
@@ -1740,24 +1976,49 @@ function incrementVideoViews(videoId) {
             position: absolute;
             top: 80px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.5);
+            background: transparent;
             border: none;
             color: #fff;
             font-size: 18px;
             cursor: pointer;
-            width: 50px;
-            height: 50px;
+            width: 48px;
+            height: 48px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 15;
-            transition: all 0.3s ease;
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            overflow: visible;
+        }
+
+        .sound-control-btn::before {
+            display: none;
+        }
+
+        .sound-control-btn i,
+        .sound-control-btn svg {
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
         }
         
         .sound-control-btn:hover {
-            background: rgba(0, 0, 0, 0.8);
+            background: transparent;
             transform: scale(1.1);
+            box-shadow: none;
+        }
+
+        .sound-control-btn:hover i,
+        .sound-control-btn:hover svg {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+        }
+
+        .sound-control-btn:active {
+            transform: scale(0.94);
         }
         
         .video-overlay {
@@ -1883,7 +2144,7 @@ function incrementVideoViews(videoId) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 18px;
             padding-bottom: 100px;
         }
         
@@ -1891,63 +2152,135 @@ function incrementVideoViews(videoId) {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
+            min-width: 48px;
         }
         
         .action-btn {
-            background: rgba(255, 255, 255, 0.15);
+            position: relative;
+            background: transparent;
             border: none;
             color: #fff;
-            font-size: 20px;
+            font-size: 28px;
+            line-height: 1;
             cursor: pointer;
-            width: 52px;
-            height: 52px;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            margin: 0;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            overflow: visible;
+            isolation: auto;
+        }
+
+        .action-btn::before,
+        .action-btn::after {
+            display: none;
+        }
+
+        .action-btn i,
+        .action-btn svg {
+            position: relative;
+            z-index: 1;
+            font-size: inherit;
+            width: 1em;
+            height: 1em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+            transition: transform 0.25s ease, filter 0.25s ease;
         }
         
         .action-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.05);
+            background: transparent;
+            border: none;
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: none;
+        }
+
+        .action-btn:hover::after {
+            display: none;
+        }
+
+        .action-btn:hover i,
+        .action-btn:hover svg {
+            transform: scale(1.04);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
         }
         
         .action-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
         
         .like-btn.liked {
-            background: rgba(255, 23, 68, 0.3);
-            color: #ff1744;
-            border-color: #ff1744;
+            background: transparent;
+            color: #ff4d6d;
+            border: none;
+            box-shadow: none;
+        }
+
+        .like-btn.liked i {
+            filter: drop-shadow(0 0 10px rgba(255, 77, 109, 0.75)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
         }
         
         .repost-btn.reposted {
-            background: rgba(23, 191, 99, 0.3);
-            color: #17bf63;
-            border-color: #17bf63;
+            background: transparent;
+            color: #3dff9a;
+            border: none;
+            box-shadow: none;
+        }
+
+        .repost-btn.reposted i {
+            filter: drop-shadow(0 0 10px rgba(61, 255, 154, 0.65)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
         }
         
         .upload-btn {
-            background: rgba(0, 123, 255, 0.2);
-            color: #007bff;
-            border-color: #007bff;
+            background: transparent;
+            color: #5ab0ff;
+            border: none;
+            box-shadow: none;
+            font-size: 26px;
+        }
+
+        .upload-btn::before {
+            display: none;
+        }
+
+        .upload-btn:hover {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #8cc8ff;
+        }
+
+        .upload-btn:hover i {
+            filter: drop-shadow(0 0 12px rgba(90, 176, 255, 0.7)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
         }
         
         .action-count {
             color: #fff;
             font-size: 12px;
             font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-            min-height: 16px;
+            line-height: 1.15;
+            letter-spacing: 0.01em;
+            text-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.75),
+                0 0 10px rgba(0, 0, 0, 0.35);
+            min-height: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 4px;
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
         }
         
         .progress-bar {
@@ -1967,185 +2300,330 @@ function incrementVideoViews(videoId) {
             transition: width 0.1s linear;
         }
         
-        /* Comments Sidebar */
+        /* Comments Bottom Sheet — Instagram style */
+        .comments-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease;
+        }
+
+        .comments-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .comments-sidebar {
             position: fixed;
-            top: 0;
-            right: -25%;
-            width: 25%;
-            height: 100vh;
-            background: #fff;
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 72vh;
+            max-height: 760px;
+            background: #1c1c1e;
+            border-radius: 20px 20px 0 0;
+            transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
             z-index: 1001;
             display: flex;
             flex-direction: column;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-            min-width: 320px;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateX(100%);
+            box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
+            transform: translateY(100%);
+            overflow: hidden;
+            overscroll-behavior: contain;
         }
-        
+
         .comments-sidebar.active {
-            right: 0;
-            opacity: 1;
-            visibility: visible;
-            transform: translateX(0);
+            transform: translateY(0);
         }
-        
+
+        .comments-grabber {
+            width: 40px;
+            height: 4px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.25);
+            margin: 10px auto 4px;
+            flex-shrink: 0;
+            cursor: grab;
+            touch-action: none;
+        }
+
         .comments-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
+            padding: 8px 16px 14px;
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            flex-shrink: 0;
+            cursor: grab;
+            touch-action: none;
         }
-        
+
+        .comments-sidebar.dragging {
+            transition: none !important;
+        }
+
+        .comments-sidebar.dragging .comments-grabber,
+        .comments-sidebar.dragging .comments-header {
+            cursor: grabbing;
+        }
+
+        /* Keep the close button clickable, not a drag handle */
+        .comments-header .close-comments {
+            cursor: pointer;
+            touch-action: auto;
+        }
+
         .comments-header h3 {
             margin: 0;
-            color: #333;
-            font-size: 18px;
-            font-weight: 600;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
         }
-        
+
         .close-comments {
-            background: rgba(0, 0, 0, 0.05);
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
             border: none;
-            font-size: 18px;
             cursor: pointer;
-            color: #666;
-            padding: 8px;
+            color: #fff;
+            padding: 6px;
             border-radius: 50%;
-            transition: all 0.3s ease;
-            width: 36px;
-            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.2s ease;
         }
-        
+
         .close-comments:hover {
-            background: rgba(0, 0, 0, 0.1);
-            color: #333;
-            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.1);
         }
-        
+
         .comments-list {
             flex: 1;
             overflow-y: auto;
-            padding: 20px;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 12px 16px 8px;
+            min-height: 0;
         }
-        
-        .no-comments {
-            text-align: center;
-            color: #888;
-            padding: 40px 20px;
-        }
-        
+
+        .no-comments,
         .loading {
             text-align: center;
-            color: #888;
-            padding: 40px 20px;
+            color: #8e8e93;
+            padding: 48px 20px;
+            font-size: 14px;
         }
-        
+
         .comment-item {
             display: flex;
-            margin-bottom: 16px;
+            margin-bottom: 20px;
             gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.02);
-            transition: background-color 0.3s ease;
+            align-items: flex-start;
         }
-        
-        .comment-item:hover {
-            background: rgba(0, 0, 0, 0.05);
+
+        .comment-item.is-reply {
+            margin-left: 44px;
         }
-        
+
         .comment-avatar-initials {
-            width: 36px;
-            height: 36px;
+            width: 34px;
+            height: 34px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 700;
             font-size: 13px;
             color: white;
             flex-shrink: 0;
-            border: 2px solid #e9ecef;
         }
-        
+
         .comment-content {
             flex: 1;
+            min-width: 0;
         }
-        
+
+        .comment-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
         .comment-content strong {
-            color: #333;
-            font-size: 14px;
+            color: #f5f5f7;
+            font-size: 13px;
             font-weight: 600;
         }
-        
-        .comment-content p {
-            margin: 4px 0;
-            color: #333;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-        
+
         .comment-time {
-            color: #666;
+            color: #8e8e93;
             font-size: 12px;
         }
-        
-        .comment-form {
-            padding: 20px;
-            border-top: 1px solid #eee;
-            display: flex;
-            gap: 12px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+
+        .comment-content p {
+            margin: 3px 0 0;
+            color: #e5e5ea;
+            font-size: 14px;
+            line-height: 1.4;
+            word-wrap: break-word;
         }
-        
+
+        .comment-actions {
+            display: flex;
+            gap: 16px;
+            margin-top: 6px;
+        }
+
+        .comment-actions span {
+            color: #8e8e93;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .comment-like {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: #8e8e93;
+            flex-shrink: 0;
+            cursor: pointer;
+            padding-top: 4px;
+        }
+
+        .comment-like svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .comment-like.liked {
+            color: #ff3040;
+        }
+
+        .comment-like span {
+            font-size: 11px;
+        }
+
+        /* Emoji quick reactions */
+        .comment-reactions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 18px;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .reaction-emoji {
+            background: transparent;
+            border: none;
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            padding: 2px;
+            transition: transform 0.15s ease;
+        }
+
+        .reaction-emoji:hover {
+            transform: scale(1.25);
+        }
+
+        /* Composer */
+        .comment-form {
+            padding: 8px 12px calc(12px + env(safe-area-inset-bottom));
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: #1c1c1e;
+            flex-shrink: 0;
+        }
+
+        .comment-form__avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            color: #fff;
+            background: linear-gradient(135deg, #cb0c9f, #830866);
+        }
+
         .comment-form input {
             flex: 1;
-            padding: 12px 18px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
+            padding: 11px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 22px;
             font-size: 14px;
             outline: none;
-            transition: all 0.3s ease;
-            background: #fff;
+            transition: border-color 0.2s ease;
+            background: #2c2c2e;
+            color: #fff;
         }
-        
+
+        .comment-form input::placeholder {
+            color: #8e8e93;
+        }
+
         .comment-form input:focus {
-            border-color: #ff6b6b;
-            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+            border-color: rgba(203, 12, 159, 0.6);
         }
-        
+
         .comment-form button {
-            background: linear-gradient(135deg, #ff6b6b, #ff8a80);
+            background: #cb0c9f;
             color: #fff;
             border: none;
-            border-radius: 25px;
-            padding: 12px 24px;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+            flex-shrink: 0;
+            transition: background 0.2s ease, opacity 0.2s ease;
         }
-        
+
         .comment-form button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #ff5252, #ff6b6b);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(255, 82, 82, 0.4);
+            background: #830866;
         }
-        
+
         .comment-form button:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
-            transform: none;
+        }
+
+        /* Hide top header & bottom nav while comments are open */
+        body.comments-open .top-header,
+        body.comments-open .transparent-header,
+        body.comments-open .video-actions,
+        body.comments-open .sound-control-btn {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+
+        body.comments-open .bottom-nav {
+            display: none !important;
+        }
+
+        body.comments-open .video-feed {
+            overflow: hidden !important;
+            touch-action: none;
+            overscroll-behavior: none;
         }
         
         .no-videos {
@@ -2153,56 +2631,155 @@ function incrementVideoViews(videoId) {
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            color: #fff;
+            gap: 10px;
+            min-height: calc(100vh - 78px);
+            width: 100%;
+            color: #f8fafc;
             text-align: center;
-            padding: 40px;
+            padding: 24px 16px;
+            position: relative;
+            isolation: isolate;
+            animation: emptyStateFloat 4.6s ease-in-out infinite;
         }
-        
+
+        .no-videos::before {
+            content: '';
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -58%);
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, rgba(236, 72, 153, 0.08) 40%, transparent 72%);
+            filter: blur(28px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .no-videos::after {
+            content: '';
+            position: absolute;
+            width: min(92vw, 540px);
+            height: min(62vh, 460px);
+            border-radius: 30px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 36%, rgba(8, 8, 14, 0.28) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 22px 60px rgba(0, 0, 0, 0.45);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes emptyStateFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .no-videos > * {
+            position: relative;
+            z-index: 1;
+        }
+
         .no-videos i {
-            font-size: 4rem;
+            width: 78px;
+            height: 78px;
+            border-radius: 22px;
             margin-bottom: 20px;
-            opacity: 0.5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: rgba(244, 244, 245, 0.92);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 14px 28px rgba(0, 0, 0, 0.4);
         }
-        
+
         .no-videos h3 {
-            margin-bottom: 10px;
-            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #ffffff;
         }
-        
+
         .no-videos p {
-            opacity: 0.7;
-            margin-bottom: 30px;
+            max-width: 360px;
+            margin: 0 0 30px;
+            color: rgba(226, 232, 240, 0.78);
+            font-size: 1.02rem;
         }
-        
+
         .upload-first-video-btn {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            background: linear-gradient(135deg, #ff6b6b, #ff8a80);
+            gap: 10px;
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 45%, #ec4899 100%);
             color: #fff;
             text-decoration: none;
-            padding: 16px 32px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
+            padding: 14px 26px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 8px 22px rgba(244, 63, 94, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
         }
-        
+
         .upload-first-video-btn:hover {
-            background: linear-gradient(135deg, #ff5252, #ff6b6b);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(255, 82, 82, 0.4);
             color: #fff;
+            text-decoration: none;
+            transform: translateY(-2px);
+            filter: saturate(1.07);
+            box-shadow: 0 14px 30px rgba(244, 63, 94, 0.45), 0 0 26px rgba(236, 72, 153, 0.33);
         }
-        
+
         .upload-first-video-btn i {
-            font-size: 18px;
+            font-size: 14px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            line-height: 1;
+            flex: 0 0 22px;
+        }
+
+        .no-videos::after {
+            background:
+                radial-gradient(circle at 22% 20%, rgba(244, 114, 182, 0.2) 0%, transparent 38%),
+                radial-gradient(circle at 82% 86%, rgba(56, 189, 248, 0.14) 0%, transparent 42%),
+                linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(244, 114, 182, 0.08) 35%, rgba(15, 23, 42, 0.46) 100%);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .no-videos {
+                animation: none;
+            }
+
+            .no-videos::after {
+                animation: none;
+            }
         }
         
         /* Mobile Optimizations */
         @media (max-width: 768px) {
+            .no-videos {
+                min-height: calc(100vh - 122px);
+                padding: 16px 14px 74px;
+            }
+
             .transparent-header {
                 padding: 15px;
             }
@@ -2223,9 +2800,8 @@ function incrementVideoViews(videoId) {
             }
             
             .comments-sidebar {
-                width: 100%;
-                right: -100%;
-                min-width: unset;
+                height: 82vh;
+                max-height: none;
             }
             
             .video-overlay {
@@ -2297,18 +2873,22 @@ function incrementVideoViews(videoId) {
             }
             
             .action-btn {
-                width: 48px;
-                height: 48px;
-                font-size: 18px;
+                width: 44px;
+                height: 44px;
+                font-size: 26px;
             }
             
             .video-actions {
-                gap: 12px;
+                gap: 16px;
                 padding-bottom: 100px;
+            }
+
+            .action-item {
+                gap: 2px;
             }
             
             .action-count {
-                font-size: 11px;
+                font-size: 12px;
             }
             
             .sound-control-btn {
@@ -2347,9 +2927,25 @@ function incrementVideoViews(videoId) {
         /* Tablet responsive */
         @media (min-width: 769px) and (max-width: 1024px) {
             .comments-sidebar {
-                width: 35%;
-                right: -35%;
-                min-width: 350px;
+                left: 50%;
+                right: auto;
+                width: 480px;
+                transform: translate(-50%, 100%);
+            }
+            .comments-sidebar.active {
+                transform: translate(-50%, 0);
+            }
+        }
+
+        @media (min-width: 1025px) {
+            .comments-sidebar {
+                left: 50%;
+                right: auto;
+                width: 500px;
+                transform: translate(-50%, 100%);
+            }
+            .comments-sidebar.active {
+                transform: translate(-50%, 0);
             }
         }
         
@@ -2364,18 +2960,22 @@ function incrementVideoViews(videoId) {
             }
             
             .video-actions {
-                gap: 8px;
+                gap: 14px;
                 padding-bottom: 90px;
             }
             
             .action-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 14px;
+                width: 42px;
+                height: 42px;
+                font-size: 24px;
+            }
+
+            .upload-btn {
+                font-size: 22px;
             }
             
             .action-count {
-                font-size: 10px;
+                font-size: 11px;
             }
             
             .video-overlay {
@@ -2447,49 +3047,73 @@ function incrementVideoViews(videoId) {
         /* Bottom Navigation Bar */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.9);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 10px 5px;
+            bottom: calc(8px + env(safe-area-inset-bottom));
+            left: 10px;
+            right: 10px;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(236, 72, 153, 0.2) 0%, transparent 35%),
+                radial-gradient(circle at 85% 100%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                linear-gradient(180deg, rgba(13, 14, 24, 0.94) 0%, rgba(6, 7, 14, 0.95) 100%);
+            backdrop-filter: blur(22px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 8px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
         
         .bottom-nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             text-decoration: none;
-            color: #999;
-            transition: all 0.3s ease;
-            padding: 6px 8px;
+            color: rgba(226, 232, 240, 0.72);
+            transition: all 0.25s ease;
+            padding: 9px 8px 7px;
             border-radius: 12px;
             flex: 1;
+            max-width: 120px;
+            position: relative;
+            overflow: hidden;
         }
         
         .bottom-nav-item.active {
             color: #fff;
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.24), rgba(56, 189, 248, 0.14));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 24px rgba(236, 72, 153, 0.28);
+        }
+
+        .bottom-nav-item.active::after {
+            content: '';
+            position: absolute;
+            left: 18%;
+            right: 18%;
+            bottom: 0;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(244, 114, 182, 0.9), rgba(56, 189, 248, 0.9));
         }
         
         .bottom-nav-item:hover {
             color: #fff;
-            transform: translateY(-2px);
+            transform: translateY(-1px) scale(1.01);
         }
         
         .bottom-nav-icon {
-            font-size: 18px;
-            margin-bottom: 3px;
+            font-size: 14px;
+            margin-bottom: 4px;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
         }
         
         .bottom-nav-text {
-            font-size: 11px;
-            font-weight: 500;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
         }
         
         

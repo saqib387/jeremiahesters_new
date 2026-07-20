@@ -1,45 +1,84 @@
-@if(!Auth::user()->email_verified_at) @include('elements.resend-verification-email-box') @endif
+@if(!Auth::user()->email_verified_at)
+    <div class="account-settings__verify">
+        @include('elements.resend-verification-email-box')
+    </div>
+@endif
 
-<form method="POST" action="{{route('my.settings.account.save')}}">
-    @csrf
-    @if(session('success'))
-        <div class="alert alert-success text-white font-weight-bold mt-2" role="alert">
-            {{session('success')}}
-            <button type="button" class="close" data-dismiss="alert" aria-label="{{__('Close')}}">
-                <span aria-hidden="true">&times;</span>
-            </button>
+<div class="account-settings">
+    <div class="account-settings__intro">
+        <div class="account-settings__intro-icon" aria-hidden="true">
+            @include('elements.icon', ['icon' => 'lock-closed-outline', 'variant' => 'medium', 'centered' => true])
         </div>
-    @endif
-
-    <div class="form-group">
-        <label for="username">{{__('Password')}}</label>
-        <input class="form-control {{ $errors->has('password') ? 'is-invalid' : '' }}" id="username" name="password" type="password">
-        @if($errors->has('password'))
-            <span class="invalid-feedback" role="alert">
-                <strong>{{$errors->first('password')}}</strong>
-            </span>
-        @endif
+        <div class="account-settings__intro-text">
+            <h2 class="account-settings__intro-title">{{ __('Security') }}</h2>
+            <p class="account-settings__intro-desc">{{ __('Update your password to keep your account secure.') }}</p>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label for="username">{{__('New password')}}</label>
-        <input class="form-control {{ $errors->has('new_password') ? 'is-invalid' : '' }}" id="username" name="new_password" type="password">
-        @if($errors->has('new_password'))
-            <span class="invalid-feedback" role="alert">
-                <strong>{{$errors->first('new_password')}}</strong>
-            </span>
-        @endif
-    </div>
+    <form method="POST" action="{{ route('my.settings.account.save') }}" class="account-settings__form">
+        @csrf
 
-    <div class="form-group">
-        <label for="username">{{__('Confirm password')}}</label>
-        <input class="form-control {{ $errors->has('confirm_password') ? 'is-invalid' : '' }}" id="username" name="confirm_password" type="password">
-        @if($errors->has('confirm_password'))
-            <span class="invalid-feedback" role="alert">
-                <strong>{{$errors->first('confirm_password')}}</strong>
-            </span>
+        @if(session('success'))
+            <div class="account-settings__alert" role="alert">
+                <span class="account-settings__alert-icon" aria-hidden="true">
+                    @include('elements.icon', ['icon' => 'checkmark-circle-outline', 'variant' => 'small', 'centered' => true])
+                </span>
+                <span class="account-settings__alert-text">{{ session('success') }}</span>
+                <button type="button" class="account-settings__alert-close" data-dismiss="alert" aria-label="{{ __('Close') }}">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
         @endif
-    </div>
-    <button class="btn btn-primary btn-block rounded mr-0" type="submit">{{__('Save')}}</button>
 
-</form>
+        <div class="account-settings__card">
+            <div class="account-settings__field">
+                <label for="account-password">{{ __('Current password') }}</label>
+                <div class="account-settings__input-wrap">
+                    <span class="account-settings__input-icon" aria-hidden="true">
+                        @include('elements.icon', ['icon' => 'key-outline', 'variant' => 'small', 'centered' => true])
+                    </span>
+                    <input class="form-control account-settings__input {{ $errors->has('password') ? 'is-invalid' : '' }}" id="account-password" name="password" type="password" autocomplete="current-password" placeholder="{{ __('Enter current password') }}">
+                </div>
+                @if($errors->has('password'))
+                    <span class="invalid-feedback d-block" role="alert">
+                        <strong>{{ $errors->first('password') }}</strong>
+                    </span>
+                @endif
+            </div>
+
+            <div class="account-settings__field">
+                <label for="account-new-password">{{ __('New password') }}</label>
+                <div class="account-settings__input-wrap">
+                    <span class="account-settings__input-icon" aria-hidden="true">
+                        @include('elements.icon', ['icon' => 'lock-closed-outline', 'variant' => 'small', 'centered' => true])
+                    </span>
+                    <input class="form-control account-settings__input {{ $errors->has('new_password') ? 'is-invalid' : '' }}" id="account-new-password" name="new_password" type="password" autocomplete="new-password" placeholder="{{ __('Enter new password') }}">
+                </div>
+                @if($errors->has('new_password'))
+                    <span class="invalid-feedback d-block" role="alert">
+                        <strong>{{ $errors->first('new_password') }}</strong>
+                    </span>
+                @endif
+            </div>
+
+            <div class="account-settings__field account-settings__field--last">
+                <label for="account-confirm-password">{{ __('Confirm password') }}</label>
+                <div class="account-settings__input-wrap">
+                    <span class="account-settings__input-icon" aria-hidden="true">
+                        @include('elements.icon', ['icon' => 'shield-checkmark-outline', 'variant' => 'small', 'centered' => true])
+                    </span>
+                    <input class="form-control account-settings__input {{ $errors->has('confirm_password') ? 'is-invalid' : '' }}" id="account-confirm-password" name="confirm_password" type="password" autocomplete="new-password" placeholder="{{ __('Confirm new password') }}">
+                </div>
+                @if($errors->has('confirm_password'))
+                    <span class="invalid-feedback d-block" role="alert">
+                        <strong>{{ $errors->first('confirm_password') }}</strong>
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <button class="btn btn-primary account-settings__submit" type="submit">
+            {{ __('Save') }}
+        </button>
+    </form>
+</div>

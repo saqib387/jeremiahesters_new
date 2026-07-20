@@ -1,4 +1,4 @@
-<footer class="d-none d-md-block">
+<footer class="d-none d-lg-block site-footer-compact">
     <!-- A grey container -->
     <div class="greycontainer">
         <!-- A black container -->

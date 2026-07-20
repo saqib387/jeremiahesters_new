@@ -11,8 +11,13 @@ jQuery(document).ready(function() {
         $('.overlay').removeClass('active');
     });
 
-    // Menu toggled
+    // Menu toggled — use glass mobile drawer on phone
     $('.open-menu').on('click', function(e) {
+        if (window.matchMedia('(max-width: 768px)').matches && window.MobileSidebar) {
+            e.preventDefault();
+            window.MobileSidebar.open();
+            return;
+        }
         e.preventDefault();
         $('.sidebar').addClass('active');
         $('.overlay').addClass('active');

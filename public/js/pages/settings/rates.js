@@ -12,19 +12,15 @@ $(function () {
         $("#profile_access_offer_date").val('');
     });
 
-    $('.custom-control-input').on('change',function () {
+    $('#paid-profile').on('change', function () {
         const key = $(this).attr('id');
-        const val = $(this).prop("checked");
-        GeneralSettings.updateFlagSetting(key,val);
+        const val = $(this).prop('checked');
+        GeneralSettings.updateFlagSetting(key, val);
 
-        if(val){
-            if($('.paid-profile-rates').hasClass('d-none')){
-                $('.paid-profile-rates').removeClass('d-none');
-            }
+        if (val) {
+            $('.paid-profile-rates').removeClass('d-none');
         } else {
-            if(!$('.paid-profile-rates').hasClass('d-none')){
-                $('.paid-profile-rates').addClass('d-none');
-            }
+            $('.paid-profile-rates').addClass('d-none');
         }
     });
 });

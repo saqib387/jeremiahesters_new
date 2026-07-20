@@ -5,8 +5,56 @@
 /* global app, user, listVars, profileVars, launchToast, redirect, trans, trans_choice */
 
 $(function () {
-
+    if (document.querySelector('.lists-page')) {
+        scheduleListsPageHeight();
+        window.addEventListener('resize', scheduleListsPageHeight);
+        window.addEventListener('orientationchange', scheduleListsPageHeight);
+    }
 });
+
+function getListsPageChromeHeight() {
+    var shell = document.querySelector('.flex-fill');
+    if (shell && shell.getBoundingClientRect) {
+        return Math.max(0, shell.getBoundingClientRect().top);
+    }
+    var appBar = document.querySelector('.mobile-app-bar');
+    return appBar && appBar.offsetHeight ? appBar.offsetHeight : 0;
+}
+
+function adjustListsPageHeight() {
+    var page = document.querySelector('.lists-page');
+    if (!page) {
+        return;
+    }
+
+    var available = window.innerHeight - getListsPageChromeHeight();
+    var isMobile = window.matchMedia('(max-width: 767px)').matches;
+    var shell = document.querySelector('.flex-fill');
+
+    if (isMobile && shell) {
+        shell.style.height = available + 'px';
+        shell.style.maxHeight = available + 'px';
+        shell.style.overflow = 'hidden';
+        page.style.height = '100%';
+        page.style.maxHeight = '100%';
+        document.documentElement.classList.add('ls-page-mobile-lock');
+        document.body.classList.add('ls-page-mobile-lock');
+    } else if (shell) {
+        shell.style.height = '';
+        shell.style.maxHeight = '';
+        shell.style.overflow = '';
+        page.style.height = '';
+        page.style.maxHeight = '';
+        page.style.minHeight = '';
+        document.documentElement.classList.remove('ls-page-mobile-lock');
+        document.body.classList.remove('ls-page-mobile-lock');
+    }
+}
+
+function scheduleListsPageHeight() {
+    adjustListsPageHeight();
+    window.requestAnimationFrame(adjustListsPageHeight);
+}
 
 var Lists = {
 
@@ -67,10 +115,18 @@ var Lists = {
                     let element = $('*[data-memberuserid="'+Lists.state.listMemberToDelete+'"]');
                     launchToast('success',trans('Success'),result.message);
                     $('#list-member-delete-dialog').modal('hide');
-                    element.parent().fadeOut(300,function(){
+                    element.fadeOut(300, function () {
                         $(this).remove();
-                        if($('.suggestion-box').length === 0){
-                            $('.list-wrapper').html(`<p class="pl-0 pt-2">${trans('No profiles available')}</p>`);
+                        if ($('.lists-members__item').length === 0) {
+                            $('.list-wrapper').html(
+                                '<div class="lists-empty lists-empty--show">' +
+                                '<div class="lists-empty__icon" aria-hidden="true"></div>' +
+                                '<h2 class="lists-empty__title">' + trans('No profiles available') + '</h2>' +
+                                '<p class="lists-empty__text">' + trans('Members you add to this list will appear here.') + '</p>' +
+                                '<a href="' + app.baseUrl + '/my/lists" class="lists-empty__cta lists-empty__cta--link">' + trans('Back to lists') + '</a>' +
+                                '</div>'
+                            );
+                            $('.lists-page').addClass('lists-page--empty');
                         }
                     });
                 }
@@ -97,6 +153,10 @@ var Lists = {
      * Shows up list create dialog
      */
     showListAddModal: function(){
+        try {
+            $('[data-toggle="tooltip"]').tooltip('hide');
+            $('.tooltip').remove();
+        } catch (e) {}
         $('#list-add-user-dialog').modal('show');
         Lists.initListsCheckboxes();
     },

@@ -1,34 +1,7 @@
-<div class="ph-item border-0 conversation-loading-box d-none">
-    <div class="ph-col-12">
-        <div class="ph-row">
-            <div class="ph-col-6 big"></div>
-            <div class="ph-col-4 empty big"></div>
-            <div class="ph-col-2 empty big"></div>
-
-            <div class="ph-col-4 big"></div>
-            <div class="ph-col-6 empty big"></div>
-            <div class="ph-col-2 empty big"></div>
-
-            <div class="ph-col-6 empty big"></div>
-            <div class="ph-col-4 empty big"></div>
-            <div class="ph-col-2 big"></div>
-
-            <div class="ph-col-6 empty big"></div>
-            <div class="ph-col-2 empty big"></div>
-            <div class="ph-col-4 big"></div>
-
-            <div class="ph-col-6 empty big"></div>
-            <div class="ph-col-4 empty big"></div>
-            <div class="ph-col-2 big"></div>
-
-            <div class="ph-col-2 big"></div>
-            <div class="ph-col-4 empty big"></div>
-            <div class="ph-col-6 empty big"></div>
-
-            <div class="ph-col-4 big"></div>
-            <div class="ph-col-6 empty big"></div>
-            <div class="ph-col-2 empty big"></div>
-
-        </div>
+<div class="messenger-skeleton-chat conversation-loading-box d-none" aria-hidden="true">
+  @for($i = 0; $i < 4; $i++)
+    <div class="messenger-skeleton-chat__row {{ $i % 2 === 0 ? 'messenger-skeleton-chat__row--left' : 'messenger-skeleton-chat__row--right' }}">
+      <div class="messenger-skeleton-chat__bubble"></div>
     </div>
+  @endfor
 </div>
