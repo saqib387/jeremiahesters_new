@@ -30,6 +30,12 @@
             padding: 0;
         }
         
+        /* Legacy modals replaced by mobile-sidebar */
+        .header-modal,
+        .search-modal {
+            display: none !important;
+        }
+        
         /* Hide header on home page - TikTok style */
         header, .header, .navbar, nav.navbar, .site-header, footer, .footer {
             display: none !important;
@@ -117,30 +123,30 @@
         
         .video-overlay {
             position: absolute;
-            bottom: 60px;
+            bottom: 64px;
             left: 0;
             right: 0;
-            padding: 20px 20px 20px 10px;
-            background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+            padding: 60px 90px 18px 16px;
+            background: linear-gradient(transparent, rgba(0, 0, 0, 0.55) 55%, rgba(0, 0, 0, 0.75));
             color: #fff;
             z-index: 10;
             pointer-events: auto;
         }
         
         .video-info {
-            max-width: 70%;
+            max-width: 100%;
             text-align: left;
         }
         
-        /* Right Action Buttons (TikTok style) */
+        /* Right Action Rail (Instagram Reels style) */
         .video-actions-left {
             position: absolute;
-            right: 20px;
-            bottom: 160px;
+            right: 10px;
+            bottom: 96px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
+            gap: 18px;
             z-index: 15;
             pointer-events: auto;
         }
@@ -186,95 +192,150 @@
             transform: scale(0.95);
         }
         
+        .user-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
         .user-info {
             display: inline-flex;
+            flex-direction: row !important;
             align-items: center;
-            margin-bottom: 18px;
-            gap: 14px;
+            gap: 10px;
         }
         
         .user-info.clickable {
             cursor: pointer;
-            transition: all 0.3s ease;
-            padding: 10px 14px 10px 10px;
-            border-radius: 14px;
-            margin: -10px -14px 8px -10px;
+            transition: transform 0.2s ease;
             background: transparent !important;
             backdrop-filter: none !important;
             pointer-events: auto;
+            flex-shrink: 0;
+        }
+
+        .user-details {
+            display: flex;
+            align-items: center;
         }
         
         .user-info.clickable:hover {
             background: transparent !important;
-            transform: scale(1.03);
+            transform: none;
         }
         
         .user-avatar-initials {
-            width: 52px;
-            height: 52px;
+            position: relative;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
-            border: 3px solid #fff;
+            border: 2px solid #000;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 18px;
+            font-weight: 700;
+            font-size: 13px;
             color: white;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
             transition: transform 0.2s ease;
+        }
+
+        .user-avatar-initials::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #f9ce34, #ee2a7b, #6228d7);
+            z-index: -1;
         }
         
         .user-info.clickable:hover .user-avatar-initials {
-            transform: scale(1.08);
+            transform: scale(1.06);
         }
         
         .user-details h4 {
-            margin: 0 0 4px 0;
-            font-size: 17px;
+            margin: 0;
+            font-size: 15px;
             font-weight: 700;
             text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
             letter-spacing: 0.2px;
         }
-        
-        .user-details p {
-            margin: 0;
-            font-size: 14px;
-            opacity: 0.85;
+
+        .follow-btn {
+            appearance: none;
+            border: 1px solid rgba(255, 255, 255, 0.85);
+            background: transparent;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            pointer-events: auto;
+        }
+
+        .follow-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .follow-btn.following {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.75);
+            font-weight: 600;
         }
         
         .video-caption {
-            margin-top: 8px;
-            text-align: left;
-        }
-        
-        .video-title {
-            margin: 0 0 8px 0;
-            font-size: 16px;
-            font-weight: 600;
-            line-height: 1.3;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            margin-top: 4px;
             text-align: left;
         }
         
         .video-description {
             font-size: 14px;
-            opacity: 0.9;
+            opacity: 0.95;
             line-height: 1.4;
             margin: 0;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
+        }
+
+        .video-audio,
+        .video-location {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.92);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .video-audio i,
+        .video-location i {
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .video-audio__marquee {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .video-actions {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 15px;
+            gap: 18px;
             padding-bottom: 0;
         }
         
@@ -282,65 +343,150 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 4px;
+            gap: 2px;
+            min-width: 48px;
             pointer-events: auto;
         }
         
         .action-btn {
-            background: rgba(255, 255, 255, 0.15);
+            position: relative;
+            background: transparent;
             border: none;
             color: #fff;
-            font-size: 20px;
+            font-size: 28px;
+            line-height: 1;
             cursor: pointer;
-            width: 52px;
-            height: 52px;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            margin: 0;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s ease;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+            filter: none;
             pointer-events: auto;
+            overflow: visible;
+            isolation: auto;
+        }
+
+        .action-btn::before {
+            display: none;
+        }
+
+        .action-btn i,
+        .action-btn svg {
+            position: relative;
+            z-index: 1;
+            font-size: inherit;
+            width: 1em;
+            height: 1em;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
+            transition: transform 0.25s ease, filter 0.25s ease;
         }
         
         .action-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.05);
+            background: transparent;
+            border: none;
+            transform: translateY(-2px) scale(1.08);
+            box-shadow: none;
+        }
+
+        .action-btn:hover i,
+        .action-btn:hover svg {
+            transform: scale(1.04);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
         }
         
         .action-btn:active {
-            transform: scale(0.95);
+            transform: scale(0.92);
         }
         
         .like-btn.liked {
-            background: rgba(255, 23, 68, 0.3);
-            color: #ff1744;
-            border-color: #ff1744;
+            background: transparent;
+            color: #ff4d6d;
+            border: none;
+            box-shadow: none;
+        }
+
+        .like-btn.liked i {
+            filter: drop-shadow(0 0 10px rgba(255, 77, 109, 0.75)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
         }
         
         .repost-btn.reposted {
-            background: rgba(23, 191, 99, 0.3);
-            color: #17bf63;
-            border-color: #17bf63;
+            background: transparent;
+            color: #3dff9a;
+            border: none;
+            box-shadow: none;
         }
-        
-        .upload-btn {
-            background: rgba(0, 123, 255, 0.2);
-            color: #007bff;
-            border-color: #007bff;
+
+        .repost-btn.reposted i {
+            filter: drop-shadow(0 0 10px rgba(61, 255, 154, 0.65)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+        }
+
+        .save-btn.saved {
+            background: transparent;
+            color: #ffd54f;
+            border: none;
+            box-shadow: none;
+        }
+
+        .save-btn.saved i {
+            filter: drop-shadow(0 0 10px rgba(255, 213, 79, 0.65)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.45));
+        }
+
+        .more-btn {
+            font-size: 26px;
+            background: transparent;
+            color: #5ab0ff;
+            border: none;
+            box-shadow: none;
+        }
+
+        /* Profile thumbnail at bottom of rail (Instagram style) */
+        .action-profile {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 13px;
+            border: 1.5px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            pointer-events: auto;
+        }
+
+        .action-profile:hover {
+            transform: scale(1.08);
         }
         
         .action-count {
             color: #fff;
             font-size: 12px;
             font-weight: 600;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
-            min-height: 16px;
+            line-height: 1.15;
+            letter-spacing: 0.01em;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.7);
+            min-height: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 4px;
+            margin: 0;
+            padding: 0;
+            white-space: nowrap;
         }
         
         .progress-bar {
@@ -362,235 +508,361 @@
         }
         
         /* Comments Sidebar */
-        .comments-sidebar {
+        /* ============================================
+           Comments — Instagram-style bottom sheet
+           ============================================ */
+        .comments-overlay {
             position: fixed;
-            top: 0;
-            right: -25%;
-            width: 25%;
-            height: 100vh;
-            background: #fff;
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 1002;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -4px 0 20px rgba(0, 0, 0, 0.15);
-            min-width: 320px;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            z-index: 10100;
             opacity: 0;
             visibility: hidden;
-            transform: translateX(100%);
-            overflow: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            -webkit-tap-highlight-color: transparent;
         }
-        
-        .comments-sidebar.active {
-            right: 0;
+
+        .comments-overlay.active {
             opacity: 1;
             visibility: visible;
-            transform: translateX(0);
         }
-        
+
+        .comments-sidebar {
+            --cs-bg: #18181e;
+            --cs-bg-2: #121216;
+            --cs-border: rgba(255, 255, 255, 0.1);
+            --cs-text: #f4f4f5;
+            --cs-text-2: #a1a1aa;
+            --cs-muted: #71717a;
+            --cs-accent: #cb0c9f;
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            top: auto;
+            width: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+            height: min(72vh, 640px);
+            max-height: 85vh;
+            min-width: 0;
+            background: var(--cs-bg);
+            color: var(--cs-text);
+            border-radius: 16px 16px 0 0;
+            border: 1px solid var(--cs-border);
+            border-bottom: none;
+            box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.45);
+            z-index: 10110;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            overscroll-behavior: contain;
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(110%);
+            transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        .comments-sidebar.active {
+            transform: translateY(0);
+            right: auto;
+        }
+
         .comments-sidebar.active .comment-form {
             display: flex !important;
             visibility: visible !important;
             opacity: 1 !important;
         }
-        
-        /* Comments Overlay Background */
-        .comments-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1001;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .comments-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
+
         .comments-header {
-            padding: 20px;
-            border-bottom: 1px solid #eee;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             position: relative;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 52px;
+            padding: 18px 48px 12px;
+            border-bottom: 1px solid var(--cs-border);
+            background: var(--cs-bg);
         }
-        
+
         .comments-header::before {
             content: '';
             position: absolute;
             top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 0;
-            height: 0;
-            background: #ddd;
-            border-radius: 2px;
-            transition: all 0.3s ease;
+            width: 36px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.28);
+            border-radius: 999px;
         }
-        
+
         .comments-header h3 {
             margin: 0;
-            color: #333;
-            font-size: 18px;
-            font-weight: 600;
+            color: var(--cs-text);
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            text-align: center;
         }
-        
+
         .close-comments {
-            background: rgba(0, 0, 0, 0.05);
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-40%);
+            background: transparent;
             border: none;
-            font-size: 18px;
-            cursor: pointer;
-            color: #666;
-            padding: 8px;
-            border-radius: 50%;
-            transition: all 0.3s ease;
+            color: var(--cs-text);
             width: 36px;
             height: 36px;
+            padding: 0;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            transition: background 0.15s ease;
         }
-        
+
         .close-comments:hover {
-            background: rgba(0, 0, 0, 0.1);
-            color: #333;
-            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--cs-text);
+            transform: translateY(-40%);
         }
-        
+
+        .close-comments svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+            fill: none;
+            stroke-linecap: round;
+        }
+
         .comments-list {
             flex: 1 1 auto;
             overflow-y: auto;
-            padding: 20px;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
+            padding: 12px 16px 8px;
             min-height: 0;
-            max-height: 100%;
+            background: var(--cs-bg);
         }
-        
-        .no-comments {
-            text-align: center;
-            color: #888;
-            padding: 40px 20px;
-        }
-        
+
+        .no-comments,
         .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             text-align: center;
-            color: #888;
-            padding: 40px 20px;
+            color: var(--cs-muted);
+            padding: 48px 24px;
+            min-height: 180px;
+            gap: 8px;
         }
-        
+
+        .no-comments p,
+        .loading p {
+            margin: 0;
+            font-size: 0.92rem;
+            color: var(--cs-text-2);
+        }
+
+        .no-comments__hint {
+            font-size: 0.8rem !important;
+            color: var(--cs-muted) !important;
+        }
+
         .comment-item {
             display: flex;
-            margin-bottom: 16px;
             gap: 12px;
-            padding: 12px;
-            border-radius: 12px;
-            background: rgba(0, 0, 0, 0.02);
-            transition: background-color 0.3s ease;
+            margin-bottom: 18px;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
         }
-        
+
         .comment-item:hover {
-            background: rgba(0, 0, 0, 0.05);
+            background: transparent;
         }
-        
+
         .comment-avatar-initials {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            font-size: 13px;
-            color: white;
+            font-weight: 700;
+            font-size: 12px;
+            color: #fff;
             flex-shrink: 0;
-            border: 2px solid #e9ecef;
+            border: none;
+            margin-top: 2px;
         }
-        
+
         .comment-content {
             flex: 1;
+            min-width: 0;
         }
-        
+
+        .comment-content__row {
+            font-size: 0.875rem;
+            line-height: 1.4;
+            color: var(--cs-text);
+            word-wrap: break-word;
+        }
+
         .comment-content strong {
-            color: #333;
-            font-size: 14px;
-            font-weight: 600;
+            color: var(--cs-text);
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-right: 6px;
         }
-        
+
         .comment-content p {
-            margin: 4px 0;
-            color: #333;
-            font-size: 14px;
+            display: inline;
+            margin: 0;
+            color: var(--cs-text);
+            font-size: 0.875rem;
             line-height: 1.4;
         }
-        
-        .comment-time {
-            color: #666;
-            font-size: 12px;
-        }
-        
-        .comment-form {
-            padding: 20px;
-            border-top: 1px solid #eee;
+
+        .comment-meta {
             display: flex;
+            align-items: center;
             gap: 12px;
-            background: #fff;
-            position: relative;
-            bottom: 0;
-            z-index: 10;
+            margin-top: 6px;
+        }
+
+        .comment-time {
+            color: var(--cs-muted);
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .comment-form {
             flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px calc(12px + env(safe-area-inset-bottom, 0px));
+            border-top: 1px solid var(--cs-border);
+            background: var(--cs-bg-2);
+            position: relative;
+            z-index: 2;
             margin-top: auto;
         }
-        
-        .comment-form input {
-            flex: 1;
-            padding: 12px 18px;
-            border: 2px solid #e9ecef;
-            border-radius: 25px;
-            font-size: 14px;
-            outline: none;
-            transition: all 0.3s ease;
-            background: #fff;
-            display: block;
-            visibility: visible;
-        }
-        
-        .comment-form input:focus {
-            border-color: #ff6b6b;
-            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
-        }
-        
-        .comment-form button {
-            background: linear-gradient(135deg, #ff6b6b, #ff8a80);
+
+        .comment-form__avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
             color: #fff;
-            border: none;
-            border-radius: 25px;
-            padding: 12px 24px;
+            background: linear-gradient(135deg, #cb0c9f, #830866);
+        }
+
+        .comment-form input,
+        .comment-form #comment-input {
+            flex: 1;
+            min-width: 0;
+            height: 40px;
+            padding: 0 14px !important;
+            border: 1px solid var(--cs-border) !important;
+            border-radius: 999px !important;
+            font-size: 0.9rem !important;
+            outline: none;
+            background: var(--cs-bg) !important;
+            color: var(--cs-text) !important;
+            box-shadow: none !important;
+            display: block !important;
+            visibility: visible !important;
+        }
+
+        .comment-form input::placeholder {
+            color: var(--cs-muted);
+        }
+
+        .comment-form input:focus {
+            border-color: rgba(203, 12, 159, 0.5) !important;
+            box-shadow: none !important;
+        }
+
+        .comment-form button,
+        .comment-form #post-comment {
+            flex-shrink: 0;
+            height: 40px;
+            padding: 0 14px !important;
+            border: none !important;
+            border-radius: 999px !important;
+            background: transparent !important;
+            color: var(--cs-accent) !important;
+            font-size: 0.9rem !important;
+            font-weight: 700 !important;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-            display: block;
-            visibility: visible;
+            box-shadow: none !important;
+            display: block !important;
+            visibility: visible !important;
+            transition: opacity 0.15s ease;
         }
-        
+
         .comment-form button:hover:not(:disabled) {
-            background: linear-gradient(135deg, #ff5252, #ff6b6b);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 16px rgba(255, 82, 82, 0.4);
+            background: transparent !important;
+            transform: none !important;
+            box-shadow: none !important;
+            opacity: 0.85;
         }
-        
+
         .comment-form button:disabled {
-            opacity: 0.6;
+            opacity: 0.35;
             cursor: not-allowed;
             transform: none;
+        }
+
+        body.comments-open {
+            overflow: hidden !important;
+        }
+
+        body.comments-open .video-feed {
+            overflow: hidden !important;
+            touch-action: none;
+            overscroll-behavior: none;
+        }
+
+        body.comments-open .bottom-nav,
+        body.comments-open .top-header {
+            pointer-events: none;
+            visibility: hidden;
+        }
+
+        @media (min-width: 769px) {
+            .comments-sidebar {
+                max-width: 420px;
+                height: min(70vh, 620px);
+                border-radius: 16px 16px 0 0;
+            }
+
+            .comments-overlay {
+                display: block;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .comments-sidebar {
+                max-width: 100%;
+                height: 75vh;
+                max-height: 85vh;
+            }
         }
         
         .no-videos {
@@ -598,52 +870,146 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            color: #fff;
+            gap: 10px;
+            min-height: calc(100vh - 78px);
+            width: 100%;
+            color: #f8fafc;
             text-align: center;
-            padding: 40px;
+            padding: 24px 16px;
+            position: relative;
+            isolation: isolate;
+            animation: emptyStateFloat 4.6s ease-in-out infinite;
         }
-        
+
+        .no-videos::before {
+            content: '';
+            position: absolute;
+            width: 230px;
+            height: 230px;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -58%);
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.22) 0%, rgba(236, 72, 153, 0.08) 40%, transparent 72%);
+            filter: blur(28px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .no-videos::after {
+            content: '';
+            position: absolute;
+            width: min(92vw, 540px);
+            height: min(62vh, 460px);
+            border-radius: 30px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 36%, rgba(8, 8, 14, 0.28) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 22px 60px rgba(0, 0, 0, 0.45);
+            z-index: -2;
+            pointer-events: none;
+        }
+
+        @keyframes emptyStateFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .no-videos > * {
+            position: relative;
+            z-index: 1;
+        }
+
         .no-videos i {
-            font-size: 4rem;
+            width: 78px;
+            height: 78px;
+            border-radius: 22px;
             margin-bottom: 20px;
-            opacity: 0.5;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: rgba(244, 244, 245, 0.92);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 14px 28px rgba(0, 0, 0, 0.4);
         }
-        
+
         .no-videos h3 {
-            margin-bottom: 10px;
-            font-size: 1.5rem;
+            margin-bottom: 8px;
+            font-size: clamp(1.45rem, 2.2vw, 1.9rem);
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #ffffff;
         }
-        
+
         .no-videos p {
-            opacity: 0.7;
-            margin-bottom: 30px;
+            max-width: 360px;
+            margin: 0 0 30px;
+            color: rgba(226, 232, 240, 0.78);
+            font-size: 1.02rem;
         }
-        
+
         .upload-first-video-btn {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            background: linear-gradient(135deg, #ff6b6b, #ff8a80);
+            gap: 10px;
+            background: linear-gradient(135deg, #fb7185 0%, #f43f5e 45%, #ec4899 100%);
             color: #fff;
             text-decoration: none;
-            padding: 16px 32px;
-            border-radius: 50px;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(255, 107, 107, 0.3);
+            padding: 14px 26px;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            box-shadow: 0 8px 22px rgba(244, 63, 94, 0.38), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+            transition: transform 0.22s ease, box-shadow 0.22s ease, filter 0.22s ease;
         }
-        
+
         .upload-first-video-btn:hover {
-            background: linear-gradient(135deg, #ff5252, #ff6b6b);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(255, 82, 82, 0.4);
             color: #fff;
+            text-decoration: none;
+            transform: translateY(-2px);
+            filter: saturate(1.07);
+            box-shadow: 0 14px 30px rgba(244, 63, 94, 0.45), 0 0 26px rgba(236, 72, 153, 0.33);
         }
-        
+
         .upload-first-video-btn i {
-            font-size: 18px;
+            font-size: 14px;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.22);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            line-height: 1;
+            flex: 0 0 22px;
+        }
+
+        .no-videos::after {
+            background:
+                radial-gradient(circle at 22% 20%, rgba(244, 114, 182, 0.2) 0%, transparent 38%),
+                radial-gradient(circle at 82% 86%, rgba(56, 189, 248, 0.14) 0%, transparent 42%),
+                linear-gradient(160deg, rgba(255, 255, 255, 0.12) 0%, rgba(244, 114, 182, 0.08) 35%, rgba(15, 23, 42, 0.46) 100%);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .no-videos {
+                animation: none;
+            }
+
+            .no-videos::after {
+                animation: none;
+            }
         }
         
         /* Desktop - Centered like TikTok */
@@ -667,6 +1033,11 @@
         
         /* Mobile Optimizations - Full Screen */
         @media (max-width: 768px) {
+            .no-videos {
+                min-height: calc(100vh - 122px);
+                padding: 16px 14px 74px;
+            }
+
             .reels-container {
                 justify-content: flex-start;
             }
@@ -688,57 +1059,31 @@
                 max-width: 100%;
             }
             
-            /* Comments as bottom sheet on mobile */
-            .comments-sidebar {
-                top: auto;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                height: 85vh;
-                max-height: 85vh;
-                min-width: unset;
-                border-radius: 20px 20px 0 0;
-                transform: translateY(100%);
-                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-            }
-            
-            .comments-sidebar.active {
-                transform: translateY(0);
-                right: auto;
-            }
-            
+            /* Comments bottom sheet styles are defined globally above */
+
             .video-overlay {
-                padding: 15px 15px 15px 8px;
+                padding: 50px 78px 14px 14px;
                 bottom: 55px;
             }
             
             .video-info {
-                max-width: calc(100% - 70px);
+                max-width: 100%;
                 text-align: left;
             }
             
             .video-actions-left {
-                bottom: 140px;
-                right: 15px;
+                bottom: 90px;
+                right: 8px;
             }
             
             .user-avatar-initials {
-                width: 48px;
-                height: 48px;
-                font-size: 16px;
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
             }
             
             .user-details h4 {
-                font-size: 16px;
-            }
-            
-            .user-details p {
-                font-size: 13px;
-            }
-            
-            .video-title {
-                font-size: 15px;
+                font-size: 14px;
             }
             
             .video-description {
@@ -746,19 +1091,26 @@
             }
             
             .action-btn {
-                width: 48px;
-                height: 48px;
-                font-size: 18px;
+                width: 44px;
+                height: 44px;
+                font-size: 26px;
+            }
+
+            .upload-btn,
+            .more-btn {
+                width: 44px;
+                height: 44px;
+                font-size: 24px;
             }
             
             .video-actions {
-                gap: 12px;
+                gap: 16px;
                 padding-bottom: 0;
             }
             
             .video-actions-left {
-                bottom: 80px;
-                gap: 15px;
+                bottom: 90px;
+                gap: 16px;
             }
             
             .video-navigation-right {
@@ -773,127 +1125,7 @@
             }
             
             .action-count {
-                font-size: 11px;
-            }
-            
-            /* Mobile comments header with drag handle */
-            .comments-header::before {
-                width: 40px;
-                height: 4px;
-            }
-            
-            .comments-list {
-                max-height: calc(85vh - 200px);
-                overflow-y: auto;
-            }
-            
-            /* Mobile comment form - ensure it's always visible */
-            .comment-form {
-                padding: 16px 20px;
-                padding-bottom: calc(24px + env(safe-area-inset-bottom, 16px));
-                position: sticky !important;
-                bottom: 0;
-                background: #fff;
-                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-                margin-bottom: 0;
-                margin-top: 0;
-            }
-            
-            .comment-form input {
-                padding: 12px 16px;
-                font-size: 15px;
-            }
-            
-            .comment-form button {
-                padding: 12px 24px;
-                font-size: 14px;
-                white-space: nowrap;
-            }
-        }
-        
-        /* Tablet and Desktop - hide overlay, use sidebar */
-        @media (min-width: 769px) {
-            .comments-overlay {
-                display: none;
-            }
-            
-            /* Ensure sidebar and form are visible on desktop */
-            .comments-sidebar {
-                display: flex !important;
-                flex-direction: column;
-                overflow: hidden;
-            }
-            
-            .comments-header {
-                flex-shrink: 0;
-                flex-grow: 0;
-            }
-            
-            .comments-list {
-                flex: 1;
-                overflow-y: auto;
-                min-height: 0;
-                max-height: calc(100vh - 200px);
-            }
-            
-            /* Ensure comment form is visible on desktop */
-            .comment-form {
-                display: flex !important;
-                position: relative !important;
-                bottom: auto !important;
-                background: #fff;
-                flex-shrink: 0 !important;
-                flex-grow: 0 !important;
-                padding: 20px;
-                border-top: 1px solid #eee;
-                visibility: visible !important;
-                opacity: 1 !important;
-                height: auto;
-                min-height: 80px;
-                margin-top: auto;
-                gap: 12px;
-            }
-            
-            .comment-form input {
-                flex: 1;
-                padding: 12px 18px;
-                border: 2px solid #e9ecef;
-                border-radius: 25px;
-                font-size: 14px;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                background: #fff;
-            }
-            
-            .comment-form button {
-                padding: 12px 24px;
-                background: linear-gradient(135deg, #ff6b6b, #ff8a80) !important;
-                color: #fff !important;
-                border: none;
-                border-radius: 25px;
-                cursor: pointer;
-                font-size: 14px;
-                font-weight: 600;
-                display: block !important;
-                visibility: visible !important;
-                opacity: 1 !important;
-                box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-            }
-            
-            .comment-form button:hover {
-                background: linear-gradient(135deg, #ff5252, #ff6b6b) !important;
-                transform: translateY(-1px);
-                box-shadow: 0 6px 16px rgba(255, 82, 82, 0.4);
-            }
-        }
-        
-        /* Tablet responsive */
-        @media (min-width: 769px) and (max-width: 1024px) {
-            .comments-sidebar {
-                width: 35%;
-                right: -35%;
-                min-width: 350px;
+                font-size: 12px;
             }
         }
         
@@ -914,29 +1146,103 @@
         
         .header-menu-btn,
         .search-btn {
-            background: rgba(255, 255, 255, 0.15);
+            position: relative;
+            background: transparent;
             border: none;
             color: #fff;
             font-size: 18px;
             cursor: pointer;
-            width: 45px;
-            height: 45px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), filter 0.25s ease;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
             pointer-events: auto;
+            overflow: visible;
+        }
+
+        .header-menu-btn::before,
+        .search-btn::before {
+            display: none;
+        }
+
+        .header-menu-btn i,
+        .search-btn i,
+        .header-menu-btn svg,
+        .search-btn svg {
+            position: relative;
+            z-index: 1;
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
         }
         
         .header-menu-btn:hover,
         .search-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.05);
+            background: transparent;
+            border: none;
+            transform: scale(1.08);
+            box-shadow: none;
+        }
+
+        .header-menu-btn:hover i,
+        .search-btn:hover i,
+        .header-menu-btn:hover svg,
+        .search-btn:hover svg {
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.35)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.55));
         }
         
+        /* Gamification: streak / level pill in the top header */
+        .home-streak-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            color: #fff;
+            font-size: 0.78rem;
+            font-weight: 600;
+            line-height: 1;
+            text-decoration: none;
+            background: rgba(0, 0, 0, 0.32);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.25s ease;
+            pointer-events: auto;
+        }
+
+        .home-streak-pill:hover,
+        .home-streak-pill:focus {
+            color: #fff;
+            text-decoration: none;
+            transform: scale(1.04);
+            background: rgba(131, 8, 102, 0.55);
+        }
+
+        .home-streak-pill__sep {
+            width: 1px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.28);
+        }
+
+        body.comments-open .home-streak-pill {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 360px) {
+            .home-streak-pill {
+                padding: 6px 10px;
+                font-size: 0.7rem;
+                gap: 6px;
+            }
+        }
+
         /* Bottom Modal Styles */
         .header-modal {
             position: fixed;
@@ -1502,43 +1808,62 @@
         /* Bottom Navigation Bar */
         .bottom-nav {
             position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.95);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 8px 5px 8px 5px;
+            bottom: calc(8px + env(safe-area-inset-bottom));
+            left: 10px;
+            right: 10px;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(236, 72, 153, 0.2) 0%, transparent 35%),
+                radial-gradient(circle at 85% 100%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+                linear-gradient(180deg, rgba(13, 14, 24, 0.94) 0%, rgba(6, 7, 14, 0.95) 100%);
+            backdrop-filter: blur(22px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            padding: 8px;
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 1001;
-            padding-bottom: calc(8px + env(safe-area-inset-bottom));
             pointer-events: auto;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.12);
         }
         
         .bottom-nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             text-decoration: none;
-            color: rgba(255, 255, 255, 0.6);
-            transition: all 0.3s ease;
-            padding: 6px 8px;
+            color: rgba(226, 232, 240, 0.72);
+            transition: all 0.25s ease;
+            padding: 9px 8px 7px;
             border-radius: 12px;
             flex: 1;
-            max-width: 80px;
+            max-width: 120px;
             background: transparent !important;
+            position: relative;
+            overflow: hidden;
         }
         
         .bottom-nav-item.active {
             color: #fff;
-            background: transparent !important;
+            background: linear-gradient(135deg, rgba(244, 114, 182, 0.24), rgba(56, 189, 248, 0.14)) !important;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 8px 24px rgba(236, 72, 153, 0.28);
+        }
+
+        .bottom-nav-item.active::after {
+            content: '';
+            position: absolute;
+            left: 18%;
+            right: 18%;
+            bottom: 0;
+            height: 2px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(244, 114, 182, 0.9), rgba(56, 189, 248, 0.9));
         }
         
         .bottom-nav-item:hover {
             color: #fff;
-            transform: translateY(-2px);
+            transform: translateY(-1px) scale(1.01);
             background: transparent !important;
         }
         
@@ -1547,39 +1872,38 @@
         }
         
         .bottom-nav-icon {
-            font-size: 20px;
+            font-size: 14px;
             margin-bottom: 4px;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.1));
         }
         
         .bottom-nav-text {
-            font-size: 10px;
-            font-weight: 500;
+            font-size: 9px;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
         }
         
         /* Mobile adjustments */
         @media (max-width: 768px) {
             .user-avatar-initials {
-                width: 44px;
-                height: 44px;
-                font-size: 15px;
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
                 border-width: 2px;
             }
             
             .user-details h4 {
-                font-size: 15px;
-            }
-            
-            .user-details p {
-                font-size: 12px;
+                font-size: 14px;
             }
             
             .user-info {
-                gap: 12px;
+                gap: 10px;
             }
             
             .user-info.clickable {
-                padding: 8px 12px 8px 8px;
-                margin: -8px -12px 6px -8px;
+                padding: 0;
+                margin: 0;
                 background: transparent !important;
                 backdrop-filter: none !important;
             }
@@ -1600,16 +1924,25 @@
             }
             
             .bottom-nav {
-                padding: 6px 5px 6px 5px;
+                left: 6px;
+                right: 6px;
+                bottom: calc(6px + env(safe-area-inset-bottom));
+                border-radius: 16px;
+                padding: 7px 6px;
+            }
+
+            .bottom-nav-item {
+                padding: 8px 4px 6px;
+                border-radius: 12px;
             }
             
             .bottom-nav-icon {
-                font-size: 18px;
+                font-size: 13px;
                 margin-bottom: 3px;
             }
             
             .bottom-nav-text {
-                font-size: 9px;
+                font-size: 8px;
             }
             
             /* Mobile Menu Modal Fixes */
@@ -1670,102 +2003,23 @@
         <button id="header-menu-btn" class="header-menu-btn">
             <i class="fas fa-bars"></i>
         </button>
+        @auth
+            {{-- Gamification: level + daily streak, links to achievements --}}
+            <a href="{{ route('gamification.achievements') }}" class="home-streak-pill" aria-label="{{ __('Achievements') }}">
+                <span>🔥 {{ Auth::user()->streak_count ?? 0 }}</span>
+                <span class="home-streak-pill__sep" aria-hidden="true"></span>
+                <span>Lv {{ Auth::user()->level ?? 1 }}</span>
+            </a>
+        @endauth
         <button id="search-btn" class="search-btn">
             <i class="fas fa-search"></i>
         </button>
     </div>
 
-    <!-- Header Menu Modal -->
-    <div class="header-modal" id="header-modal">
-        <div class="header-modal-content">
-            <div class="header-modal-header">
-                <h3>Menu</h3>
-                <button class="header-modal-close">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="header-menu-items">
-                @auth
-                <div style="padding:14px 16px;margin-bottom:10px;border-radius:12px;background:linear-gradient(135deg,#830866,#a10a7f);color:#fff;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;font-weight:700;">
-                        <span>Level {{ Auth::user()->level ?? 1 }}</span>
-                        <span>🔥 {{ Auth::user()->streak_count ?? 0 }} day streak</span>
-                    </div>
-                    <div style="height:7px;background:rgba(255,255,255,.3);border-radius:6px;overflow:hidden;margin-top:8px;">
-                        <div style="height:100%;width:{{ (int)(Auth::user()->xp ?? 0) % 100 }}%;background:#fff;border-radius:6px;"></div>
-                    </div>
-                    <div style="font-size:.72rem;opacity:.9;margin-top:4px;">{{ (int)(Auth::user()->xp ?? 0) % 100 }}/100 XP to next level</div>
-                </div>
-                @endauth
-                <a href="/" class="header-menu-item">
-                    <i class="fas fa-home"></i>
-                    <span>Home</span>
-                </a>
-                @if(getSetting('streams.allow_streams'))
-                <a href="{{ route('streams.index') }}" class="header-menu-item">
-                    <i class="fas fa-video"></i>
-                    <span>Live Streams</span>
-                </a>
-                @endif
-                <a href="{{ route('custom-requests.marketplace') }}" class="header-menu-item">
-                    <i class="fas fa-gift"></i>
-                    <span>Custom Requests</span>
-                </a>
-                @auth
-                    <a href="/{{ Auth::user()->username ?? 'profile' }}" class="header-menu-item">
-                        <i class="fas fa-user"></i>
-                        <span>Profile</span>
-                    </a>
-                    <a href="{{ route('creator.dashboard') }}" class="header-menu-item">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Creator Dashboard</span>
-                    </a>
-                    <a href="{{ route('gamification.achievements') }}" class="header-menu-item">
-                        <i class="fas fa-trophy"></i>
-                        <span>Achievements</span>
-                    </a>
-                    <a href="{{ route('gamification.leaderboard') }}" class="header-menu-item">
-                        <i class="fas fa-ranking-star"></i>
-                        <span>Leaderboard</span>
-                    </a>
-                    <a href="{{ route('videos.create') }}" class="header-menu-item">
-                        <i class="fas fa-video"></i>
-                        <span>Create Video</span>
-                    </a>
-                    <a href="{{ route('cryptocurrency.wallet') }}" class="header-menu-item">
-                        <i class="fas fa-wallet"></i>
-                        <span>Wallet</span>
-                    </a>
-                    <a href="{{ route('cryptocurrency.marketplace') }}" class="header-menu-item">
-                        <i class="fas fa-store"></i>
-                        <span>Marketplace</span>
-                    </a>
-                    <a href="{{ route('my.settings') }}" class="header-menu-item">
-                        <i class="fas fa-cog"></i>
-                        <span>Settings</span>
-                    </a>
-                    <a href="{{ route('logout') }}" class="header-menu-item" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Logout</span>
-                    </a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
-                @else
-                    <a href="{{ route('login') }}" class="header-menu-item">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Login</span>
-                    </a>
-                    <a href="{{ route('register') }}" class="header-menu-item">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Register</span>
-                    </a>
-                @endauth
-            </div>
-        </div>
-    </div>
+    <!-- Mobile menu / gamification + crypto links handled by template/mobile-sidebar
+         (Achievements, Leaderboard, Wallet, Token Marketplace, NFT Marketplace, XP + streak card) -->
 
-    <!-- TikTok-Style Full Screen Search -->
+    <!-- TikTok-Style Full Screen Search (legacy — hidden, use mobile-search) -->
     <div class="search-modal" id="search-modal">
         <div class="search-header">
             <button class="search-back-btn" id="search-back-btn">
@@ -1787,6 +2041,15 @@
         </div>
     </div>
 
+    @php
+        $fmtCount = function ($n) {
+            $n = (int) $n;
+            if ($n >= 1000000) { return rtrim(rtrim(number_format($n / 1000000, 1), '0'), '.') . 'M'; }
+            if ($n >= 1000) { return rtrim(rtrim(number_format($n / 1000, 1), '0'), '.') . 'K'; }
+            return number_format($n);
+        };
+    @endphp
+
     <div class="reels-container">
         <div class="video-feed">
             @if($videos && $videos->count() > 0)
@@ -1802,42 +2065,57 @@
                                 preload="auto"
                                 class="video-player"
                                 webkit-playsinline
+                                @if(!empty($video->poster_url)) poster="{{ $video->poster_url }}" @endif
                             ></video>
                             
-                            <!-- Left Action Buttons -->
+                            <!-- Right Action Rail (Instagram Reels style) -->
+                            @php
+                                $savesCount = $video->saves_count ?? max(1, intdiv((int) $video->likes_count, 5));
+                            @endphp
                             <div class="video-actions-left">
                                 <div class="action-item">
                                     <button class="action-btn like-btn @if($video->is_liked) liked @endif" data-video-id="{{ $video->id }}">
                                         <i class="@if($video->is_liked) fas @else far @endif fa-heart"></i>
                                     </button>
-                                    <span class="action-count">{{ $video->likes_count }}</span>
+                                    <span class="action-count">{{ $fmtCount($video->likes_count) }}</span>
                                 </div>
                                 
                                 <div class="action-item">
                                     <button class="action-btn comment-btn" data-video-id="{{ $video->id }}">
-                                        <i class="fas fa-comment"></i>
+                                        <i class="far fa-comment"></i>
                                     </button>
-                                    <span class="action-count">{{ $video->comments_count }}</span>
+                                    <span class="action-count">{{ $fmtCount($video->comments_count) }}</span>
                                 </div>
-                                
-                                <div class="action-item">
-                                    <button class="action-btn share-btn" data-video-id="{{ $video->id }}">
-                                        <i class="fas fa-share"></i>
-                                    </button>
-                                    <span class="action-count">{{ $video->shares_count }}</span>
-                                </div>
-                                
+
                                 <div class="action-item">
                                     <button class="action-btn repost-btn @if($video->is_reposted) reposted @endif" data-video-id="{{ $video->id }}">
                                         <i class="fas fa-retweet"></i>
                                     </button>
-                                    <span class="action-count">{{ $video->reposts_count }}</span>
+                                    <span class="action-count">{{ $fmtCount($video->reposts_count) }}</span>
                                 </div>
                                 
                                 <div class="action-item">
-                                    <button class="action-btn upload-btn" onclick="handleUploadClick()">
-                                        <i class="fas fa-plus"></i>
+                                    <button class="action-btn share-btn" data-video-id="{{ $video->id }}">
+                                        <i class="far fa-paper-plane"></i>
                                     </button>
+                                    <span class="action-count">{{ $fmtCount($video->shares_count) }}</span>
+                                </div>
+
+                                <div class="action-item">
+                                    <button type="button" class="action-btn save-btn" onclick="toggleSave(this)" data-video-id="{{ $video->id }}">
+                                        <i class="far fa-bookmark"></i>
+                                    </button>
+                                    <span class="action-count">{{ $fmtCount($savesCount) }}</span>
+                                </div>
+
+                                <div class="action-item">
+                                    <button type="button" class="action-btn more-btn" onclick="handleUploadClick()">
+                                        <i class="fas fa-ellipsis"></i>
+                                    </button>
+                                </div>
+
+                                <div class="action-profile clickable" data-user-id="{{ $video->user->id }}" data-user-username="{{ $video->user->username ?? strtolower(str_replace(' ', '', $video->user->name)) }}" style="background: {{ ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][abs(crc32($video->user->name)) % 5] }};">
+                                    <span>{{ strtoupper(substr($video->user->name, 0, 1)) }}</span>
                                 </div>
                             </div>
                             
@@ -1854,22 +2132,37 @@
                             <!-- Bottom Video Info -->
                             <div class="video-overlay">
                                 <div class="video-info">
-                                    <div class="user-info clickable" data-user-id="{{ $video->user->id }}" data-user-username="{{ $video->user->username ?? strtolower(str_replace(' ', '', $video->user->name)) }}">
-                                        <div class="user-avatar-initials" style="background: {{ ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][rand(0,4)] }};">
-                                            {{ strtoupper(substr($video->user->name, 0, 1)) }}{{ strtoupper(substr(explode(' ', $video->user->name)[1] ?? '', 0, 1)) }}
+                                    <div class="user-row">
+                                        <div class="user-info clickable" data-user-id="{{ $video->user->id }}" data-user-username="{{ $video->user->username ?? strtolower(str_replace(' ', '', $video->user->name)) }}">
+                                            <div class="user-avatar-initials" style="background: {{ ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][abs(crc32($video->user->name)) % 5] }};">
+                                                {{ strtoupper(substr($video->user->name, 0, 1)) }}{{ strtoupper(substr(explode(' ', $video->user->name)[1] ?? '', 0, 1)) }}
+                                            </div>
+                                            <div class="user-details">
+                                                <h4>{{ '@' . ($video->user->username ?? strtolower(str_replace(' ', '', $video->user->name))) }}</h4>
+                                            </div>
                                         </div>
-                                        <div class="user-details">
-                                            <h4>{{ $video->user->name }}</h4>
-                                            <p>{{ '@' . ($video->user->username ?? strtolower(str_replace(' ', '', $video->user->name))) }}</p>
-                                        </div>
+                                        <button type="button" class="follow-btn" onclick="this.classList.toggle('following'); this.textContent = this.classList.contains('following') ? 'Following' : 'Follow';">Follow</button>
                                     </div>
-                                    
+
                                     <div class="video-caption">
-                                        <p class="video-title">{{ $video->title }}</p>
                                         @if($video->description)
                                             <p class="video-description">{{ $video->description }}</p>
+                                        @else
+                                            <p class="video-description">{{ $video->title }}</p>
                                         @endif
                                     </div>
+
+                                    <div class="video-audio">
+                                        <i class="fas fa-music"></i>
+                                        <span class="video-audio__marquee">{{ ($video->user->name) . ' · ' . ($video->audio_title ?? 'Original audio') }}</span>
+                                    </div>
+
+                                    @if(!empty($video->location))
+                                        <div class="video-location">
+                                            <i class="fas fa-location-dot"></i>
+                                            <span>{{ $video->location }}</span>
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                             
@@ -1895,24 +2188,30 @@
         <!-- Comments Overlay -->
         <div class="comments-overlay" id="comments-overlay"></div>
         
-        <!-- Comments Sidebar -->
-        <div class="comments-sidebar" id="comments-sidebar">
+        <!-- Comments bottom sheet -->
+        <div class="comments-sidebar" id="comments-sidebar" role="dialog" aria-modal="true" aria-labelledby="comments-title">
             <div class="comments-header">
-                <h3>Comments</h3>
-                <button class="close-comments">
-                    <i class="fas fa-times"></i>
+                <h3 id="comments-title">Comments</h3>
+                <button type="button" class="close-comments" aria-label="Close comments">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
             
             <div class="comments-list" id="comments-list">
                 <div class="no-comments">
-                    <p>No comments yet. Be the first to comment!</p>
+                    <p>No comments yet</p>
+                    <p class="no-comments__hint">Start the conversation.</p>
                 </div>
             </div>
             
             <div class="comment-form">
-                <input type="text" id="comment-input" placeholder="Add a comment..." maxlength="500">
-                <button id="post-comment">Post</button>
+                @auth
+                    <div class="comment-form__avatar" aria-hidden="true">{{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}</div>
+                @else
+                    <div class="comment-form__avatar" aria-hidden="true">?</div>
+                @endauth
+                <input type="text" id="comment-input" placeholder="Add a comment..." maxlength="500" autocomplete="off">
+                <button type="button" id="post-comment">Post</button>
             </div>
         </div>
     </div>
@@ -1975,6 +2274,32 @@
             @else
                 window.location.href = '{{ route("register") }}';
             @endauth
+        };
+
+        window.toggleSave = function(btn) {
+            const icon = btn.querySelector('i');
+            const isSaved = btn.classList.toggle('saved');
+            if (icon) {
+                icon.classList.toggle('fas', isSaved);
+                icon.classList.toggle('far', !isSaved);
+            }
+            const countSpan = btn.closest('.action-item')?.querySelector('.action-count');
+            if (countSpan) {
+                const parse = (t) => {
+                    t = (t || '0').trim().toUpperCase();
+                    if (t.endsWith('K')) return Math.round(parseFloat(t) * 1000);
+                    if (t.endsWith('M')) return Math.round(parseFloat(t) * 1000000);
+                    return parseInt(t.replace(/,/g, ''), 10) || 0;
+                };
+                const fmt = (n) => {
+                    if (n >= 1000000) return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+                    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'K';
+                    return n.toLocaleString();
+                };
+                let n = parse(countSpan.textContent);
+                n = isSaved ? n + 1 : Math.max(0, n - 1);
+                countSpan.textContent = fmt(n);
+            }
         };
         
         window.scrollToNextVideo = function() {
@@ -2242,6 +2567,11 @@
                 if (commentsOverlay) {
                     commentsOverlay.classList.add('active');
                 }
+                document.body.classList.add('comments-open');
+                if (videoFeed) {
+                    videoFeed.dataset.lockedScrollTop = String(videoFeed.scrollTop);
+                    videoFeed.style.overflow = 'hidden';
+                }
             }
             
             function closeComments() {
@@ -2249,7 +2579,28 @@
                 if (commentsOverlay) {
                     commentsOverlay.classList.remove('active');
                 }
+                document.body.classList.remove('comments-open');
+                if (videoFeed) {
+                    videoFeed.style.overflow = '';
+                    if (videoFeed.dataset.lockedScrollTop != null) {
+                        videoFeed.scrollTop = parseFloat(videoFeed.dataset.lockedScrollTop) || 0;
+                    }
+                }
             }
+
+            // Keep reel feed from scrolling while the comments sheet is open
+            const blockFeedScroll = function(e) {
+                if (!document.body.classList.contains('comments-open')) return;
+                const inCommentsList = e.target.closest && e.target.closest('.comments-list');
+                const inCommentInput = e.target.closest && (
+                    e.target.closest('.comment-form') ||
+                    e.target.closest('#comment-input')
+                );
+                if (inCommentsList || inCommentInput) return;
+                e.preventDefault();
+            };
+            document.addEventListener('wheel', blockFeedScroll, { passive: false, capture: true });
+            document.addEventListener('touchmove', blockFeedScroll, { passive: false, capture: true });
             
             // Comment button functionality - using event delegation for dynamic content
             document.addEventListener('click', function(e) {
@@ -2277,6 +2628,12 @@
                     closeComments();
                 });
             }
+
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape' && commentsSidebar.classList.contains('active')) {
+                    closeComments();
+                }
+            });
             
             // Share button functionality - using event delegation for dynamic content
             document.addEventListener('click', function(e) {
@@ -2380,11 +2737,64 @@
             });
             
             // Comments functionality
+            function renderCommentsList(comments) {
+                const commentsList = document.getElementById('comments-list');
+                if (!commentsList) return;
+
+                if (!comments || !comments.length) {
+                    commentsList.innerHTML = '<div class="no-comments"><p>No comments yet</p><p class="no-comments__hint">Start the conversation.</p></div>';
+                    return;
+                }
+
+                commentsList.innerHTML = comments.map(comment => {
+                    const user = comment.user || {};
+                    const userName = user.name || comment.user_name || 'User';
+                    const userUsername = user.username || comment.user_username || '';
+                    const commentContent = comment.content || '';
+                    const createdAt = comment.created_at || 'Just now';
+                    const label = userUsername ? '@' + userUsername : userName;
+
+                    return `
+                        <div class="comment-item">
+                            <div class="comment-avatar-initials" style="background: ${getRandomColor()};">${getUserInitials(userName)}</div>
+                            <div class="comment-content">
+                                <div class="comment-content__row">
+                                    <strong>${label}</strong>
+                                    <p>${commentContent}</p>
+                                </div>
+                                <div class="comment-meta">
+                                    <span class="comment-time">${createdAt}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            function getDemoComments(videoId) {
+                const samples = [
+                    { user: { name: 'Priya Shah', username: 'priyashah' }, content: 'This is fire 🔥', created_at: '2h' },
+                    { user: { name: 'Dev Patel', username: 'devp' }, content: 'Need the audio name!!', created_at: '5h' },
+                    { user: { name: 'Maya Chen', username: 'mayachen' }, content: 'Tag your friend who needs to see this', created_at: '1d' },
+                    { user: { name: 'Leo Martins', username: 'leom' }, content: 'Quality content as always 👏', created_at: '1d' },
+                    { user: { name: 'Aisha Khan', username: 'aishak' }, content: 'Where was this filmed?', created_at: '2d' },
+                ];
+                // Slightly vary by video id so each reel feels different
+                const offset = Math.abs(parseInt(videoId, 10) || 0) % samples.length;
+                return samples.slice(offset).concat(samples.slice(0, offset)).slice(0, 4);
+            }
+
             function loadComments(videoId) {
                 const commentsList = document.getElementById('comments-list');
                 if (!commentsList) return;
                 
-                commentsList.innerHTML = '<div class="loading">Loading comments...</div>';
+                commentsList.innerHTML = '<div class="loading"><p>Loading comments...</p></div>';
+
+                // Demo videos use negative IDs — show sample comments
+                if (parseInt(videoId, 10) < 0) {
+                    renderCommentsList(getDemoComments(videoId));
+                    return;
+                }
                 
                 fetch(`/videos/${videoId}/comments`, {
                     method: 'GET',
@@ -2403,12 +2813,9 @@
                 .then(data => {
                     console.log('Comments API Response:', data);
                     
-                    // Check if data.success exists and is true
                     if (data.success !== false) {
-                        // Get comments array - could be data.comments or data.data.comments
                         let comments = data.comments || data.data?.comments || [];
                         
-                        // If comments is not an array, try to convert it
                         if (!Array.isArray(comments)) {
                             if (typeof comments === 'object' && comments !== null) {
                                 comments = Object.values(comments);
@@ -2417,42 +2824,14 @@
                             }
                         }
                         
-                        console.log('Parsed comments array:', comments);
-                        console.log('Comments count:', comments.length);
-                        
-                        if (comments && comments.length > 0) {
-                            const commentsHtml = comments.map(comment => {
-                                // Handle different comment structures
-                                const user = comment.user || {};
-                                const userName = user.name || comment.user_name || 'User';
-                                const userUsername = user.username || comment.user_username || 'user';
-                                const commentContent = comment.content || '';
-                                // Backend returns created_at as "2 hours ago" format, so use it directly
-                                const createdAt = comment.created_at || 'Just now';
-                                
-                                return `
-                                    <div class="comment-item">
-                                        <div class="comment-avatar-initials" style="background: ${getRandomColor()};">${getUserInitials(userName)}</div>
-                                        <div class="comment-content">
-                                            <strong>${userName}</strong>
-                                            <p>${commentContent}</p>
-                                            <span class="comment-time">${createdAt}</span>
-                                        </div>
-                                    </div>
-                                `;
-                            }).join('');
-                            commentsList.innerHTML = commentsHtml;
-                        } else {
-                            commentsList.innerHTML = '<div class="no-comments"><p>No comments yet. Be the first to comment!</p></div>';
-                        }
+                        renderCommentsList(comments);
                     } else {
-                        // If success is false, show no comments
-                        commentsList.innerHTML = '<div class="no-comments"><p>No comments yet. Be the first to comment!</p></div>';
+                        renderCommentsList([]);
                     }
                 })
                 .catch(error => {
                     console.error('Error loading comments:', error);
-                    commentsList.innerHTML = '<div class="no-comments"><p>No comments yet. Be the first to comment!</p></div>';
+                    renderCommentsList([]);
                 });
             }
             
@@ -2570,51 +2949,9 @@
                 });
             }
             
-            // Header Menu Modal
-            const headerMenuBtn = document.getElementById('header-menu-btn');
-            const headerModal = document.getElementById('header-modal');
-            const headerModalClose = document.querySelector('.header-modal-close');
+            // Header menu + search: handled by mobile-sidebar.js (#header-menu-btn, #search-btn)
             
-            if (headerMenuBtn && headerModal) {
-                headerMenuBtn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    headerModal.classList.add('active');
-                    document.body.classList.add('modal-open');
-                    // Prevent body scroll
-                    document.body.style.overflow = 'hidden';
-                });
-            }
-            
-            if (headerModalClose) {
-                headerModalClose.addEventListener('click', function() {
-                    headerModal.classList.remove('active');
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                });
-            }
-            
-            // Close menu modal when clicking outside
-            if (headerModal) {
-                headerModal.addEventListener('click', function(e) {
-                    if (e.target === headerModal) {
-                        headerModal.classList.remove('active');
-                        document.body.classList.remove('modal-open');
-                        document.body.style.overflow = '';
-                    }
-                });
-            }
-            
-            // Close modal on escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape' && headerModal && headerModal.classList.contains('active')) {
-                    headerModal.classList.remove('active');
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                }
-            });
-            
-            // TikTok-Style Search Modal
+            // TikTok-Style Search Modal (legacy fallback if mobile-search unavailable)
             const searchBtn = document.getElementById('search-btn');
             const searchModal = document.getElementById('search-modal');
             const searchBackBtn = document.getElementById('search-back-btn');
@@ -2915,7 +3252,7 @@
             
             // Profile click functionality - using event delegation for dynamic content
             document.addEventListener('click', function(e) {
-                const userInfo = e.target.closest('.user-info.clickable');
+                const userInfo = e.target.closest('.user-info.clickable, .action-profile.clickable');
                 if (!userInfo) return;
                 
                 e.stopPropagation();

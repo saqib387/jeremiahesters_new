@@ -876,3 +876,8 @@
         margin-left: 0;
     }
 }
+
+.tc-hint--error {
+    color: #ef4444;
+    font-weight: 600;
+}

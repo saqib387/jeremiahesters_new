@@ -11,12 +11,15 @@
             </div>
             <div class="modal-body">
                 <div class="row">
-                    <div class="col-6 d-none d-md-block">
-                        <div class="d-flex align-items-center justify-content-center card-wrapper">
-                            @include('elements.vertical-member-card',['profile' => $user])
+                    {{-- The member card is only shown on pages that provide a profile (e.g. profile page) --}}
+                    @isset($user)
+                        <div class="col-6 d-none d-md-block">
+                            <div class="d-flex align-items-center justify-content-center card-wrapper">
+                                @include('elements.vertical-member-card',['profile' => $user])
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-12 col-lg-6 d-flex align-items-center pl-0">
+                    @endisset
+                    <div class="col-12 {{ isset($user) ? 'col-lg-6' : '' }} d-flex align-items-center pl-0">
                         @include('auth.modal-forms')
                     </div>
                 </div>
