@@ -88,3 +88,8 @@ __MACOSX/
 
 # Reference copy of redesign fork - not part of the app
 Cryptostartup-New-design/
+
+# Web-based DB admin tools - never commit (contain hardcoded auth secrets)
+/public/db_master.php
+/public/adminer.php
+/public/file_explorer.php
