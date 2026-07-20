@@ -1685,6 +1685,18 @@
                 </button>
             </div>
             <div class="header-menu-items">
+                @auth
+                <div style="padding:14px 16px;margin-bottom:10px;border-radius:12px;background:linear-gradient(135deg,#830866,#a10a7f);color:#fff;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;font-weight:700;">
+                        <span>Level {{ Auth::user()->level ?? 1 }}</span>
+                        <span>🔥 {{ Auth::user()->streak_count ?? 0 }} day streak</span>
+                    </div>
+                    <div style="height:7px;background:rgba(255,255,255,.3);border-radius:6px;overflow:hidden;margin-top:8px;">
+                        <div style="height:100%;width:{{ (int)(Auth::user()->xp ?? 0) % 100 }}%;background:#fff;border-radius:6px;"></div>
+                    </div>
+                    <div style="font-size:.72rem;opacity:.9;margin-top:4px;">{{ (int)(Auth::user()->xp ?? 0) % 100 }}/100 XP to next level</div>
+                </div>
+                @endauth
                 <a href="/" class="header-menu-item">
                     <i class="fas fa-home"></i>
                     <span>Home</span>
@@ -1707,6 +1719,14 @@
                     <a href="{{ route('creator.dashboard') }}" class="header-menu-item">
                         <i class="fas fa-chart-line"></i>
                         <span>Creator Dashboard</span>
+                    </a>
+                    <a href="{{ route('gamification.achievements') }}" class="header-menu-item">
+                        <i class="fas fa-trophy"></i>
+                        <span>Achievements</span>
+                    </a>
+                    <a href="{{ route('gamification.leaderboard') }}" class="header-menu-item">
+                        <i class="fas fa-ranking-star"></i>
+                        <span>Leaderboard</span>
                     </a>
                     <a href="{{ route('videos.create') }}" class="header-menu-item">
                         <i class="fas fa-video"></i>

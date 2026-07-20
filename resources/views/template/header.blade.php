@@ -58,11 +58,17 @@
                 @guest
                     <div class="auth-links">
                     @if(Route::currentRouteName() !== 'profile')
-                            <a href="{{ route('login') }}" class="auth-link login-link">
+                            <a href="{{ route('login') }}" class="auth-link login-link"
+                               data-toggle="modal" data-target="#login-dialog"
+                               data-bs-toggle="modal" data-bs-target="#login-dialog"
+                               onclick="if(window.LoginModal){event.preventDefault();LoginModal.changeActiveTab('login');}">
                                 {{ __('Login') }}
                             </a>
                         @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="auth-link register-link">
+                                <a href="{{ route('register') }}" class="auth-link register-link"
+                                   data-toggle="modal" data-target="#login-dialog"
+                                   data-bs-toggle="modal" data-bs-target="#login-dialog"
+                                   onclick="if(window.LoginModal){event.preventDefault();LoginModal.changeActiveTab('register');}">
                                     {{ __('Sign Up') }}
                                 </a>
                             @endif

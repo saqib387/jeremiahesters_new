@@ -26,15 +26,79 @@
                 @endif
             </div>
         </div>
+
+        {{-- Gamification: level + daily streak + XP progress --}}
+        @auth
+        <div class="px-1 mb-4">
+            <div class="d-flex align-items-center justify-content-between" style="font-size:.9rem;font-weight:600;">
+                <span>{{ __('Level') }} {{ Auth::user()->level ?? 1 }}</span>
+                <span style="color:#830866;">🔥 {{ Auth::user()->streak_count ?? 0 }} {{ __('day streak') }}</span>
+            </div>
+            <div style="height:7px;background:rgba(0,0,0,.08);border-radius:6px;overflow:hidden;margin-top:6px;">
+                <div style="height:100%;width:{{ (int)(Auth::user()->xp ?? 0) % 100 }}%;background:linear-gradient(135deg,#830866,#a10a7f);border-radius:6px;"></div>
+            </div>
+            <div style="font-size:.72rem;color:#888;margin-top:3px;">{{ (int)(Auth::user()->xp ?? 0) % 100 }}/100 XP {{ __('to next level') }}</div>
+        </div>
+        @endauth
     </div>
 
     <ul class="list-unstyled menu-elements p-0">
         @if(GenericHelper::isEmailEnforcedAndValidated())
+            <li class="{{Route::currentRouteName() == 'feed' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center" href="{{route('feed')}}">
+                    @include('elements.icon',['icon'=>'home-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                    {{__('Home')}}</a>
+            </li>
+            <li class="{{Route::currentRouteName() == 'videos.reels' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center" href="{{route('videos.reels')}}">
+                    @include('elements.icon',['icon'=>'film-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                    {{__('Reels')}}</a>
+            </li>
+            <li class="{{Route::currentRouteName() == 'gamification.achievements' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center" href="{{route('gamification.achievements')}}">
+                    @include('elements.icon',['icon'=>'trophy-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                    {{__('Achievements')}}</a>
+            </li>
+            <li class="{{Route::currentRouteName() == 'gamification.leaderboard' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center" href="{{route('gamification.leaderboard')}}">
+                    @include('elements.icon',['icon'=>'podium-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                    {{__('Leaderboard')}}</a>
+            </li>
             <li class="{{Route::currentRouteName() == 'profile' && (request()->route("username") == Auth::user()->username) ? 'active' : ''}}">
                 <a class="scroll-link d-flex align-items-center" href="{{route('profile',['username'=>Auth::user()->username])}}">
                     @include('elements.icon',['icon'=>'person-circle-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
                     {{__('My profile')}}</a>
             </li>
+            <li class="{{Route::currentRouteName() == 'my.notifications' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center justify-content-between" href="{{route('my.notifications')}}">
+                    <span class="d-flex align-items-center">
+                        @include('elements.icon',['icon'=>'notifications-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                        {{__('Notifications')}}
+                    </span>
+                    <span class="menu-notification-badge {{ NotificationsHelper::getUnreadNotifications()->total > 0 ? '' : 'd-none' }}">{{ NotificationsHelper::getUnreadNotifications()->total }}</span>
+                </a>
+            </li>
+            <li class="{{Route::currentRouteName() == 'my.messenger.get' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center justify-content-between" href="{{route('my.messenger.get')}}">
+                    <span class="d-flex align-items-center">
+                        @include('elements.icon',['icon'=>'chatbubble-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                        {{__('Messages')}}
+                    </span>
+                    <span class="menu-notification-badge {{ NotificationsHelper::getUnreadMessages() > 0 ? '' : 'd-none' }}">{{ NotificationsHelper::getUnreadMessages() }}</span>
+                </a>
+            </li>
+            <li class="{{Route::currentRouteName() == 'custom-requests.marketplace' ? 'active' : ''}}">
+                <a class="scroll-link d-flex align-items-center" href="{{route('custom-requests.marketplace')}}">
+                    @include('elements.icon',['icon'=>'gift-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                    {{__('Custom requests')}}</a>
+            </li>
+            @if(!getSetting('site.hide_create_post_menu'))
+                <li class="{{Route::currentRouteName() == 'posts.create' ? 'active' : ''}}">
+                    <a class="scroll-link d-flex align-items-center" href="{{route('posts.create')}}">
+                        @include('elements.icon',['icon'=>'add-circle-outline','variant'=>'medium','centered'=>false,'classes'=>'mr-2'])
+                        {{__('Create post')}}</a>
+                </li>
+            @endif
             @if(getSetting('streams.allow_streams'))
                 <li class="{{ in_array(Route::currentRouteName(), ['my.streams.get', 'public.stream.get', 'public.vod.get']) ? 'active' : ''}}">
                     <a class="scroll-link d-flex align-items-center" href="{{route('my.streams.get')}}">

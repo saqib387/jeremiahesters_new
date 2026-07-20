@@ -22,7 +22,6 @@
             '/libs/photoswipe/dist/photoswipe-ui-default.min.js',
             '/js/plugins/media/mediaswipe.js',
             '/js/plugins/media/mediaswipe-loader.js',
-            '/js/LoginModal.js',
             '/js/messenger/messenger.js',
          ],$additionalAssets))->withFullUrl()
     !!}
@@ -501,9 +500,8 @@
         @include('elements.lists.list-add-user-dialog',['user_id' => $user->id, 'lists' => ListsHelper::getUserLists()])
         @include('elements.checkout.checkout-box')
         @include('elements.messenger.send-user-message',['receiver'=>$user])
-    @else
-        @include('elements.modal-login')
     @endif
+    {{-- Guest login modal (#login-dialog) is now included globally in layouts/generic.blade.php --}}
 
     @include('elements.profile.qr-code-dialog')
 

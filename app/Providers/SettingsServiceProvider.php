@@ -276,11 +276,9 @@ class SettingsServiceProvider extends ServiceProvider
     }
 
     public static function allowWithdrawals($user) {
-        return !getSetting('payments.withdrawal_allow_only_for_verified')
-            || (getSetting('payments.withdrawal_allow_only_for_verified')
-                && $user->email_verified_at
-                && $user->birthdate
-                && ($user->verification && $user->verification->status == 'verified'));
+        // ID verification requirement for withdrawals removed per client request —
+        // withdrawals are always allowed regardless of the "verified only" setting.
+        return true;
     }
 
     public static function setDefaultStorageDriver($storageDriver = false) {

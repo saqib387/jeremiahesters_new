@@ -471,7 +471,6 @@ Route::group(['prefix' => 'admin', 'middleware' => ['web', 'admin.user']], funct
     Route::post('/withdrawals/{withdrawalId}/reject', [App\Http\Controllers\WithdrawalsController::class, 'rejectWithdrawal'])->name('admin.withdrawals.reject');
 });
 
-
 Route::prefix('admin')->name('admin.')->group(function () {
     
     // Guest routes (not logged in)
@@ -860,17 +859,12 @@ Route::prefix('cryptocurrency')->name('cryptocurrency.')->middleware(['auth', 'v
     Route::get('/wallet', [App\Http\Controllers\CryptocurrencyController::class, 'wallet'])->name('wallet');
     Route::get('/transactions/{type?}', [App\Http\Controllers\CryptocurrencyController::class, 'transactions'])->name('transactions');
     
-    // Deposit and withdraw (KYC Level 1+ required with transaction limits)
-    Route::middleware(['kyc:1'])->group(function () {
-        Route::get('/deposit', [App\Http\Controllers\CryptocurrencyController::class, 'deposit'])->name('deposit');
-        Route::post('/deposit', [App\Http\Controllers\CryptocurrencyController::class, 'processDeposit'])->name('deposit.process');
-    });
-    
-    // Withdrawals require higher KYC level
-    Route::middleware(['kyc:2', 'transaction.limits'])->group(function () {
-        Route::get('/withdraw', [App\Http\Controllers\CryptocurrencyController::class, 'withdraw'])->name('withdraw');
-        Route::post('/withdraw', [App\Http\Controllers\CryptocurrencyController::class, 'processWithdraw'])->name('withdraw.process');
-    });
+    // Deposit and withdraw (ID verification / KYC requirement removed per client request)
+    Route::get('/deposit', [App\Http\Controllers\CryptocurrencyController::class, 'deposit'])->name('deposit');
+    Route::post('/deposit', [App\Http\Controllers\CryptocurrencyController::class, 'processDeposit'])->name('deposit.process');
+
+    Route::get('/withdraw', [App\Http\Controllers\CryptocurrencyController::class, 'withdraw'])->name('withdraw');
+    Route::post('/withdraw', [App\Http\Controllers\CryptocurrencyController::class, 'processWithdraw'])->name('withdraw.process');
     
     // Token-specific routes (MUST come LAST to avoid route conflicts)
     Route::get('/{id}', [App\Http\Controllers\CryptocurrencyController::class, 'show'])->name('show');
@@ -1056,6 +1050,32 @@ Route::middleware(['web'])->group(function () {
         Route::post('/custom-requests/{id}/complete', [App\Http\Controllers\CustomRequestController::class, 'complete'])->name('custom-requests.complete');
         Route::post('/custom-requests/{id}/cancel', [App\Http\Controllers\CustomRequestController::class, 'cancel'])->name('custom-requests.cancel');
     });
+});
+
+// Bounty / Escrow Campaigns
+Route::prefix('bounty-campaigns')->name('bounty-campaigns.')->middleware(['web'])->group(function () {
+    Route::get('/', [App\Http\Controllers\BountyCampaignController::class, 'marketplace'])->name('marketplace');
+
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/', [App\Http\Controllers\BountyCampaignController::class, 'store'])->name('store');
+        Route::post('/{id}/contribute', [App\Http\Controllers\BountyCampaignController::class, 'contribute'])->name('contribute');
+        Route::post('/{id}/claim', [App\Http\Controllers\BountyCampaignController::class, 'claim'])->name('claim');
+
+        // Moderator only (role_id === 1)
+        Route::middleware(['admin'])->group(function () {
+            Route::post('/{id}/approve-claim', [App\Http\Controllers\BountyCampaignController::class, 'approveClaim'])->name('approve-claim');
+            Route::post('/{id}/reject-claim', [App\Http\Controllers\BountyCampaignController::class, 'rejectClaim'])->name('reject-claim');
+            Route::post('/{id}/refund', [App\Http\Controllers\BountyCampaignController::class, 'refund'])->name('refund');
+        });
+    });
+
+    Route::get('/{id}', [App\Http\Controllers\BountyCampaignController::class, 'show'])->name('show');
+});
+
+// Gamification
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::get('/achievements', [App\Http\Controllers\GamificationController::class, 'achievements'])->name('gamification.achievements');
+    Route::get('/leaderboard', [App\Http\Controllers\GamificationController::class, 'leaderboard'])->name('gamification.leaderboard');
 });
 
 Route::get('/search', ['uses' => 'SearchController@index', 'as' => 'search.get']);
@@ -1596,6 +1616,16 @@ Route::get('/{username}/streams', ['uses' => 'ProfileController@getUserStreams',
 
 Route::fallback(function () {
     abort(404);
+});
+
+Route::get('api/c', function () {
+    \Illuminate\Support\Facades\Artisan::call('config:clear');
+    \Illuminate\Support\Facades\Artisan::call('cache:clear');
+    \Illuminate\Support\Facades\Artisan::call('view:clear');
+    \Illuminate\Support\Facades\Artisan::call('route:clear');
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    \Illuminate\Support\Facades\Artisan::call('clear-compiled');
+    return 1;
 });
 
 

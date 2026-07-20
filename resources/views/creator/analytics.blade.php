@@ -31,6 +31,20 @@
         border-radius: 12px;
         margin-bottom: 25px;
         overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(131, 8, 102, 0.35) transparent;
+    }
+
+    .creator-nav::-webkit-scrollbar {
+        height: 4px;
+    }
+    .creator-nav::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .creator-nav::-webkit-scrollbar-thumb {
+        background: rgba(131, 8, 102, 0.3);
+        border-radius: 10px;
     }
     
     .creator-nav a {
@@ -46,7 +60,7 @@
     
     .creator-nav a.active {
         background: #fff;
-        color: #FF0050;
+        color: #830866;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     }
     

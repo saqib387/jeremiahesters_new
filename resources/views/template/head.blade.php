@@ -81,6 +81,9 @@
          ))->withFullUrl()
 !!}
 
+{{-- FontAwesome (icons used by crypto/creator pages on the generic layout) --}}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 {{-- Page specific CSS --}}
 @yield('styles')
 

@@ -177,7 +177,15 @@ class GenericHelperServiceProvider extends ServiceProvider
     public static function canUserPost()
     {
         $errors = [];
-        
+
+        // Admins (role_id === 1) bypass posting requirements (age / ID verification / bank).
+        if (Auth::check() && Auth::user()->role_id === 1) {
+            return [
+                'can_post' => true,
+                'errors' => []
+            ];
+        }
+
         // Check 18+ requirement
         if (!self::isUser18Plus()) {
             $errors[] = __('You must be 18 years or older to post content.');

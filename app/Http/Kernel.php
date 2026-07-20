@@ -43,6 +43,7 @@ class Kernel extends HttpKernel
             Middleware\LocaleSetter::class,
             Middleware\JavascriptVariables::class,
             Middleware\EnsureUserLists::class,
+            Middleware\TrackDailyStreak::class, // Gamification: daily streak + XP
             'throttle:web', // Add web rate limiter
         ],
 

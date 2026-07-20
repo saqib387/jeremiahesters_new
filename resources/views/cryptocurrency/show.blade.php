@@ -104,6 +104,78 @@
         </div>
         @endif
 
+        <!-- Price Chart -->
+        @php
+            $points = collect($cryptocurrency->transactions ?? [])
+                ->filter(function ($t) { return ($t->price_per_token ?? 0) > 0; })
+                ->sortBy('created_at')
+                ->values();
+
+            if ($points->count() >= 2) {
+                $chartLabels = $points->map(function ($t) { return $t->created_at->format('M d'); })->toArray();
+                $chartData = $points->map(function ($t) { return round($t->price_per_token, 8); })->toArray();
+            } else {
+                // Not enough trade history yet — show a flat baseline at the current price.
+                $basePrice = round($cryptocurrency->current_price, 8);
+                $chartLabels = [];
+                $chartData = [];
+                for ($i = 6; $i >= 0; $i--) {
+                    $chartLabels[] = now()->subDays($i)->format('M d');
+                    $chartData[] = $basePrice;
+                }
+            }
+        @endphp
+        <div class="crypto-section-header">
+            <h2>Price Chart</h2>
+        </div>
+        <div class="mb-4" style="background:#fff;border-radius:16px;padding:1.25rem;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
+            <div style="position:relative;height:280px;width:100%;">
+                <canvas id="cryptoPriceChart"></canvas>
+            </div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+        <script>
+        (function () {
+            var el = document.getElementById('cryptoPriceChart');
+            if (!el || typeof Chart === 'undefined') { return; }
+            var ctx = el.getContext('2d');
+            var grad = ctx.createLinearGradient(0, 0, 0, 280);
+            grad.addColorStop(0, 'rgba(131, 8, 102, 0.25)');
+            grad.addColorStop(1, 'rgba(131, 8, 102, 0.0)');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: @json($chartLabels),
+                    datasets: [{
+                        label: 'Price (USD)',
+                        data: @json($chartData),
+                        borderColor: '#830866',
+                        backgroundColor: grad,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#830866',
+                        pointHoverRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { intersect: false, mode: 'index' },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: function (c) { return '$' + Number(c.parsed.y).toFixed(8); } } }
+                    },
+                    scales: {
+                        y: { ticks: { callback: function (v) { return '$' + Number(v).toFixed(8); } }, grid: { color: 'rgba(0,0,0,0.05)' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        })();
+        </script>
+
         <!-- Modern Market Stats Grid -->
         <div class="crypto-section-header">
             <h2>Market Statistics</h2>
@@ -375,9 +447,9 @@
 <style>
 /* Modern Cryptocurrency Detail Page Styles */
 :root {
-    --primary-color: #6366f1;
-    --primary-dark: #4f46e5;
-    --secondary-color: #8b5cf6;
+    --primary-color: #830866;
+    --primary-dark: #6a0652;
+    --secondary-color: #a10a7f;
     --success-color: #10b981;
     --success-dark: #059669;
     --danger-color: #ef4444;

@@ -42,7 +42,55 @@ class FeedController extends Controller
             return $video;
         });
 
+        // "For You" smart ranking: engagement + recency, boosted for creators the
+        // viewer subscribes to. Pass ?sort=latest for plain newest-first.
+        if ($request->get('sort') !== 'latest') {
+            $videos = $this->applyForYouRanking($videos, $userId);
+        }
+
         return view('pages.feed', compact('videos'));
+    }
+
+    /**
+     * Rank feed videos by a "hotness" score (engagement decayed by age), boosting
+     * creators the viewer subscribes to. Pure in-memory re-sort — it never changes
+     * which videos are visible, only their order.
+     */
+    private function applyForYouRanking($videos, $userId)
+    {
+        $boost = [];
+        if ($userId) {
+            try {
+                $subs = \App\Providers\PostsHelperServiceProvider::getUserActiveSubs($userId);
+                if (is_array($subs)) {
+                    $boost = array_flip($subs);
+                }
+            } catch (\Throwable $e) {
+                $boost = [];
+            }
+        }
+
+        $now = now();
+
+        return $videos->map(function ($v) use ($boost, $now) {
+            try {
+                $ageHours = \Illuminate\Support\Carbon::parse($v->created_at)->diffInHours($now);
+            } catch (\Throwable $e) {
+                $ageHours = 24;
+            }
+            $engagement = 1
+                + ((float) ($v->views_count ?? 0)) * 0.2
+                + ((float) ($v->likes_count ?? 0)) * 3
+                + ((float) ($v->comments_count ?? 0)) * 4
+                + ((float) ($v->shares_count ?? 0)) * 5
+                + ((float) ($v->reposts_count ?? 0)) * 5;
+            $score = $engagement / pow(max(0, $ageHours) + 2, 1.3);
+            if (isset($boost[$v->user_id])) {
+                $score *= 1.6;
+            }
+            $v->for_you_score = $score;
+            return $v;
+        })->sortByDesc('for_you_score')->values();
     }
 
     /**

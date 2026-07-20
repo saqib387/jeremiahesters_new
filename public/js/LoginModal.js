@@ -34,6 +34,9 @@ var LoginModal = {
             $('.'+tab).addClass('d-none');
         });
         $('.'+activeTab+'-section').removeClass('d-none');
+        // Highlight the matching tab pill (login / register). Forgot has no pill.
+        $('.auth-modal-tab').removeClass('active');
+        $('.auth-modal-tab[data-auth-tab="'+activeTab+'"]').addClass('active');
         LoginModal.clearFormErrors();
     },
 
@@ -69,7 +72,7 @@ var LoginModal = {
                         $('input[name="email"]').val('');
                     }
                     else{
-                        window.reload();
+                        window.location.reload();
                     }
                 }
             },

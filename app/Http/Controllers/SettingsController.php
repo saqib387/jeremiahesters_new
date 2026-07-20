@@ -59,6 +59,8 @@ class SettingsController extends Controller
             unset($this->availableSettings['verify']);
         }
 
+        // Retired the old native wallet page (replaced by the crypto wallet).
+        unset($this->availableSettings['wallet']);
     }
 
     /**
@@ -86,6 +88,11 @@ class SettingsController extends Controller
      */
     public function index(Request $request)
     {
+        // The old native wallet page has been retired in favour of the crypto wallet.
+        if ($request->route('type') === 'wallet') {
+            return redirect()->route('cryptocurrency.wallet');
+        }
+
         $this->checkReferralAccess();
         $this->checkIfValidRoute($request->route('type'));
         $user = Auth::user();

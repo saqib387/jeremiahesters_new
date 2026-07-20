@@ -21,5 +21,13 @@
     @include('elements.custom-request.create-modal')
     <script src="{{ asset('js/CustomRequest.js') }}"></script>
 @endauth
+@guest
+    @if(getSetting('security.recaptcha_enabled'))
+        {!! NoCaptcha::renderJs() !!}
+    @endif
+    @include('elements.modal-login')
+    <script src="{{ asset('js/LoginModal.js') }}"></script>
+@endguest
+@include('elements.gamification-celebrations')
 </body>
 </html>

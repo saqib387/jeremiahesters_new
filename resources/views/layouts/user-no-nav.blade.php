@@ -12,6 +12,15 @@
 @include('elements.impersonation-header')
 @include('elements.global-announcement')
 <div class="flex-fill">
+    {{-- Mobile top navigation bar (replaces the old bottom bar) --}}
+    <div class="d-block d-md-none fixed-top mobile-top-nav-wrapper">
+        @include('elements.mobile-navbar')
+    </div>
+    <style>
+        @media (max-width: 767.98px) {
+            body { padding-top: 58px; }
+        }
+    </style>
     @include('template.user-side-menu')
 
     <div class="container-xl overflow-x-hidden-m">
@@ -22,9 +31,6 @@
             <div class="col-12 col-md-9 {{(!in_array(Route::currentRouteName(),['my.messenger.get']) ? 'min-vh-100' : '' )}}  border-left px-0 overflow-x-hidden-m content-wrapper {{(in_array(Route::currentRouteName(),['feed','profile','my.messenger.get','search.get','my.notifications','my.bookmarks','my.lists.all','my.lists.show','my.settings','posts.get']) ? '' : 'border-right' )}}">
                 @yield('content')
             </div>
-        </div>
-        <div class="d-block d-md-none fixed-bottom">
-            @include('elements.mobile-navbar')
         </div>
     </div>
 
@@ -47,5 +53,6 @@
     @include('elements.custom-request.create-modal')
     <script src="{{ asset('js/CustomRequest.js') }}"></script>
 @endauth
+@include('elements.gamification-celebrations')
 </body>
 </html>

@@ -151,7 +151,7 @@
 .footer-logo {
     height: 50px;
     width: auto;
-    filter: brightness(0) invert(1);
+    /* filter: brightness(0) invert(1); */
 }
 
 .footer-description-text {

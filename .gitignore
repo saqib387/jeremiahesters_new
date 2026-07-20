@@ -85,3 +85,6 @@ __MACOSX/
 
 # Local debug files
 /phpinfo.php
+
+# Reference copy of redesign fork - not part of the app
+Cryptostartup-New-design/

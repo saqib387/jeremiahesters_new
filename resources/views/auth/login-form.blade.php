@@ -25,9 +25,9 @@
             id="email" 
             type="email" 
             name="email" 
-            value="{{ old('email') }}" 
-            autocomplete="email" 
-            autofocus
+            value="{{ old('email') }}"
+            autocomplete="email"
+            @if(($mode ?? '') !== 'ajax') autofocus @endif
             required
             style="width: 100%; padding: 12px 16px; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; color: #ffffff; font-size: 14px; transition: all 0.3s ease; box-sizing: border-box;"
             onfocus="this.style.outline='none'; this.style.borderColor='#830866'; this.style.boxShadow='0 0 0 3px rgba(131, 8, 102, 0.1)';"

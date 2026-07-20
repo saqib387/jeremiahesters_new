@@ -86,6 +86,26 @@
                     </div>
                 </a>
             </li>
+            <li class="nav-item">
+                <a href="{{route('gamification.achievements')}}" class="nav-link {{Route::currentRouteName() == 'gamification.achievements' ? 'active' : ''}} h-pill h-pill-primary d-flex justify-content-between">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="icon-wrapper d-flex justify-content-center align-items-center">
+                            @include('elements.icon',['icon'=>'trophy-outline','variant'=>'large'])
+                        </div>
+                        <span class="d-none d-md-block d-xl-block d-lg-block ml-2 text-truncate side-menu-label">{{__('Achievements')}}</span>
+                    </div>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{route('gamification.leaderboard')}}" class="nav-link {{Route::currentRouteName() == 'gamification.leaderboard' ? 'active' : ''}} h-pill h-pill-primary d-flex justify-content-between">
+                    <div class="d-flex justify-content-center align-items-center">
+                        <div class="icon-wrapper d-flex justify-content-center align-items-center">
+                            @include('elements.icon',['icon'=>'podium-outline','variant'=>'large'])
+                        </div>
+                        <span class="d-none d-md-block d-xl-block d-lg-block ml-2 text-truncate side-menu-label">{{__('Leaderboard')}}</span>
+                    </div>
+                </a>
+            </li>
             @if(getSetting('streams.allow_streams'))
                 <li class="nav-item">
                     <a href="{{route('search.get')}}?filter=live" class="nav-link {{Route::currentRouteName() == 'search.get' && request()->get('filter') == 'live' ? 'active' : ''}} h-pill h-pill-primary d-flex justify-content-between">
