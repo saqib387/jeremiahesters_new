@@ -672,3 +672,343 @@
         transition: none;
     }
 }
+
+/* ============================================
+   UNIFIED WALLET — tabs, NFTs, coins, send/receive
+   Added when /wallet, /cryptocurrency/wallet and
+   /settings/wallet were merged into one surface.
+   ============================================ */
+
+/* --- Hero hint ---------------------------------------------------------- */
+.wallet-hero__hint {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--w-text-muted);
+}
+
+/* --- Tabs --------------------------------------------------------------- */
+.wallet-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+}
+
+.wallet-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.wallet-tab {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 16px;
+    border: 1px solid var(--w-border);
+    border-radius: 999px;
+    background: var(--w-surface);
+    color: var(--w-text-2);
+    font-family: var(--w-font);
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s ease, color .15s ease, border-color .15s ease;
+}
+
+.wallet-tab:hover {
+    background: var(--w-surface-hover);
+    color: var(--w-text);
+}
+
+.wallet-tab.is-active {
+    background: var(--w-accent-grad);
+    border-color: transparent;
+    color: #fff;
+}
+
+.wallet-tab__count {
+    display: inline-block;
+    min-width: 18px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--w-surface-2);
+    color: var(--w-text-muted);
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.wallet-tab.is-active .wallet-tab__count {
+    background: rgba(255, 255, 255, 0.22);
+    color: #fff;
+}
+
+/* --- Panels ------------------------------------------------------------- */
+.wallet-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.wallet-panel[hidden] {
+    display: none;
+}
+
+/* --- Two-up split (receive / send) -------------------------------------- */
+.wallet-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 720px) {
+    .wallet-split {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* --- Receive ------------------------------------------------------------ */
+.wallet-receive {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 18px;
+}
+
+.wallet-receive__qr {
+    display: flex;
+    justify-content: center;
+    padding: 10px;
+    border-radius: var(--w-radius-md);
+    background: #fff;
+    line-height: 0;
+}
+
+.wallet-receive__addr {
+    display: flex;
+    width: 100%;
+    gap: 8px;
+}
+
+.wallet-receive__addr input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--w-border);
+    border-radius: var(--w-radius-sm);
+    background: var(--w-input-bg);
+    color: var(--w-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 12px;
+    text-overflow: ellipsis;
+}
+
+/* --- Forms -------------------------------------------------------------- */
+.wallet-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+}
+
+.wallet-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.wallet-field > span {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--w-text-2);
+}
+
+.wallet-field input {
+    width: 100%;
+    padding: 11px 13px;
+    border: 1px solid var(--w-border);
+    border-radius: var(--w-radius-sm);
+    background: var(--w-input-bg);
+    color: var(--w-text);
+    font-family: var(--w-font);
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.wallet-field input:focus {
+    outline: none;
+    border-color: var(--w-brand-neon);
+}
+
+/* --- Notes -------------------------------------------------------------- */
+.wallet-note {
+    margin: 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--w-text-muted);
+}
+
+.wallet-note--error   { color: var(--w-danger); }
+.wallet-note--success { color: var(--w-success); }
+.wallet-note--muted   { color: var(--w-text-2); }
+
+.wallet-note--boxed {
+    margin: 14px 18px 18px;
+    padding: 12px 14px;
+    border: 1px solid var(--w-border);
+    border-radius: var(--w-radius-sm);
+    background: var(--w-surface-2);
+}
+
+/* --- Explore links ------------------------------------------------------ */
+.wallet-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 18px;
+}
+
+@media (max-width: 560px) {
+    .wallet-links {
+        grid-template-columns: 1fr;
+    }
+}
+
+.wallet-link {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px;
+    border: 1px solid var(--w-border);
+    border-radius: var(--w-radius-md);
+    background: var(--w-surface-2);
+    text-decoration: none;
+    transition: background .15s ease, border-color .15s ease;
+}
+
+.wallet-link:hover {
+    background: var(--w-surface-hover);
+    border-color: var(--w-border-strong);
+    text-decoration: none;
+}
+
+.wallet-link__title {
+    font-family: var(--w-font-display);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--w-text);
+}
+
+.wallet-link__sub {
+    font-size: 12.5px;
+    color: var(--w-text-muted);
+}
+
+/* --- NFT grid ----------------------------------------------------------- */
+.nft-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+    padding: 18px;
+}
+
+.nft-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--w-border);
+    border-radius: var(--w-radius-md);
+    background: var(--w-surface-2);
+    overflow: hidden;
+    text-decoration: none;
+    transition: border-color .15s ease, transform .15s ease;
+}
+
+.nft-card:hover {
+    border-color: var(--w-border-strong);
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.nft-card__media {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    background: var(--w-input-bg);
+}
+
+.nft-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.nft-card__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--w-text-muted);
+}
+
+.nft-card__placeholder svg {
+    width: 34px;
+    height: 34px;
+}
+
+.nft-card__status {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: rgba(9, 9, 11, 0.72);
+    color: #f4f4f5;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    backdrop-filter: blur(4px);
+}
+
+.nft-card__status--listed       { background: rgba(203, 12, 159, 0.9); }
+.nft-card__status--sold         { background: rgba(113, 113, 122, 0.9); }
+.nft-card__status--pending_mint { background: rgba(234, 179, 8, 0.9); color: #1c1917; }
+
+.nft-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px 12px;
+}
+
+.nft-card__name {
+    font-family: var(--w-font-display);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--w-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nft-card__sub {
+    font-size: 11.5px;
+    color: var(--w-text-muted);
+}
+
+/* --- Activity amount colours -------------------------------------------- */
+.txn-item__amount--in  { color: var(--w-success); }
+.txn-item__amount--out { color: var(--w-danger); }
+
+@media (prefers-reduced-motion: reduce) {
+    .wallet-tab,
+    .wallet-link,
+    .nft-card {
+        transition: none;
+    }
+}

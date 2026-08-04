@@ -67,9 +67,9 @@
                 <div class="text-center py-5">
                     <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
                     <h3 class="text-muted">You don't have any NFTs yet</h3>
-                    <p class="text-muted">Create your first NFT to get started!</p>
-                    <a href="{{ route('nft.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create NFT
+                    <p class="text-muted">Turn a video or photo you've uploaded into an NFT.</p>
+                    <a href="{{ route('nft.mintable') }}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i> Mint from my uploads
                     </a>
                 </div>
             </div>

@@ -799,9 +799,13 @@ Route::prefix('nft')->name('nft.')->middleware(['auth', 'verified', '2fa'])->gro
     // Main marketplace
     Route::get('/marketplace', [App\Http\Controllers\NFTMarketplaceController::class, 'index'])->name('marketplace');
     
-    // Create NFT
-    Route::get('/create', [App\Http\Controllers\NFTMarketplaceController::class, 'create'])->name('create');
-    Route::post('/store', [App\Http\Controllers\NFTMarketplaceController::class, 'store'])->name('store');
+    // Platform rule: an NFT may only be created from media that was uploaded to the site
+    // (feed post, video, private message) — never from a standalone blank mint form. The old
+    // /create + /store pair let a user upload an arbitrary file straight to a mint, so both
+    // now funnel into the "mint from your uploads" picker instead.
+    Route::get('/create', fn () => redirect()->route('nft.mintable'))->name('create');
+    Route::post('/store', fn () => redirect()->route('nft.mintable')
+        ->with('error', __('NFTs can only be minted from media you have uploaded to the site.')))->name('store');
 
     // Wallet connection (persists the user's on-chain wallet address). Two-segment paths so
     // they never collide with the GET /{id} show route below.
@@ -848,23 +852,27 @@ Route::prefix('creator-coins')->name('creator-coins.')->middleware(['auth', 'ver
     Route::post('/{id}/buy', [App\Http\Controllers\CreatorCoinController::class, 'buy'])->name('buy');
 });
 
-// Integrated crypto wallet hub (non-custodial): unified view of wallet, NFTs, creator points,
-// platform credits and activity.
+// THE wallet. One surface for every form of value a user holds: platform credits, creator
+// tokens, creator coins, NFTs and their non-custodial on-chain wallet. Deep-linkable per
+// section via /wallet#tokens, #nfts, #coins, #activity.
 Route::get('/wallet', [App\Http\Controllers\WalletHubController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('wallet.hub');
 
 // Continue cryptocurrency routes
 Route::prefix('cryptocurrency')->name('cryptocurrency.')->middleware(['auth', 'verified', '2fa'])->group(function () {
-    // Wallet management (KYC Level 1 required)
-    Route::get('/wallet', [App\Http\Controllers\CryptocurrencyController::class, 'wallet'])->name('wallet');
+    // Superseded by the unified wallet — kept as a redirect so old links/bookmarks survive.
+    Route::get('/wallet', fn () => redirect()->route('wallet.hub'))->name('wallet');
     Route::get('/transactions/{type?}', [App\Http\Controllers\CryptocurrencyController::class, 'transactions'])->name('transactions');
     
-    // Deposit and withdraw (ID verification / KYC requirement removed per client request)
-    Route::get('/deposit', [App\Http\Controllers\CryptocurrencyController::class, 'deposit'])->name('deposit');
-    Route::post('/deposit', [App\Http\Controllers\CryptocurrencyController::class, 'processDeposit'])->name('deposit.process');
+    // Deposit/withdraw now go through the real payment flow (Stripe/PayPal) under
+    // /my/settings?type=wallet. The old CryptocurrencyController handlers were stubs:
+    // processDeposit() recorded a "completed" deposit and reported success WITHOUT ever
+    // taking payment. They are redirected rather than left reachable by direct URL.
+    Route::get('/deposit', fn () => redirect()->route('my.settings', ['type' => 'wallet', 'active' => 'deposit']))->name('deposit');
+    Route::post('/deposit', fn () => redirect()->route('my.settings', ['type' => 'wallet', 'active' => 'deposit']))->name('deposit.process');
 
-    Route::get('/withdraw', [App\Http\Controllers\CryptocurrencyController::class, 'withdraw'])->name('withdraw');
-    Route::post('/withdraw', [App\Http\Controllers\CryptocurrencyController::class, 'processWithdraw'])->name('withdraw.process');
+    Route::get('/withdraw', fn () => redirect()->route('my.settings', ['type' => 'wallet', 'active' => 'withdraw']))->name('withdraw');
+    Route::post('/withdraw', fn () => redirect()->route('my.settings', ['type' => 'wallet', 'active' => 'withdraw']))->name('withdraw.process');
     
     // Token-specific routes (MUST come LAST to avoid route conflicts)
     Route::get('/{id}', [App\Http\Controllers\CryptocurrencyController::class, 'show'])->name('show');

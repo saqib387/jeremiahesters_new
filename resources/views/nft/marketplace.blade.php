@@ -1,142 +1,163 @@
 @extends('layouts.generic')
 
+@php
+    $isDarkTheme = Cookie::get('app_theme') == null
+        ? getSetting('site.default_user_theme') == 'dark'
+        : Cookie::get('app_theme') == 'dark';
+
+    $network = strtoupper(config('web3.network'));
+@endphp
+
+@section('styles')
+    <link rel="stylesheet" href="{{ asset('css/pages/nft-marketplace.css') }}?v=20260804a">
+@endsection
+
 @section('content')
-<div class="container py-4">
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="display-4 mb-2">NFT Marketplace</h1>
-                    <p class="lead text-muted">Discover and collect unique digital assets</p>
-                </div>
-                <a href="{{ route('nft.create') }}" class="btn btn-primary btn-lg">
-                    <i class="fas fa-plus"></i> Create NFT
-                </a>
-            </div>
+<div class="nftm-page {{ $isDarkTheme ? 'nftm-page--dark' : 'nftm-page--light' }}">
+<div class="nftm-container">
+
+    <header class="nftm-header">
+        <div>
+            <h1 class="nftm-header__title">{{ __('NFT Marketplace') }}</h1>
+            <p class="nftm-header__sub">{{ __('Own the moments your creators make') }}</p>
         </div>
-    </div>
+        {{-- Platform rule: an NFT can only come from media already uploaded to the site, so the
+             entry point is the user's own uploads — never a blank "create" form. --}}
+        <a href="{{ route('nft.mintable') }}" class="nftm-btn nftm-btn--primary">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            {{ __('Mint from my uploads') }}
+        </a>
+    </header>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+        <div class="nftm-alert nftm-alert--success">{{ session('success') }}</div>
     @endif
-
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>
-        </div>
+        <div class="nftm-alert nftm-alert--error">{{ session('error') }}</div>
     @endif
 
-    <!-- NFT Grid -->
-    <div class="row">
-        @forelse($listings as $listing)
-            <div class="col-md-4 col-lg-3 mb-4">
-                <div class="card h-100 shadow-sm nft-card">
-                    <div class="nft-image-container">
-                        <img src="{{ $listing->nft->image_url ?? asset('img/default-nft.png') }}" 
-                             class="card-img-top nft-image" 
-                             alt="{{ $listing->nft->name }}">
-                        <div class="nft-price-badge">
-                            {{ rtrim(rtrim(number_format($listing->price, 6), '0'), '.') }} {{ strtoupper(config('web3.network')) }}
-                        </div>
-                    </div>
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title">{{ $listing->nft->name }}</h5>
-                        <p class="card-text text-muted small flex-grow-1">
-                            {{ Str::limit($listing->nft->description ?? 'No description', 100) }}
-                        </p>
-                        <div class="small text-muted mb-2">
-                            <i class="fas fa-user"></i> {{ $listing->seller->name ?? 'Unknown' }}
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-auto">
-                            <a href="{{ route('nft.show', $listing->nft_id) }}" class="btn btn-sm btn-outline-primary">View</a>
-                            @if((int) $listing->seller_id !== (int) auth()->id() && auth()->user()->wallet_address)
+    {{-- Real figures, not decoration: all four are computed from listings/mints. --}}
+    <section class="nftm-stats">
+        <div class="nftm-stat">
+            <span class="nftm-stat__value">{{ number_format($stats['listed']) }}</span>
+            <span class="nftm-stat__label">{{ __('For sale') }}</span>
+        </div>
+        <div class="nftm-stat">
+            <span class="nftm-stat__value">
+                {{ $stats['floor'] > 0 ? rtrim(rtrim(number_format($stats['floor'], 4), '0'), '.') : '—' }}
+            </span>
+            <span class="nftm-stat__label">{{ __('Floor') }} {{ $network }}</span>
+        </div>
+        <div class="nftm-stat">
+            <span class="nftm-stat__value">{{ number_format($stats['minted']) }}</span>
+            <span class="nftm-stat__label">{{ __('Minted') }}</span>
+        </div>
+        <div class="nftm-stat">
+            <span class="nftm-stat__value">{{ number_format($stats['owners']) }}</span>
+            <span class="nftm-stat__label">{{ __('Owners') }}</span>
+        </div>
+    </section>
+
+    <section class="nftm-toolbar">
+        <form action="{{ route('nft.marketplace') }}" method="GET" class="nftm-search" role="search">
+            <input type="hidden" name="sort" value="{{ $sort }}">
+            <span class="nftm-search__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.75"/>
+                    <path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                </svg>
+            </span>
+            <input type="text" name="search" class="nftm-search__input"
+                   value="{{ $search }}" autocomplete="off"
+                   placeholder="{{ __('Search NFTs by name...') }}"
+                   aria-label="{{ __('Search NFTs') }}">
+            <button type="submit" class="nftm-search__btn">{{ __('Search') }}</button>
+        </form>
+
+        <div class="nftm-filters">
+            @foreach([
+                'newest' => __('Newest'),
+                'price_low' => __('Price: Low'),
+                'price_high' => __('Price: High'),
+            ] as $key => $label)
+                <a href="{{ route('nft.marketplace', array_filter(['search' => $search, 'sort' => $key])) }}"
+                   class="nftm-filter {{ $sort === $key ? 'is-active' : '' }}">{{ $label }}</a>
+            @endforeach
+        </div>
+    </section>
+
+    @if($listings->count())
+        <section class="nftm-grid">
+            @foreach($listings as $listing)
+                @php $nft = $listing->nft; @endphp
+                @continue(!$nft)
+                <article class="nftm-item">
+                    <a href="{{ route('nft.show', $listing->nft_id) }}" class="nftm-item__media">
+                        @if($nft->image_url)
+                            <img src="{{ $nft->image_url }}" alt="{{ $nft->name }}" loading="lazy">
+                        @else
+                            <span class="nftm-item__placeholder" aria-hidden="true">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/>
+                                    <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                                    <path d="m21 15-5-5L5 21" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                            </span>
+                        @endif
+                        @if($nft->media_type)
+                            <span class="nftm-item__type">{{ $nft->media_type }}</span>
+                        @endif
+                        <span class="nftm-item__price">
+                            {{ rtrim(rtrim(number_format($listing->price, 6), '0'), '.') }} {{ $network }}
+                        </span>
+                    </a>
+                    <div class="nftm-item__body">
+                        <a href="{{ route('nft.show', $listing->nft_id) }}" class="nftm-item__name">{{ $nft->name }}</a>
+                        <span class="nftm-item__seller">{{ __('by') }} {{ $listing->seller->name ?? __('Unknown') }}</span>
+                        <div class="nftm-item__actions">
+                            @if((int) $listing->seller_id !== (int) auth()->id() && auth()->user() && auth()->user()->wallet_address)
                                 <form action="{{ route('nft.buy', $listing->id) }}" method="POST"
-                                      onsubmit="return confirm('Buy this NFT for {{ $listing->price }} {{ strtoupper(config('web3.network')) }}?');">
+                                      onsubmit="return confirm('{{ __('Buy this NFT for') }} {{ rtrim(rtrim(number_format($listing->price, 6), '0'), '.') }} {{ $network }}?');">
                                     @csrf
-                                    <button class="btn btn-sm btn-primary"><i class="fas fa-shopping-cart"></i> Buy</button>
+                                    <button type="submit" class="nftm-btn nftm-btn--primary nftm-btn--sm nftm-btn--block">{{ __('Buy now') }}</button>
                                 </form>
+                            @else
+                                <a href="{{ route('nft.show', $listing->nft_id) }}" class="nftm-btn nftm-btn--ghost nftm-btn--sm nftm-btn--block">{{ __('View') }}</a>
                             @endif
                         </div>
                     </div>
-                </div>
-            </div>
-        @empty
-            <div class="col-12">
-                <div class="text-center py-5">
-                    <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
-                    <h3 class="text-muted">No NFTs available</h3>
-                    <p class="text-muted">Be the first to create and list an NFT!</p>
-                    <a href="{{ route('nft.create') }}" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Create NFT
-                    </a>
-                </div>
-            </div>
-        @endforelse
-    </div>
+                </article>
+            @endforeach
+        </section>
 
-    <!-- Pagination -->
-    @if($listings->hasPages())
-        <div class="row mt-4">
-            <div class="col-12 d-flex justify-content-center">
-                {{ $listings->links() }}
-            </div>
+        @if($listings->hasPages())
+            <div class="nftm-pagination">{{ $listings->links() }}</div>
+        @endif
+    @else
+        <div class="nftm-empty">
+            <span class="nftm-empty__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.75"/>
+                    <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+                    <path d="m21 15-5-5L5 21" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <h3>{{ $search !== '' ? __('No NFTs match that search') : __('Nothing listed yet') }}</h3>
+            <p>
+                {{ $search !== ''
+                    ? __('Try a different name.')
+                    : __('Turn a video or photo you have already uploaded into an NFT.') }}
+            </p>
+            @if($search !== '')
+                <a href="{{ route('nft.marketplace') }}" class="nftm-btn nftm-btn--ghost">{{ __('Clear search') }}</a>
+            @else
+                <a href="{{ route('nft.mintable') }}" class="nftm-btn nftm-btn--primary">{{ __('Mint from my uploads') }}</a>
+            @endif
         </div>
     @endif
+
 </div>
-
-<style>
-    .nft-card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        border: none;
-        overflow: hidden;
-    }
-
-    .nft-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
-    }
-
-    .nft-image-container {
-        position: relative;
-        width: 100%;
-        padding-top: 100%; /* 1:1 Aspect Ratio */
-        overflow: hidden;
-        background: #f8f9fa;
-    }
-
-    .nft-image {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .nft-price-badge {
-        position: absolute;
-        bottom: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 8px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        backdrop-filter: blur(10px);
-    }
-
-    .nft-price-badge i {
-        margin-right: 5px;
-    }
-</style>
+</div>
 @endsection
-

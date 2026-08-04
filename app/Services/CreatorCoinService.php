@@ -41,6 +41,65 @@ class CreatorCoinService
     }
 
     /**
+     * Give a user their coin automatically, deriving name/symbol from their profile.
+     *
+     * Idempotent: returns the existing coin if they already have one. Deliberately
+     * BEST-EFFORT — any failure is swallowed and logged, because a coin is never worth
+     * failing a user's registration over. Callers get null on failure.
+     */
+    public function provisionFor(User $creator): ?CreatorCoin
+    {
+        if (!config('creator_coins.auto_provision', true)) {
+            return null;
+        }
+
+        try {
+            $existing = CreatorCoin::where('creator_user_id', $creator->id)->first();
+            if ($existing) {
+                return $existing;
+            }
+
+            $display = trim((string) ($creator->name ?: $creator->username)) ?: 'Creator';
+
+            return CreatorCoin::create([
+                'creator_user_id' => $creator->id,
+                'name' => Str::limit($display, 60, '') . ' Coin',
+                'symbol' => $this->deriveSymbol($creator),
+                'description' => null,
+                'price_per_point' => config('creator_coins.default_price_per_point', 0.10),
+                'platform_fee_percentage' => config('creator_coins.platform_fee_percentage', 10),
+                'is_active' => true,
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
+    }
+
+    /**
+     * Build a ticker from the username: alphanumerics only, uppercased, <= 8 chars so it stays
+     * readable. Falls back to an id-based symbol when the username yields nothing usable.
+     * The column allows 16 chars, so the id suffix can never overflow it.
+     */
+    private function deriveSymbol(User $creator): string
+    {
+        $base = strtoupper(preg_replace('/[^A-Za-z0-9]/', '', (string) $creator->username));
+        $base = substr($base, 0, 8);
+
+        if ($base === '' || ctype_digit($base)) {
+            return 'C' . $creator->id;
+        }
+
+        // Disambiguate collisions rather than shipping two identical tickers.
+        if (CreatorCoin::where('symbol', $base)->exists()) {
+            return substr($base, 0, 8) . $creator->id;
+        }
+
+        return $base;
+    }
+
+    /**
      * Fan buys $points of $coin using platform credits. Debits the fan's credit wallet, credits
      * the creator's wallet (minus platform fee), issues points, and records the ledger row.
      */

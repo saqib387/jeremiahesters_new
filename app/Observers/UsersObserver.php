@@ -10,6 +10,7 @@ use App\Providers\AuthServiceProvider;
 use App\Providers\GenericHelperServiceProvider;
 use App\Providers\ListsHelperServiceProvider;
 use App\Model\User;
+use App\Services\CreatorCoinService;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
@@ -70,6 +71,10 @@ class UsersObserver
         if ($user != null) {
             GenericHelperServiceProvider::createUserWallet($user);
             ListsHelperServiceProvider::createUserDefaultLists($user->id);
+            // "Every profile is its own economy" — each account gets its creator coin on
+            // signup, with no manual creation step. Best-effort: provisionFor() swallows and
+            // reports its own errors so a coin failure can never fail a registration.
+            app(CreatorCoinService::class)->provisionFor($user);
             if(getSetting('security.default_2fa_on_register')) {
                 AuthServiceProvider::addNewUserDevice($user->id, true);
             }

@@ -60,14 +60,39 @@ class NFTMarketplaceController extends Controller
      * Marketplace: NFTs currently listed for sale. (Buy/sell is rebuilt in the marketplace
      * phase; for now this shows active listings only.)
      */
-    public function index()
+    public function index(Request $request)
     {
-        $listings = NFTListing::where('status', 'active')
-            ->with(['nft', 'seller'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $search = trim((string) $request->query('search', ''));
+        $sort = (string) $request->query('sort', 'newest');
 
-        return view('nft.marketplace', compact('listings'));
+        $query = NFTListing::where('status', 'active')->with(['nft', 'seller']);
+
+        // Search matches the NFT itself, not the listing row.
+        if ($search !== '') {
+            $query->whereHas('nft', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Whitelist sorts so a crafted ?sort= can't reach an arbitrary column.
+        switch ($sort) {
+            case 'price_low':  $query->orderBy('price', 'asc');  break;
+            case 'price_high': $query->orderBy('price', 'desc'); break;
+            default:           $query->orderBy('created_at', 'desc'); $sort = 'newest'; break;
+        }
+
+        $listings = $query->paginate(20)->withQueryString();
+
+        // Headline stats — real figures, computed from listings/sales.
+        $stats = [
+            'listed' => NFTListing::where('status', 'active')->count(),
+            'floor' => (float) NFTListing::where('status', 'active')->min('price'),
+            'owners' => NFT::whereNotNull('owner_address')->distinct('owner_address')->count('owner_address'),
+            'minted' => NFT::whereIn('status', [NFT::STATUS_MINTED, NFT::STATUS_LISTED, NFT::STATUS_SOLD])->count(),
+        ];
+
+        return view('nft.marketplace', compact('listings', 'stats', 'search', 'sort'));
     }
 
     /**

@@ -17,4 +17,17 @@ return [
 
     // Max points a fan can buy in a single transaction (sanity bound).
     'max_purchase_points' => env('CREATOR_COINS_MAX_PURCHASE', 1000000),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Automatic provisioning
+    |--------------------------------------------------------------------------
+    | "Every profile is its own economy": each new account gets a coin on signup,
+    | with no manual creation step. Provisioning is best-effort and never blocks
+    | registration — see CreatorCoinService::provisionFor().
+    */
+    'auto_provision' => env('CREATOR_COINS_AUTO_PROVISION', true),
+
+    // Starting price for an auto-provisioned coin, in platform credits per point.
+    'default_price_per_point' => env('CREATOR_COINS_DEFAULT_PRICE', 0.10),
 ];
