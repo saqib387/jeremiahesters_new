@@ -74,7 +74,9 @@
             </div>
 
             <div class="container d-flex justify-content-between align-items-center">
-                <div class="z-index-3 avatar-holder">
+                {{-- is-online drives the presence dot, and is only set when DMs are genuinely
+                     reachable for this viewer — not a decorative always-green badge. --}}
+                <div class="z-index-3 avatar-holder {{ ($hasSub || $viewerHasChatAccess) ? 'is-online' : '' }}">
                     <img src="{{$user->avatar}}" class="rounded-circle">
                 </div>
                 <div>
@@ -166,7 +168,7 @@
 
             <div class="container pt-2 pl-0 pr-0">
 
-                <div class="pt-2 pl-4 pr-4">
+                <div class="pt-2 pl-4 pr-4 profile-identity">
                     <h5 class="text-bold d-flex align-items-center">
                         <span>{{$user->name}}</span>
                         @if($user->email_verified_at && $user->birthdate && ($user->verification && $user->verification->status == 'verified'))
@@ -181,6 +183,15 @@
                         @endif
                     </h5>
                     <h6 class="text-muted"><span class="text-bold"><span>@</span>{{$user->username}}</span> {{--- Last seen X time ago--}}</h6>
+
+                    {{-- "Available to chat" is only claimed when DMs are actually reachable for
+                         this viewer, so it never promises something the profile can't honour. --}}
+                    @if($hasSub || $viewerHasChatAccess)
+                        <span class="profile-status">
+                            <span class="profile-status__dot" aria-hidden="true"></span>
+                            {{ __('Available to chat') }}
+                        </span>
+                    @endif
                 </div>
 
                 <div class="pt-2 pb-2 pl-4 pr-4 profile-description-holder">
@@ -202,6 +213,53 @@
                         </span>
                     @endif
                 </div>
+
+                {{-- Follow / Subscribe pair, as in the reference. Subscribe deliberately jumps
+                     to the existing .subscription-holder below instead of duplicating a
+                     subscribe button — those carry the checkout data attributes that drive
+                     payment, and cloning them would risk the payment flow. --}}
+                @if(!Auth::check() || Auth::user()->id !== $user->id)
+                    <div class="profile-hero-actions">
+                        @if(Auth::check())
+                            <button type="button" class="pf-btn pf-btn--follow manage-follow-button"
+                                    onclick="Lists.manageFollowsAction('{{$user->id}}')">
+                                <span class="manage-follows-text">{{ \App\Providers\ListsHelperServiceProvider::getUserFollowingType($user->id, true) }}</span>
+                            </button>
+                        @else
+                            <button type="button" class="pf-btn pf-btn--follow"
+                                    data-toggle="modal" data-target="#login-dialog">{{ __('Follow') }}</button>
+                        @endif
+
+                        @if($hasSub)
+                            <span class="pf-btn pf-btn--subscribe">{{ __('Subscribed') }}</span>
+                        @elseif($user->paid_profile)
+                            <a href="#profile-subscribe" class="pf-btn pf-btn--subscribe">{{ __('Subscribe') }}</a>
+                        @else
+                            <a href="#profile-subscribe" class="pf-btn pf-btn--subscribe">{{ __('Support') }}</a>
+                        @endif
+                    </div>
+
+                    {{-- Inline composer. Opens the existing messenger dialog rather than
+                         posting on its own, so message sending keeps one code path. --}}
+                    @if(Auth::check() && ($hasSub || $viewerHasChatAccess))
+                        <div class="profile-compose">
+                            <input type="text" class="profile-compose__input" id="profile-compose-input"
+                                   placeholder="{{ __('Hi') }} {{ Str::limit($user->name, 18, '') }}!"
+                                   aria-label="{{ __('Send a message') }}">
+                            <button type="button" class="profile-compose__send" id="profile-compose-send"
+                                    aria-label="{{ __('Send') }}">
+                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4 20-7z"/></svg>
+                            </button>
+                        </div>
+                    @endif
+                @endif
+
+                @isset($posts)
+                    <div class="profile-postcount">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+                        {{ number_format($posts->total()) }} {{ trans_choice('post|posts', $posts->total()) }}
+                    </div>
+                @endisset
 
                 <div class="d-flex flex-column flex-md-row justify-content-md-between pb-2 pl-4 pr-4 mb-3 mt-1">
 
@@ -249,7 +307,7 @@
                 @include('elements.message-alert',['classes'=>'px-2 pt-4'])
                 @if($user->paid_profile && (!getSetting('profiles.allow_users_enabling_open_profiles') || (getSetting('profiles.allow_users_enabling_open_profiles') && !$user->open_profile)))
                     @if( (!Auth::check() || Auth::user()->id !== $user->id) && !$hasSub)
-                        <div class="p-4 subscription-holder">
+                        <div class="p-4 subscription-holder" id="profile-subscribe">
                             <h6 class="font-weight-bold text-uppercase mb-3">{{__('Subscription')}}</h6>
                             @if(count($offer) && $offer['discountAmount']['30'] > 0)
                                 <h5 class="m-0 text-bold">{{__('Limited offer main label',['discount'=> round($offer['discountAmount']['30']), 'days_remaining'=> $offer['daysRemaining'] ])}}</h5>
@@ -306,7 +364,7 @@
                         <div class="bg-separator border-top border-bottom"></div>
                     @endif
                 @elseif(!Auth::check() || (Auth::check() && Auth::user()->id !== $user->id))
-                    <div class=" p-4 subscription-holder">
+                    <div class=" p-4 subscription-holder" id="profile-subscribe">
                         <h6 class="font-weight-bold text-uppercase mb-3">{{__('Follow this creator')}}</h6>
                         @if(Auth::check())
                             <button class="btn btn-round btn-lg btn-primary btn-block mt-3 mb-0 manage-follow-button" onclick="Lists.manageFollowsAction('{{$user->id}}')">
@@ -987,3 +1045,31 @@ body {
     </script>
 
 @stop
+
+<script>
+(function () {
+    var input = document.getElementById('profile-compose-input');
+    var send = document.getElementById('profile-compose-send');
+    if (!input || !send) return;
+
+    function open() {
+        // Hand off to the existing messenger dialog; the typed text is carried over
+        // when the dialog exposes a field for it.
+        if (window.messenger && typeof messenger.showNewMessageDialog === 'function') {
+            messenger.showNewMessageDialog();
+            var text = input.value.trim();
+            if (text) {
+                setTimeout(function () {
+                    var box = document.querySelector('#new-message-dialog textarea, #new-message-dialog input[type="text"]');
+                    if (box) { box.value = text; box.dispatchEvent(new Event('input', { bubbles: true })); }
+                }, 300);
+            }
+        }
+    }
+
+    send.addEventListener('click', open);
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); open(); }
+    });
+})();
+</script>
