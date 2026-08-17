@@ -104,6 +104,9 @@ public function store(Request $request)
             'description' => 'nullable|string|max:1000',
             'video' => 'required|file|mimes:mp4,mov,webm,avi|max:20480', // 20MB
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120', // 5MB
+            'visibility' => 'nullable|in:public,paid,private',
+            // Required only when the creator actually chose the paid tier.
+            'price' => 'nullable|numeric|min:0.5|max:500|required_if:visibility,paid',
         ]);
 
         $videoPath = null;
@@ -127,6 +130,12 @@ public function store(Request $request)
             $thumbnailPath = 'thumbnails/' . $fileName;
         }
         
+        // Visibility: public / paid / private. Private is owner-only, so it is also
+        // excluded from the public feed (Feed::getAllVideos filters on is_public).
+        $visibility = $request->input('visibility', 'public');
+        $isPrivate = $visibility === 'private';
+        $price = $visibility === 'paid' ? round((float) $request->input('price'), 2) : 0;
+
         // Create video record
         $video = \App\Models\Video::create([
             'user_id' => auth()->id(),
@@ -134,10 +143,14 @@ public function store(Request $request)
             'description' => $request->description,
             'video_path' => $videoPath,
             'thumbnail_path' => $thumbnailPath,
-            'is_public' => true,
-            'is_private' => false,
+            'is_public' => !$isPrivate,
+            'is_private' => $isPrivate,
             'status' => 'published',
         ]);
+
+        // price is not in Video::$fillable, so set it explicitly.
+        $video->price = $price;
+        $video->save();
 
         return redirect()->route('videos.reels')
             ->with('success', 'Video uploaded successfully!');
@@ -200,27 +213,37 @@ public function store(Request $request)
             'title' => 'required|string|max:191',
             'description' => 'nullable|string|max:1000',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-            'tags' => 'nullable|string|max:255',
+            'visibility' => 'nullable|in:public,paid,private',
+            'price' => 'nullable|numeric|min:0.5|max:500|required_if:visibility,paid',
         ]);
-        
-        // Handle thumbnail update if provided
+
+        // Handle thumbnail update if provided. Written to public/storage/thumbnails to match
+        // where store() puts them — the 'public' disk root differs from public_path() on the
+        // production host, so using Storage::putFile here would scatter files.
         if ($request->hasFile('thumbnail')) {
-            // Delete old thumbnail
-            if ($video->thumbnail_path) {
-                Storage::disk('public')->delete($video->thumbnail_path);
+            if ($video->thumbnail_path && is_file(public_path('storage/' . $video->thumbnail_path))) {
+                @unlink(public_path('storage/' . $video->thumbnail_path));
             }
-            
-            $thumbnailPath = $request->file('thumbnail')->store('thumbnails', 'public');
-            $video->thumbnail_path = $thumbnailPath;
+
+            $file = $request->file('thumbnail');
+            $fileName = time() . '_thumb_' . \Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/thumbnails'), $fileName);
+            $video->thumbnail_path = 'thumbnails/' . $fileName;
         }
-        
+
         $video->title = $request->title;
         $video->description = $request->description;
-        $video->tags = $request->tags;
+
+        $visibility = $request->input('visibility', $video->is_private ? 'private' : ((float) ($video->price ?? 0) > 0 ? 'paid' : 'public'));
+        $isPrivate = $visibility === 'private';
+        $video->is_private = $isPrivate;
+        $video->is_public = !$isPrivate;
+        $video->price = $visibility === 'paid' ? round((float) $request->input('price'), 2) : 0;
+
         $video->save();
-        
-        return redirect()->route('videos.show', $video)
-            ->with('success', 'Video updated successfully!');
+
+        return redirect()->route('videos.my')
+            ->with('success', __('Video updated successfully!'));
     }
 
     /**

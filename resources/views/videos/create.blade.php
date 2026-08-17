@@ -11,7 +11,7 @@
 @endphp
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/pages/video-upload.css') }}?v=20260714c">
+    <link rel="stylesheet" href="{{ asset('css/pages/video-upload.css') }}?v=20260817a">
 @endsection
 
 @section('content')
@@ -171,6 +171,49 @@
                     @error('thumbnail')
                         <span class="vu-error-text">{{ $message }}</span>
                     @enderror
+                </div>
+
+                {{-- Visibility + price. Ported here from the retired create-post design so
+                     the kept upload design carries the same controls. --}}
+                <div class="vu-field">
+                    <div class="vu-label-row">
+                        <span class="vu-label">{{ __('Who can watch this') }}</span>
+                    </div>
+                    <div class="vu-visibility">
+                        @foreach([
+                            'public'  => ['label' => __('Public'),  'hint' => __('Anyone can watch'),        'icon' => 'M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20'],
+                            'paid'    => ['label' => __('Paid'),    'hint' => __('Unlock for a one-off fee'), 'icon' => 'M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'],
+                            'private' => ['label' => __('Private'), 'hint' => __('Only you can watch'),      'icon' => 'M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2zM7 11V7a5 5 0 0 1 10 0v4'],
+                        ] as $value => $opt)
+                            <label class="vu-visibility__opt">
+                                <input type="radio" name="visibility" value="{{ $value }}"
+                                       {{ old('visibility', 'public') === $value ? 'checked' : '' }}>
+                                <span class="vu-visibility__body">
+                                    <span class="vu-visibility__icon" aria-hidden="true">
+                                        <svg class="vu-ic" viewBox="0 0 24 24"><path d="{{ $opt['icon'] }}"/></svg>
+                                    </span>
+                                    <span class="vu-visibility__text">
+                                        <span class="vu-visibility__label">{{ $opt['label'] }}</span>
+                                        <span class="vu-visibility__hint">{{ $opt['hint'] }}</span>
+                                    </span>
+                                </span>
+                            </label>
+                        @endforeach
+                    </div>
+                    @error('visibility')<span class="vu-error-text">{{ $message }}</span>@enderror
+                </div>
+
+                {{-- Price: only meaningful for the "paid" option, so it is revealed by JS. --}}
+                <div class="vu-field {{ old('visibility') === 'paid' ? '' : 'd-none' }}" id="priceField">
+                    <div class="vu-label-row">
+                        <label for="price" class="vu-label">{{ __('Price') }}<span class="vu-req">*</span></label>
+                        <span class="vu-count">{{ __('One-off unlock') }}</span>
+                    </div>
+                    <input type="number" class="vu-input @error('price') is-invalid @enderror"
+                           id="price" name="price" step="0.01" min="0.5" max="500"
+                           value="{{ old('price') }}" placeholder="4.99">
+                    <p class="vu-hint">{{ __('Fans pay this once to unlock the video. Minimum 0.50.') }}</p>
+                    @error('price')<span class="vu-error-text">{{ $message }}</span>@enderror
                 </div>
 
                 {{-- Upload Progress --}}
@@ -431,5 +474,22 @@ function clearThumbnailPreview() {
     thumbnailPlaceholder.classList.remove('d-none');
     thumbnailPreview.classList.add('d-none');
 }
+
+// Reveal the price input only when "Paid" is selected.
+(function () {
+    var priceField = document.getElementById('priceField');
+    if (!priceField) return;
+    var priceInput = document.getElementById('price');
+
+    document.querySelectorAll('input[name="visibility"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            var paid = radio.value === 'paid' && radio.checked;
+            priceField.classList.toggle('d-none', !paid);
+            // Clear the amount when leaving Paid so a stale value can't be submitted.
+            if (!paid && priceInput) priceInput.value = '';
+            if (paid && priceInput) priceInput.focus();
+        });
+    });
+})();
 </script>
 @endsection

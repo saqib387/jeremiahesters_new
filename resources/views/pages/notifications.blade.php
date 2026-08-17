@@ -8,7 +8,7 @@
             '/css/pages/notifications.css'
          ])->withFullUrl()
     !!}
-    <link rel="stylesheet" href="{{ asset('css/pages/notifications.css') }}?v=20260712q">
+    <link rel="stylesheet" href="{{ asset('css/pages/notifications.css') }}?v=20260817a">
 @stop
 
 @section('scripts')

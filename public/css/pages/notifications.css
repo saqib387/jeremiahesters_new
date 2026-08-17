@@ -121,11 +121,17 @@
     pointer-events: none;
 }
 
+/* Tabs size to their own labels and the row scrolls when there are too many.
+   Previously the links were flex:1 1 0 with min-width:0, which forced every tab
+   into an equal slice of the width regardless of label length — with
+   white-space:nowrap, longer labels overflowed their box and ran into their
+   neighbour ("Likes" / "Subscriptions" collided). It also meant the items could
+   never exceed the container, so the overflow-x:auto here never engaged. */
 .notifications-page__nav {
     display: flex;
     align-items: stretch;
-    justify-content: space-between;
-    gap: 0;
+    justify-content: flex-start;
+    gap: 20px;
     padding: 0 16px;
     margin: 0;
     border: none;
@@ -144,12 +150,11 @@
 }
 
 .notifications-page__nav-link {
-    flex: 1 1 0;
+    flex: 0 0 auto;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: 0;
-    padding: 0 4px;
+    padding: 0 2px;
     border: none;
     border-radius: 0;
     text-decoration: none !important;

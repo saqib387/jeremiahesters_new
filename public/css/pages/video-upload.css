@@ -697,3 +697,150 @@
         font-size: 1.4rem;
     }
 }
+
+/* ============================================
+   Visibility + price controls, and the edit page.
+   Added when set-price / make-private / edit moved
+   out of the retired create-post design into this one.
+   ============================================ */
+
+.vu-hint {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--vu-text-muted);
+}
+
+.vu-form {
+    display: block;
+}
+
+/* --- Visibility picker --------------------------------------------------- */
+.vu-visibility {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+@media (max-width: 560px) {
+    .vu-visibility {
+        grid-template-columns: 1fr;
+    }
+}
+
+.vu-visibility__opt {
+    margin: 0;
+    cursor: pointer;
+}
+
+/* Native radio stays in the DOM for accessibility/form semantics but is visually
+   replaced by the card below. */
+.vu-visibility__opt input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.vu-visibility__body {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    height: 100%;
+    padding: 13px 14px;
+    border: 1px solid var(--vu-border);
+    border-radius: var(--vu-radius-md);
+    background: var(--vu-surface-2);
+    box-sizing: border-box;
+    transition: border-color .15s ease, background .15s ease;
+}
+
+.vu-visibility__opt:hover .vu-visibility__body {
+    background: var(--vu-surface-hover);
+    border-color: var(--vu-border-strong);
+}
+
+.vu-visibility__opt input[type="radio"]:checked + .vu-visibility__body {
+    border-color: var(--vu-brand-neon);
+    background:
+        linear-gradient(180deg, rgba(203, 12, 159, .12), transparent 70%),
+        var(--vu-surface-2);
+}
+
+/* Visible keyboard focus, since the real radio is hidden. */
+.vu-visibility__opt input[type="radio"]:focus-visible + .vu-visibility__body {
+    outline: 2px solid var(--vu-brand-neon);
+    outline-offset: 2px;
+}
+
+.vu-visibility__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    background: var(--vu-surface);
+    color: var(--vu-text-2);
+}
+
+.vu-visibility__opt input[type="radio"]:checked + .vu-visibility__body .vu-visibility__icon {
+    background: var(--vu-accent-grad);
+    color: #fff;
+}
+
+.vu-visibility__icon .vu-ic {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.vu-visibility__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.vu-visibility__label {
+    font-family: var(--vu-font-display);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--vu-text);
+}
+
+.vu-visibility__hint {
+    font-size: 12px;
+    line-height: 1.35;
+    color: var(--vu-text-muted);
+}
+
+/* --- Edit page media ----------------------------------------------------- */
+.vu-current-video {
+    width: 100%;
+    max-height: 420px;
+    border-radius: var(--vu-radius-md);
+    border: 1px solid var(--vu-border);
+    background: #000;
+    display: block;
+}
+
+.vu-current-thumb {
+    display: block;
+    width: 180px;
+    max-width: 100%;
+    margin-bottom: 10px;
+    border-radius: var(--vu-radius-sm);
+    border: 1px solid var(--vu-border);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vu-visibility__body {
+        transition: none;
+    }
+}
