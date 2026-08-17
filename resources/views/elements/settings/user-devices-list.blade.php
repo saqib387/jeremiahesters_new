@@ -21,7 +21,7 @@
                                             <small class="text-muted">{{__("Created at")}}: {{$device->created_at}}</small>
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center pr-3">
-                                            <span class="h-pill h-pill-accent rounded" onclick="PrivacySettings.showDeviceDeleteConfirmation('{{$device->signature}}')">
+                                            <span class="h-pill h-pill-accent rounded" onclick="PrivacySettings.showDeviceDeleteConfirmation('{{$device->device_id}}')">
                                                 @include('elements.icon',['icon'=>'close-outline'])
                                             </span>
                                         </div>

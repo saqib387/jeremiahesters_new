@@ -5261,3 +5261,237 @@ body.st-subs-mobile-lock {
         transition: none;
     }
 }
+
+/* ============================================
+   SECURITY SETTINGS
+   Posture checklist, 2FA row, device/session list.
+   Shares the ps-* card system used by the profile page.
+   ============================================ */
+
+/* --- Quick links (also used by the security page's "More controls") ------- */
+.ps-links {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+@media (max-width: 560px) {
+    .ps-links { grid-template-columns: 1fr; }
+}
+
+.ps-link {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 13px 15px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-bg-muted, rgba(128,128,140,.10));
+    text-decoration: none;
+    transition: background .15s ease;
+}
+
+.ps-link:hover { background: var(--st-bg-elevated, rgba(128,128,140,.18)); text-decoration: none; }
+
+.ps-link__title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--st-text, inherit);
+}
+
+.ps-link__sub {
+    font-size: 12.5px;
+    color: var(--st-text-muted, #8b8b94);
+}
+
+/* --- Posture checklist --------------------------------------------------- */
+.sec-checks {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sec-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.sec-check__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+}
+
+.sec-check__icon svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sec-check.is-ok .sec-check__icon {
+    background: rgba(34, 197, 94, .16);
+    color: #22c55e;
+}
+
+.sec-check.is-warn .sec-check__icon {
+    background: rgba(245, 158, 11, .18);
+    color: #f59e0b;
+}
+
+.sec-check__text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+}
+
+.sec-check__text strong {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--st-text, inherit);
+}
+
+.sec-check__text span {
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: var(--st-text-muted, #8b8b94);
+}
+
+/* --- Setting row with a control on the right ----------------------------- */
+.sec-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-bg-muted, rgba(128,128,140,.10));
+}
+
+.sec-row__text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.sec-row__text strong { font-size: 14.5px; font-weight: 700; color: var(--st-text, inherit); }
+.sec-row__text span { font-size: 12.5px; color: var(--st-text-muted, #8b8b94); }
+
+/* --- Devices ------------------------------------------------------------- */
+.sec-devices {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.sec-device {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-bg-muted, rgba(128,128,140,.10));
+}
+
+.sec-device__icon {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: var(--st-bg-card);
+    color: var(--st-text-muted, #8b8b94);
+}
+
+.sec-device__icon svg {
+    width: 17px;
+    height: 17px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.sec-device__meta { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.sec-device__meta strong {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--st-text, inherit);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sec-device__meta span {
+    font-size: 12px;
+    color: var(--st-text-muted, #8b8b94);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sec-device__right {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.sec-tag {
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.sec-tag--ok   { background: rgba(34, 197, 94, .16); color: #22c55e; }
+.sec-tag--warn { background: rgba(245, 158, 11, .18); color: #f59e0b; }
+
+.sec-device__remove {
+    padding: 6px 12px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--st-text-muted, #8b8b94);
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .15s ease, color .15s ease;
+}
+
+.sec-device__remove:hover {
+    background: var(--st-danger, #f43f5e);
+    border-color: transparent;
+    color: #fff;
+}
+
+.sec-device__remove:disabled { opacity: .5; cursor: default; }
+
+@media (max-width: 520px) {
+    .sec-device { flex-wrap: wrap; }
+    .sec-device__right { width: 100%; justify-content: space-between; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ps-link, .sec-device__remove { transition: none; }
+}

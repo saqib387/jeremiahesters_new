@@ -38,7 +38,7 @@
     @if(getSetting('profiles.allow_profile_bio_markdown'))
         <link href="{{asset('/libs/easymde/dist/easymde.min.css')}}" rel="stylesheet">
     @endif
-    <link rel="stylesheet" href="{{ asset('css/pages/settings-glass.css') }}?v=20260817a">
+    <link rel="stylesheet" href="{{ asset('css/pages/settings-glass.css') }}?v=20260817b">
 @stop
 
 @section('content')

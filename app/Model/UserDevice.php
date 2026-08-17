@@ -10,9 +10,10 @@ class UserDevice extends Model
 
     protected $fillable = [
         'user_id',
-        'address',
+        'ip',
         'agent',
-        'signature',
+        'device_id',
         'verified_at',
+        'last_login',
     ];
 }

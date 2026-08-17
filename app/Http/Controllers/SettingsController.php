@@ -43,6 +43,10 @@ class SettingsController extends Controller
     public $availableSettings = [
         'profile' => ['heading' => 'Update your bio, cover and avatar', 'icon' => 'person'],
         'account' => ['heading' => 'Manage your account settings', 'icon' => 'settings'],
+        // Security had no home of its own: the password form lived under Account while 2FA
+        // and device management were buried in Privacy, so nothing presented the account's
+        // actual security posture in one place.
+        'security' => ['heading' => 'Password, two-factor and active devices', 'icon' => 'lock-closed'],
         'wallet' => ['heading' => 'Your payments & wallet', 'icon' => 'wallet'],
         'payments' => ['heading' => 'Your payments & wallet', 'icon' => 'card'],
         'rates' => ['heading' => 'Prices & Bundles', 'icon' => 'layers'],
@@ -143,6 +147,31 @@ class SettingsController extends Controller
             case 'subscribers':
                 $subscribers = Subscription::with(['creator'])->where('recipient_user_id', $userID)->orderBy('id', 'desc')->paginate(2);
                 $data['subscribers'] = $subscribers;
+                break;
+            case 'security':
+                try {
+                    $data['devices'] = UserDevice::where('user_id', $userID)
+                        ->orderBy('last_login', 'DESC')
+                        ->get()
+                        ->map(function ($item) {
+                            $agent = new Agent();
+                            $agent->setUserAgent($item->agent);
+                            $type = 'Desktop';
+                            if ($agent->isPhone()) { $type = 'Mobile'; }
+                            if ($agent->isTablet()) { $type = 'Tablet'; }
+                            $item->setAttribute('device_type', $type);
+                            $item->setAttribute('browser', $agent->browser());
+                            $item->setAttribute('platform', $agent->platform());
+                            return $item;
+                        });
+                    $data['verifiedDevicesCount'] = UserDevice::where('user_id', $userID)->whereNotNull('verified_at')->count();
+                    $data['unverifiedDevicesCount'] = UserDevice::where('user_id', $userID)->whereNull('verified_at')->count();
+                } catch (\Exception $e) {
+                    // Never let device introspection break the page.
+                    $data['devices'] = collect([]);
+                    $data['verifiedDevicesCount'] = 0;
+                    $data['unverifiedDevicesCount'] = 0;
+                }
                 break;
             case 'privacy':
                 try {

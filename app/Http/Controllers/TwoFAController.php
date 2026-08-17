@@ -38,7 +38,7 @@ class TwoFAController extends Controller
             ->where('updated_at', '>=', now()->subMinutes(30))
             ->first();
         if (!is_null($code)) {
-            $device = UserDevice::where('signature', AuthServiceProvider::generate2FaDeviceSignature())->first();
+            $device = UserDevice::where('device_id', AuthServiceProvider::generate2FaDeviceSignature())->first();
             $device->verified_at = Carbon::now();
             $device->save();
             Session::put('force2fa', false);
@@ -71,8 +71,16 @@ class TwoFAController extends Controller
      */
     public function deleteDevice(Request $request) {
         try {
+            // Accept either the device signature or the row id, and always scope the
+            // delete to the signed-in user so one account can't remove another's device.
             $signature = $request->get('signature');
-            UserDevice::where('user_id', Auth::user()->id)->where('signature', $signature)->delete();
+            $query = UserDevice::where('user_id', Auth::user()->id);
+            if ($request->filled('id')) {
+                $query->where('id', $request->get('id'));
+            } else {
+                $query->where('device_id', $signature);
+            }
+            $query->delete();
             return response()->json(['success' => true, 'message' => __('Device deleted.')]);
         } catch (\Exception $exception) {
             return response()->json(['success' => false, 'errors' => [__('An internal error has occurred.')]]);

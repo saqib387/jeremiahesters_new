@@ -162,12 +162,13 @@ class AuthServiceProvider extends ServiceProvider
      */
     public static function addNewUserDevice($userID, $verified = false) {
         $signature = self::generate2FaDeviceSignature();
-        if(!UserDevice::where('signature', $signature)->where('user_id', $userID)->first()) {
+        if(!UserDevice::where('device_id', $signature)->where('user_id', $userID)->first()) {
             $data = [
                 'user_id' => $userID,
-                'address' => request()->ip(),
+                'ip' => request()->ip(),
                 'agent' => request()->header('User-Agent'),
-                'signature' => $signature,
+                'device_id' => $signature,
+                'last_login' => Carbon::now(),
             ];
             if ($verified) {
                 $data['verified_at'] = Carbon::now();
@@ -183,7 +184,7 @@ class AuthServiceProvider extends ServiceProvider
      * @return mixed
      */
     public static function getUserDevices($userID) {
-        return UserDevice::where('user_id', $userID)->where('verified_at', '<>', null)->select('signature')->pluck('signature')->toArray();
+        return UserDevice::where('user_id', $userID)->where('verified_at', '<>', null)->pluck('device_id')->toArray();
     }
 
     /**
