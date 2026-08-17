@@ -97,13 +97,35 @@ DISPLAY=:0 SSH_ASKPASS="$TMP/askpass" SSH_ASKPASS_REQUIRE=force ssh-add "$KEY" 2
     || fail "could not add key (wrong passphrase?)"
 rm -f "$TMP/askpass"
 
-# Multiplex everything over one TCP connection where supported. If the local ssh does
-# not support ControlMaster this is simply ignored and we still only make 2 connections.
-SSH_MUX=(-o ControlMaster=auto -o ControlPath="$TMP/cm" -o ControlPersist=120
-         -o BatchMode=yes -o ConnectTimeout=30)
+# The protection that matters is batching: ONE sftp session + ONE ssh session, instead of
+# a connection per command. ControlMaster would collapse those two into one, but MSYS2/Git
+# Bash on Windows fails to create the control socket ("Failed to connect to new control
+# master"), so it is opt-in via XF_MUX=1 rather than on by default.
+SSH_MUX=(-o BatchMode=yes -o ConnectTimeout=30)
+if [ "${XF_MUX:-0}" = "1" ]; then
+    SSH_MUX+=(-o ControlMaster=auto -o ControlPath="$TMP/cm" -o ControlPersist=120)
+fi
 
 # --- Upload: ONE sftp batch ---------------------------------------------------------
 : > "$TMP/batch"
+
+# sftp's mkdir is not recursive and fails on existing dirs, so emit every ancestor of every
+# destination with a leading '-' (ignore errors). Without this, a file in a directory that
+# does not exist remotely — e.g. the first deploy of deploy/ — aborts the whole batch.
+{
+    for u in "${UPLOADS[@]}"; do
+        dir=$(dirname "${u##*|}")
+        path=""
+        IFS='/' read -ra parts <<< "${dir#/}"
+        for part in "${parts[@]}"; do
+            path="$path/$part"
+            printf '%s\n' "$path"
+        done
+    done
+} | awk '!seen[$0]++' | while read -r d; do
+    printf -- '-mkdir %s\n' "$d" >> "$TMP/batch"
+done
+
 for u in "${UPLOADS[@]}"; do
     printf 'put %s %s\n' "${u%%|*}" "${u##*|}" >> "$TMP/batch"
 done
