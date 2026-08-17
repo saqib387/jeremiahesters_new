@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Model\User;
 use App\Models\UserAchievement;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Lightweight gamification: daily streaks + XP + levels.
@@ -81,18 +82,108 @@ class GamificationService
      * Achievement definitions. Icons are emoji so they render everywhere
      * without depending on an icon font.
      */
+    /** Display order + labels for the achievement groups. */
+    public const CATEGORIES = [
+        'start'   => 'Getting Started',
+        'streak'  => 'Streaks',
+        'level'   => 'Levels',
+        'support' => 'Supporting Creators',
+        'create'  => 'Creating',
+    ];
+
+    /**
+     * Achievement definitions. Icons are emoji so they render everywhere without depending
+     * on an icon font.
+     *
+     * Each entry names a `metric` (a key from userStats()) and a `target`. Expressing them
+     * this way — rather than as opaque check closures — means the UI can show real progress
+     * ("4 / 7 days") toward everything still locked, which is the part that actually pulls
+     * people back.
+     */
     public static function achievements()
     {
         return [
-            'welcome'   => ['name' => 'Welcome!',    'desc' => 'Joined the community.',    'icon' => '👋', 'xp' => 20,  'check' => function ($u) { return true; }],
-            'streak_3'  => ['name' => 'On Fire',      'desc' => 'Reached a 3-day streak.',  'icon' => '🔥', 'xp' => 30,  'check' => function ($u) { return (int) ($u->streak_count ?? 0) >= 3; }],
-            'streak_7'  => ['name' => 'Week Warrior', 'desc' => 'Reached a 7-day streak.',  'icon' => '⚡', 'xp' => 70,  'check' => function ($u) { return (int) ($u->streak_count ?? 0) >= 7; }],
-            'streak_14' => ['name' => 'Committed',    'desc' => 'Reached a 14-day streak.', 'icon' => '💪', 'xp' => 140, 'check' => function ($u) { return (int) ($u->streak_count ?? 0) >= 14; }],
-            'streak_30' => ['name' => 'Unstoppable',  'desc' => 'Reached a 30-day streak.', 'icon' => '👑', 'xp' => 300, 'check' => function ($u) { return (int) ($u->streak_count ?? 0) >= 30; }],
-            'level_5'   => ['name' => 'Rising Star',  'desc' => 'Reached level 5.',         'icon' => '⭐', 'xp' => 50,  'check' => function ($u) { return (int) ($u->level ?? 1) >= 5; }],
-            'level_10'  => ['name' => 'Veteran',      'desc' => 'Reached level 10.',        'icon' => '🏆', 'xp' => 100, 'check' => function ($u) { return (int) ($u->level ?? 1) >= 10; }],
-            'level_25'  => ['name' => 'Legend',       'desc' => 'Reached level 25.',        'icon' => '💎', 'xp' => 250, 'check' => function ($u) { return (int) ($u->level ?? 1) >= 25; }],
+            // Getting started ------------------------------------------------------------
+            'welcome'      => ['name' => 'Welcome!',       'desc' => 'Joined the community.',        'icon' => '👋', 'xp' => 20,  'category' => 'start',   'metric' => 'account',      'target' => 1,   'unit' => ''],
+            'first_post'   => ['name' => 'First Words',    'desc' => 'Published your first post.',   'icon' => '📝', 'xp' => 30,  'category' => 'start',   'metric' => 'posts',        'target' => 1,   'unit' => 'posts'],
+            'first_video'  => ['name' => 'Lights, Camera', 'desc' => 'Uploaded your first video.',   'icon' => '🎬', 'xp' => 40,  'category' => 'start',   'metric' => 'videos',       'target' => 1,   'unit' => 'videos'],
+
+            // Streaks --------------------------------------------------------------------
+            'streak_3'     => ['name' => 'On Fire',        'desc' => 'Reached a 3-day streak.',      'icon' => '🔥', 'xp' => 30,  'category' => 'streak',  'metric' => 'streak',       'target' => 3,   'unit' => 'days'],
+            'streak_7'     => ['name' => 'Week Warrior',   'desc' => 'Reached a 7-day streak.',      'icon' => '⚡', 'xp' => 70,  'category' => 'streak',  'metric' => 'streak',       'target' => 7,   'unit' => 'days'],
+            'streak_14'    => ['name' => 'Committed',      'desc' => 'Reached a 14-day streak.',     'icon' => '💪', 'xp' => 140, 'category' => 'streak',  'metric' => 'streak',       'target' => 14,  'unit' => 'days'],
+            'streak_30'    => ['name' => 'Unstoppable',    'desc' => 'Reached a 30-day streak.',     'icon' => '👑', 'xp' => 300, 'category' => 'streak',  'metric' => 'streak',       'target' => 30,  'unit' => 'days'],
+
+            // Levels ---------------------------------------------------------------------
+            'level_5'      => ['name' => 'Rising Star',    'desc' => 'Reached level 5.',             'icon' => '⭐', 'xp' => 50,  'category' => 'level',   'metric' => 'level',        'target' => 5,   'unit' => ''],
+            'level_10'     => ['name' => 'Veteran',        'desc' => 'Reached level 10.',            'icon' => '🏆', 'xp' => 100, 'category' => 'level',   'metric' => 'level',        'target' => 10,  'unit' => ''],
+            'level_25'     => ['name' => 'Legend',         'desc' => 'Reached level 25.',            'icon' => '💎', 'xp' => 250, 'category' => 'level',   'metric' => 'level',        'target' => 25,  'unit' => ''],
+
+            // Supporting creators --------------------------------------------------------
+            'first_buy'    => ['name' => 'First Support',  'desc' => 'Made your first purchase.',    'icon' => '🎁', 'xp' => 50,  'category' => 'support', 'metric' => 'purchases',    'target' => 1,   'unit' => ''],
+            'supporter_5'  => ['name' => 'True Fan',       'desc' => 'Supported creators 5 times.',  'icon' => '💖', 'xp' => 120, 'category' => 'support', 'metric' => 'purchases',    'target' => 5,   'unit' => ''],
+            'supporter_25' => ['name' => 'Superfan',       'desc' => 'Supported creators 25 times.', 'icon' => '🌟', 'xp' => 400, 'category' => 'support', 'metric' => 'purchases',    'target' => 25,  'unit' => ''],
+            'coin_holder'  => ['name' => 'Coin Holder',    'desc' => 'Hold a creator coin.',         'icon' => '🪙', 'xp' => 80,  'category' => 'support', 'metric' => 'coins_held',   'target' => 1,   'unit' => 'coins'],
+            'collector'    => ['name' => 'Collector',      'desc' => 'Own your first NFT.',          'icon' => '🖼️', 'xp' => 100, 'category' => 'support', 'metric' => 'nfts_owned',   'target' => 1,   'unit' => 'NFTs'],
+
+            // Creating -------------------------------------------------------------------
+            'first_mint'   => ['name' => 'Minted',         'desc' => 'Minted your first NFT.',       'icon' => '⛏️', 'xp' => 120, 'category' => 'create',  'metric' => 'nfts_minted',  'target' => 1,   'unit' => 'NFTs'],
+            'creator_10'   => ['name' => 'Storyteller',    'desc' => 'Published 10 posts.',          'icon' => '📚', 'xp' => 150, 'category' => 'create',  'metric' => 'posts',        'target' => 10,  'unit' => 'posts'],
+            'video_5'      => ['name' => 'Show Runner',    'desc' => 'Uploaded 5 videos.',           'icon' => '📹', 'xp' => 200, 'category' => 'create',  'metric' => 'videos',       'target' => 5,   'unit' => 'videos'],
         ];
+    }
+
+    /**
+     * Current value of every metric the achievements measure, for one user.
+     *
+     * Each lookup is guarded individually: a table that hasn't been migrated yet (or a model
+     * that isn't present) yields 0 for that metric instead of breaking the whole page.
+     *
+     * Called at most once per user per day from touchDailyStreak(), plus once per view of
+     * the achievements page.
+     */
+    public static function userStats(User $user): array
+    {
+        $count = function (callable $fn) {
+            try {
+                return (int) $fn();
+            } catch (\Throwable $e) {
+                return 0;
+            }
+        };
+
+        $userId = $user->id;
+
+        return [
+            'account'     => 1,
+            'streak'      => (int) ($user->streak_count ?? 0),
+            'level'       => (int) ($user->level ?? 1),
+            'posts'       => $count(fn () => DB::table('posts')->where('user_id', $userId)->count()),
+            'videos'      => $count(fn () => DB::table('videos')->where('user_id', $userId)->count()),
+            'nfts_minted' => $count(fn () => DB::table('nfts')->where('user_id', $userId)->count()),
+            'nfts_owned'  => $count(fn () => DB::table('nfts')
+                ->where('user_id', $userId)
+                ->whereIn('status', ['minted', 'listed', 'sold', 'transferred'])
+                ->count()),
+            'coins_held'  => $count(fn () => DB::table('creator_coin_balances')
+                ->where('user_id', $userId)->where('balance', '>', 0)->count()),
+            'purchases'   => $count(fn () => DB::table('transactions')
+                ->where('sender_user_id', $userId)
+                ->where('status', 'approved')
+                ->count()),
+        ];
+    }
+
+    /**
+     * Progress toward a single achievement: [current, target, percent 0-100].
+     */
+    public static function progressFor(array $achievement, array $stats): array
+    {
+        $target = max(1, (int) ($achievement['target'] ?? 1));
+        $current = (int) ($stats[$achievement['metric'] ?? ''] ?? 0);
+        $pct = (int) min(100, round($current / $target * 100));
+
+        return [min($current, $target), $target, $pct];
     }
 
     /**
@@ -103,13 +194,23 @@ class GamificationService
     {
         $already = UserAchievement::where('user_id', $user->id)->pluck('achievement_key')->all();
 
-        foreach (self::achievements() as $key => $a) {
+        $all = self::achievements();
+
+        // Nothing left to earn — skip the stats queries entirely.
+        if (count($already) >= count($all)) {
+            return;
+        }
+
+        $stats = self::userStats($user);
+
+        foreach ($all as $key => $a) {
             if (in_array($key, $already, true)) {
                 continue;
             }
             $met = false;
             try {
-                $met = (bool) call_user_func($a['check'], $user);
+                [$current, $target] = self::progressFor($a, $stats);
+                $met = $current >= $target;
             } catch (\Throwable $e) {
                 $met = false;
             }
