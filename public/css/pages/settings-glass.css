@@ -4992,3 +4992,272 @@ body.st-subs-mobile-lock {
 .settings-page .settings-nav__link:hover .settings-nav__chevron {
     transform: none;
 }
+
+/* ============================================
+   PROFILE SETTINGS — redesign
+   Sectioned cards, profile-strength meter, always-visible
+   media controls, counters and a sticky save bar.
+   Uses the existing --st-* tokens so it themes with the
+   rest of settings.
+   ============================================ */
+
+.ps {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.ps-card {
+    padding: 18px 20px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-lg, 16px);
+    background: var(--st-bg-card);
+    box-sizing: border-box;
+}
+
+.ps-card__head {
+    margin-bottom: 14px;
+}
+
+.ps-card__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--st-text, inherit);
+}
+
+.ps-card__sub {
+    margin: 3px 0 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--st-text-muted, #8b8b94);
+}
+
+/* --- Profile strength ---------------------------------------------------- */
+.ps-complete__head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.ps-complete__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--st-text, inherit);
+}
+
+.ps-complete__sub {
+    margin: 3px 0 0;
+    font-size: 13px;
+    color: var(--st-text-muted, #8b8b94);
+}
+
+.ps-complete__pct {
+    flex: 0 0 auto;
+    font-size: 20px;
+    font-weight: 800;
+    background: var(--st-accent-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.ps-complete__track {
+    height: 7px;
+    margin-top: 12px;
+    border-radius: 999px;
+    background: var(--st-bg-muted, rgba(128, 128, 140, .22));
+    overflow: hidden;
+}
+
+.ps-complete__fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--st-accent-gradient);
+    transition: width .45s var(--st-ease, ease);
+}
+
+/* --- Media --------------------------------------------------------------- */
+.ps-cover {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--st-radius-md, 12px);
+}
+
+/* Controls that are always visible — the hover-only overlay underneath is
+   unusable on touch devices. */
+.ps-media__controls {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 3;
+    display: flex;
+    gap: 8px;
+}
+
+.ps-media__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 999px;
+    background: rgba(9, 9, 11, .72);
+    color: #fff;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: background .15s ease;
+}
+
+.ps-media__btn:hover {
+    background: rgba(9, 9, 11, .88);
+}
+
+.ps-media__btn--danger:hover {
+    background: var(--st-danger, #f43f5e);
+    border-color: transparent;
+}
+
+.ps-media__btn svg {
+    width: 15px;
+    height: 15px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ps-avatar {
+    position: relative;
+    overflow: visible;
+}
+
+/* Camera badge on the avatar */
+.ps-avatar__btn {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    z-index: 3;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 2px solid var(--st-bg-card);
+    border-radius: 50%;
+    background: var(--st-accent-gradient);
+    color: #fff;
+    cursor: pointer;
+    transition: filter .15s ease;
+}
+
+.ps-avatar__btn:hover {
+    filter: brightness(1.1);
+}
+
+.ps-avatar__btn svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* --- Field extras -------------------------------------------------------- */
+.ps-count {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--st-text-muted, #8b8b94);
+    font-variant-numeric: tabular-nums;
+}
+
+.ps-label-row__right {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ps-hint {
+    margin: 6px 0 0;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--st-text-muted, #8b8b94);
+}
+
+.ps-hint__url {
+    color: var(--st-brand-neon, #cb0c9f);
+    font-weight: 600;
+    word-break: break-all;
+}
+
+/* --- Sticky save bar ----------------------------------------------------- */
+.ps-savebar {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-lg, 16px);
+    background: var(--st-bg-elevated, var(--st-bg-card));
+    backdrop-filter: var(--st-glass-blur, blur(12px));
+    box-shadow: var(--st-glass-shadow, 0 4px 20px rgba(0, 0, 0, .18));
+}
+
+.ps-savebar__view {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--st-text-muted, #8b8b94);
+    text-decoration: none;
+}
+
+.ps-savebar__view:hover {
+    color: var(--st-brand-neon, #cb0c9f);
+    text-decoration: none;
+}
+
+/* Override the old full-width submit now that it lives in the bar */
+.ps .profile-settings__submit.ps-savebar__submit {
+    width: auto;
+    min-width: 150px;
+    margin: 0;
+}
+
+@media (max-width: 560px) {
+    .ps-card {
+        padding: 16px 14px;
+    }
+
+    .ps-media__btn {
+        padding: 7px 10px;
+        font-size: 12px;
+    }
+
+    .ps-savebar {
+        padding: 10px 12px;
+    }
+
+    .ps .profile-settings__submit.ps-savebar__submit {
+        min-width: 120px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ps-complete__fill,
+    .ps-media__btn,
+    .ps-avatar__btn {
+        transition: none;
+    }
+}
