@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class CustomRequestController extends Controller
 {
@@ -22,13 +23,63 @@ class CustomRequestController extends Controller
      */
     public function marketplace(Request $request)
     {
-        $requests = CustomRequest::where('is_marketplace', true)
-            ->where('status', '!=', CustomRequest::STATUS_CANCELLED)
-            ->with(['creator', 'contributions'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(12);
+        $search = trim((string) $request->query('search', ''));
+        $tab = in_array($request->query('tab'), ['open', 'funded'], true) ? $request->query('tab') : 'watch';
 
-        return view('custom-requests.marketplace', compact('requests'));
+        $base = fn () => CustomRequest::where('is_marketplace', true)
+            ->where('status', '!=', CustomRequest::STATUS_CANCELLED)
+            ->with(['creator', 'contributions']);
+
+        $applySearch = function ($q) use ($search) {
+            if ($search !== '') {
+                $q->where(function ($w) use ($search) {
+                    $w->where('title', 'like', '%' . $search . '%')
+                      ->orWhere('description', 'like', '%' . $search . '%');
+                });
+            }
+            return $q;
+        };
+
+        // The hero content: challenges that were actually delivered, so the page opens on a
+        // wall of videos rather than an empty form.
+        $delivered = $applySearch(
+            $base()->whereNotNull('delivery_video_path')->where('status', CustomRequest::STATUS_COMPLETED)
+        )->orderByDesc('delivered_at')->limit(24)->get();
+
+        // Challenges still open for funding.
+        $open = $applySearch(
+            $base()->whereIn('status', [CustomRequest::STATUS_PENDING, CustomRequest::STATUS_ACCEPTED])
+        )->orderByDesc('created_at')->limit(24)->get();
+
+        // Closest to their goal — the ones most likely to tip over with one more contribution.
+        $almost = $open
+            ->filter(fn ($r) => (float) $r->goal_amount > 0 && (float) $r->current_amount > 0)
+            ->sortByDesc(fn ($r) => (float) $r->current_amount / max(0.01, (float) $r->goal_amount))
+            ->take(6)
+            ->values();
+
+        // Paginated full list drives the tab the user is actually on.
+        $listQuery = $applySearch($base());
+        if ($tab === 'open') {
+            $listQuery->whereIn('status', [CustomRequest::STATUS_PENDING, CustomRequest::STATUS_ACCEPTED]);
+        } elseif ($tab === 'funded') {
+            $listQuery->where('status', CustomRequest::STATUS_COMPLETED);
+        } else {
+            $listQuery->whereNotNull('delivery_video_path');
+        }
+        $requests = $listQuery->orderByDesc('created_at')->paginate(12)->withQueryString();
+
+        $stats = [
+            'watch' => CustomRequest::whereNotNull('delivery_video_path')->count(),
+            'open' => CustomRequest::where('is_marketplace', true)
+                ->whereIn('status', [CustomRequest::STATUS_PENDING, CustomRequest::STATUS_ACCEPTED])->count(),
+            'raised' => (float) CustomRequestContribution::where('status', CustomRequestContribution::STATUS_COMPLETED)->sum('amount'),
+            'completed' => CustomRequest::where('status', CustomRequest::STATUS_COMPLETED)->count(),
+        ];
+
+        return view('custom-requests.marketplace', compact(
+            'requests', 'delivered', 'open', 'almost', 'stats', 'search', 'tab'
+        ));
     }
 
     /**
@@ -379,6 +430,38 @@ class CustomRequestController extends Controller
                 'success' => false,
                 'message' => 'Unauthorized. You can only complete requests you accepted.'
             ], 403);
+        }
+
+        // Optional delivery video. Completing used to only flip the status, so the fulfilment
+        // never existed as content anywhere — the browse page had nothing to show. When a
+        // video is supplied it is stored alongside the request and becomes the public proof
+        // of the challenge.
+        if (request()->hasFile('delivery_video')) {
+            $validator = Validator::make(request()->all(), [
+                'delivery_video' => 'file|mimes:mp4,mov,webm,avi|max:20480',
+                'delivery_thumbnail' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            ]);
+
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                ], 422);
+            }
+
+            $file = request()->file('delivery_video');
+            $name = time() . '_cr' . $customRequest->id . '_' . Str::random(8) . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('storage/custom-requests'), $name);
+            $customRequest->delivery_video_path = 'custom-requests/' . $name;
+
+            if (request()->hasFile('delivery_thumbnail')) {
+                $thumb = request()->file('delivery_thumbnail');
+                $thumbName = time() . '_cr' . $customRequest->id . '_thumb_' . Str::random(8) . '.' . $thumb->getClientOriginalExtension();
+                $thumb->move(public_path('storage/custom-requests'), $thumbName);
+                $customRequest->delivery_thumbnail_path = 'custom-requests/' . $thumbName;
+            }
+
+            $customRequest->delivered_at = now();
         }
 
         $customRequest->status = CustomRequest::STATUS_COMPLETED;

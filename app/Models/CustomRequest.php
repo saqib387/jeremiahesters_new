@@ -37,6 +37,10 @@ class CustomRequest extends Model
         'has_support_ticket',
         'support_status',
         'deadline',
+        'delivery_video_path',
+        'delivery_thumbnail_path',
+        'delivered_at',
+        'views_count',
     ];
 
     protected $casts = [
@@ -53,6 +57,8 @@ class CustomRequest extends Model
         'payment_received_at' => 'datetime',
         'funds_released_at' => 'datetime',
         'deadline' => 'datetime',
+        'delivered_at' => 'datetime',
+        'views_count' => 'integer',
     ];
 
     // Request types
