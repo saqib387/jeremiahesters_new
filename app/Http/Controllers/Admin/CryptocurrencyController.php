@@ -251,7 +251,18 @@ class CryptocurrencyController extends Controller
         $data['is_verified'] = $request->has('is_verified');
         $data['is_active'] = $request->has('is_active');
 
+        // Route a price change through updatePrice() so it records a history point and a real
+        // change_24h. Assigning current_price directly (as this used to) left price_history
+        // empty forever, which is why every token displayed a permanent +0.00%.
+        $newPrice = (float) $data['current_price'];
+        $priceChanged = abs($newPrice - (float) $cryptocurrency->current_price) > 0.00000001;
+        unset($data['current_price']);
+
         $cryptocurrency->update($data);
+
+        if ($priceChanged) {
+            $cryptocurrency->refresh()->updatePrice($newPrice);
+        }
 
         return redirect()->route('voyager.tokens.index')
             ->with('success', 'Token updated successfully.');

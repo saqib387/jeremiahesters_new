@@ -666,3 +666,73 @@
         transition: none;
     }
 }
+
+/* ============================================
+   Added with the marketplace data fixes: platform
+   stats bar, real sparklines, "New" (no-history) badge.
+   ============================================ */
+
+.mp-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+@media (max-width: 640px) {
+    .mp-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.mp-stat {
+    padding: 14px 16px;
+    border: 1px solid var(--mp-border);
+    border-radius: var(--mp-radius-md);
+    background: var(--mp-surface);
+}
+
+.mp-stat__value {
+    display: block;
+    font-family: var(--mp-font-display);
+    font-size: 19px;
+    font-weight: 800;
+    color: var(--mp-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mp-stat__label {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--mp-text-muted);
+}
+
+/* Sparkline strip on each token card */
+.mp-token__spark {
+    margin: 10px 0 2px;
+    height: 34px;
+    color: var(--mp-text-muted);
+}
+
+.mp-token__spark svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* Shown instead of a misleading +0.00% when a token has no price history yet */
+.mp-token__change--flat {
+    background: var(--mp-surface-2);
+    color: var(--mp-text-muted);
+}
+
+/* Three stats per card now, so let them wrap on narrow screens */
+.mp-token__stats {
+    flex-wrap: wrap;
+    gap: 10px;
+}

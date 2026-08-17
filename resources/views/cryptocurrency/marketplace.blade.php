@@ -5,12 +5,10 @@
         ? getSetting('site.default_user_theme') == 'dark'
         : Cookie::get('app_theme') == 'dark';
 
-    $currentSort = request('sort');
-    $currentOrder = request('order');
 @endphp
 
 @section('styles')
-    <link rel="stylesheet" href="{{ asset('css/pages/marketplace.css') }}?v=20260713c">
+    <link rel="stylesheet" href="{{ asset('css/pages/marketplace.css') }}?v=20260817a">
 @endsection
 
 @section('content')
@@ -19,16 +17,35 @@
 
     <header class="mp-header">
         <h1 class="mp-header__title">{{ __('Token Marketplace') }}</h1>
-        <p class="mp-header__sub">{{ __('Discover and invest in creator tokens') }}</p>
+        <p class="mp-header__sub">{{ __('Back the creators you believe in, early') }}</p>
     </header>
+
+    {{-- Live platform figures. Every one is computed from real ledger data. --}}
+    <section class="mp-stats">
+        <div class="mp-stat">
+            <span class="mp-stat__value">{{ number_format($stats['tokens']) }}</span>
+            <span class="mp-stat__label">{{ __('Tokens') }}</span>
+        </div>
+        <div class="mp-stat">
+            <span class="mp-stat__value">${{ number_format($stats['volume24h'], 2) }}</span>
+            <span class="mp-stat__label">{{ __('24h Volume') }}</span>
+        </div>
+        <div class="mp-stat">
+            <span class="mp-stat__value">{{ number_format($stats['holders']) }}</span>
+            <span class="mp-stat__label">{{ __('Holders') }}</span>
+        </div>
+        <div class="mp-stat">
+            <span class="mp-stat__value">
+                {{ $stats['marketCap'] > 0 ? '$' . number_format($stats['marketCap'], 0) : '—' }}
+            </span>
+            <span class="mp-stat__label">{{ __('Market Cap') }}</span>
+        </div>
+    </section>
 
     <section class="mp-toolbar">
         <form action="{{ route('cryptocurrency.marketplace') }}" method="GET" class="mp-search" role="search">
-            @if(request('sort'))
-                <input type="hidden" name="sort" value="{{ request('sort') }}">
-            @endif
-            @if(request('order'))
-                <input type="hidden" name="order" value="{{ request('order') }}">
+            @if($sort !== '')
+                <input type="hidden" name="sort" value="{{ $sort }}">
             @endif
             <span class="mp-search__icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none">
@@ -42,34 +59,53 @@
                 type="text"
                 name="search"
                 placeholder="{{ __('Search tokens by name or symbol...') }}"
-                value="{{ request('search') }}"
+                value="{{ $search }}"
                 autocomplete="off"
                 aria-label="{{ __('Search tokens') }}"
             >
             <button type="submit" class="mp-search__btn">{{ __('Search') }}</button>
         </form>
 
+        {{-- Values here MUST match the whitelist in CryptocurrencyController@marketplace.
+             They previously used sort/order pairs the controller never read, so every one of
+             these chips changed the URL and nothing else. --}}
         <div class="mp-filters" role="list">
-            <a href="{{ route('cryptocurrency.marketplace', array_filter(['search' => request('search')])) }}"
-               class="mp-filter {{ !$currentSort ? 'is-active' : '' }}">{{ __('All') }}</a>
-            <a href="{{ route('cryptocurrency.marketplace', array_filter(['search' => request('search'), 'sort' => 'current_price', 'order' => 'desc'])) }}"
-               class="mp-filter {{ $currentSort === 'current_price' && $currentOrder === 'desc' ? 'is-active' : '' }}">{{ __('Price: High') }}</a>
-            <a href="{{ route('cryptocurrency.marketplace', array_filter(['search' => request('search'), 'sort' => 'current_price', 'order' => 'asc'])) }}"
-               class="mp-filter {{ $currentSort === 'current_price' && $currentOrder === 'asc' ? 'is-active' : '' }}">{{ __('Price: Low') }}</a>
-            <a href="{{ route('cryptocurrency.marketplace', array_filter(['search' => request('search'), 'sort' => 'market_cap', 'order' => 'desc'])) }}"
-               class="mp-filter {{ $currentSort === 'market_cap' ? 'is-active' : '' }}">{{ __('Market Cap') }}</a>
-            <a href="{{ route('cryptocurrency.marketplace', array_filter(['search' => request('search'), 'sort' => 'created_at', 'order' => 'desc'])) }}"
-               class="mp-filter {{ $currentSort === 'created_at' ? 'is-active' : '' }}">{{ __('Newest') }}</a>
+            @foreach([
+                '' => __('All'),
+                'price_high' => __('Price: High'),
+                'price_low' => __('Price: Low'),
+                'market_cap' => __('Market Cap'),
+                'newest' => __('Newest'),
+            ] as $key => $label)
+                <a href="{{ route('cryptocurrency.marketplace', array_filter(['search' => $search, 'sort' => $key])) }}"
+                   class="mp-filter {{ $sort === $key ? 'is-active' : '' }}">{{ $label }}</a>
+            @endforeach
         </div>
     </section>
 
-    @if($trending->count() > 0 && !request('search'))
+    {{-- Top movers: only shown when tokens actually have enough history to rank honestly. --}}
+    @if($gainers->count() > 0 && $search === '')
+    <section class="mp-section">
+        <div class="mp-section__head">
+            <h2 class="mp-section__title">{{ __('Top Gainers') }}</h2>
+            <span class="mp-section__count">{{ __('last 24h') }}</span>
+        </div>
+        <div class="mp-grid">
+            @foreach($gainers as $crypto)
+                @include('cryptocurrency.partials.marketplace-token-card', ['crypto' => $crypto])
+            @endforeach
+        </div>
+    </section>
+    @endif
+
+    @if($trending->count() > 0 && $search === '')
     <section class="mp-section">
         <div class="mp-section__head">
             <h2 class="mp-section__title">{{ __('Trending Tokens') }}</h2>
+            <span class="mp-section__count">{{ __('by 24h volume') }}</span>
         </div>
         <div class="mp-grid">
-            @foreach($trending->take(3) as $crypto)
+            @foreach($trending as $crypto)
                 @include('cryptocurrency.partials.marketplace-token-card', ['crypto' => $crypto])
             @endforeach
         </div>
@@ -103,8 +139,8 @@
                     </svg>
                 </span>
                 <h3>{{ __('No tokens found') }}</h3>
-                <p>{{ request('search') ? __('Try a different search term') : __('Be the first to create a token!') }}</p>
-                @if(request('search'))
+                <p>{{ $search !== '' ? __('Try a different search term') : __('Be the first to create a token!') }}</p>
+                @if($search !== '')
                     <a href="{{ route('cryptocurrency.marketplace') }}" class="mp-btn mp-btn--ghost">{{ __('Clear search') }}</a>
                 @endif
             </div>

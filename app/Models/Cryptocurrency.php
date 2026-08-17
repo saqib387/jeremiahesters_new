@@ -180,7 +180,14 @@ class Cryptocurrency extends Model
      */
     public function getPriceChangePercentageAttribute(): float
     {
-        // Use change_24h if available, otherwise calculate from initial price
+        // Preferred: a genuine rolling 24h window derived from recorded price history.
+        // The stored change_24h column is only written when updatePrice() runs, so on its own
+        // it goes stale and reads 0.00% forever.
+        $rolling = $this->rollingChange(24);
+        if ($rolling !== null) {
+            return $rolling;
+        }
+
         if ($this->change_24h !== null) {
             return (float) $this->change_24h;
         }
@@ -190,6 +197,72 @@ class Cryptocurrency extends Model
         }
 
         return (($this->current_price - $this->initial_price) / $this->initial_price) * 100;
+    }
+
+    /**
+     * Percentage change between the current price and the most recent recorded price that is
+     * at least $hours old. Returns null when history doesn't span that far back, so callers
+     * can distinguish "no movement" from "not enough data" instead of printing a false 0.00%.
+     */
+    public function rollingChange(int $hours = 24): ?float
+    {
+        $points = $this->priceHistoryPoints();
+        if (count($points) < 2) {
+            return null;
+        }
+
+        $cutoff = now()->subHours($hours)->timestamp;
+
+        // Walk backwards for the newest point at or before the cutoff.
+        $baseline = null;
+        foreach (array_reverse($points) as $point) {
+            if ($point['timestamp'] <= $cutoff) {
+                $baseline = $point['price'];
+                break;
+            }
+        }
+
+        // History exists but is entirely inside the window: compare against its oldest point
+        // so a freshly-active token still shows real movement.
+        if ($baseline === null) {
+            $baseline = $points[0]['price'];
+        }
+
+        if ($baseline <= 0) {
+            return null;
+        }
+
+        return (((float) $this->current_price - $baseline) / $baseline) * 100;
+    }
+
+    /**
+     * Normalised price history as [['price' => float, 'timestamp' => int], ...], oldest first.
+     * Tolerates the column being a JSON string, an array, or malformed.
+     */
+    public function priceHistoryPoints(): array
+    {
+        $raw = $this->price_history;
+        if (is_string($raw)) {
+            $raw = json_decode($raw, true);
+        }
+        if (!is_array($raw)) {
+            return [];
+        }
+
+        $points = [];
+        foreach ($raw as $entry) {
+            if (!is_array($entry) || !isset($entry['price']) || !is_numeric($entry['price'])) {
+                continue;
+            }
+            $points[] = [
+                'price' => (float) $entry['price'],
+                'timestamp' => (int) ($entry['timestamp'] ?? 0),
+            ];
+        }
+
+        usort($points, fn ($a, $b) => $a['timestamp'] <=> $b['timestamp']);
+
+        return $points;
     }
 
     /**
@@ -311,20 +384,29 @@ class Cryptocurrency extends Model
         // Update market cap
         $this->market_cap = $this->circulating_supply * $newPrice;
         
-        // Add to price history
-        $priceHistory = json_decode($this->price_history ?? '[]', true);
+        // Add to price history. NOTE: price_history is cast to 'json', so reading it yields an
+        // array and Eloquent re-encodes on write. Calling json_decode()/json_encode() here (as
+        // this method used to) would fatal on the array and then double-encode the column.
+        $priceHistory = $this->price_history;
+        if (is_string($priceHistory)) {
+            $priceHistory = json_decode($priceHistory, true);
+        }
+        if (!is_array($priceHistory)) {
+            $priceHistory = [];
+        }
+
         $priceHistory[] = [
             'price' => $newPrice,
             'timestamp' => now()->timestamp,
             'date' => now()->toISOString()
         ];
-        
+
         // Keep only last 100 price points
         if (count($priceHistory) > 100) {
             $priceHistory = array_slice($priceHistory, -100);
         }
-        
-        $this->price_history = json_encode($priceHistory);
+
+        $this->price_history = $priceHistory;
         $this->save();
     }
 

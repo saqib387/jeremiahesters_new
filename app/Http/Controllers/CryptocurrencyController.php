@@ -618,18 +618,75 @@ public function show($id)
     /**
      * Display the cryptocurrency marketplace.
      */
-    public function marketplace()
+    public function marketplace(Request $request)
     {
-        $trending = Cryptocurrency::where('is_active', true)
-            ->orderBy('volume_24h', 'desc')
-            ->limit(5)
-            ->get();
-            
-        $cryptocurrencies = Cryptocurrency::where('is_active', true)
-            ->orderBy('current_price', 'desc')
-            ->paginate(20);
-            
-        return view('cryptocurrency.marketplace', compact('trending', 'cryptocurrencies'));
+        $search = trim((string) $request->query('search', ''));
+        $sort = (string) $request->query('sort', '');
+
+        // --- Real activity, computed from the ledger ---------------------------------------
+        // volume_24h on the row is a lifetime running total (buy() only ever adds to it and
+        // nothing decays it), so a genuine 24h figure has to come from the transactions table.
+        $volume24h = CryptoTransaction::where('created_at', '>=', now()->subDay())
+            ->where('status', 'completed')
+            ->groupBy('cryptocurrency_id')
+            ->selectRaw('cryptocurrency_id, SUM(total_price) as total')
+            ->pluck('total', 'cryptocurrency_id');
+
+        $holders = CryptoWallet::where('balance', '>', 0)
+            ->groupBy('cryptocurrency_id')
+            ->selectRaw('cryptocurrency_id, COUNT(*) as total')
+            ->pluck('total', 'cryptocurrency_id');
+
+        // --- Listing ------------------------------------------------------------------------
+        $query = Cryptocurrency::where('is_active', true);
+
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('symbol', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Whitelisted so a crafted ?sort= can never reach an arbitrary column.
+        switch ($sort) {
+            case 'price_high':  $query->orderBy('current_price', 'desc'); break;
+            case 'price_low':   $query->orderBy('current_price', 'asc');  break;
+            case 'market_cap':  $query->orderBy('market_cap', 'desc');    break;
+            case 'newest':      $query->orderBy('created_at', 'desc');    break;
+            default:            $query->orderBy('current_price', 'desc'); $sort = ''; break;
+        }
+
+        $cryptocurrencies = $query->paginate(20)->withQueryString();
+
+        // --- Trending -----------------------------------------------------------------------
+        // Ordered by REAL 24h traded value. Falls back to newest when nothing has traded, so
+        // the strip is never an arbitrary ordering of an all-zero column.
+        $active = Cryptocurrency::where('is_active', true)->get();
+        $trending = $active
+            ->sortByDesc(fn ($c) => (float) ($volume24h[$c->id] ?? 0))
+            ->take(3)
+            ->values();
+        if ($volume24h->isEmpty()) {
+            $trending = $active->sortByDesc('created_at')->take(3)->values();
+        }
+
+        // Top movers over a real 24h window; only tokens with enough history to say.
+        $gainers = $active
+            ->filter(fn ($c) => $c->rollingChange(24) !== null && $c->rollingChange(24) > 0)
+            ->sortByDesc(fn ($c) => $c->rollingChange(24))
+            ->take(3)
+            ->values();
+
+        $stats = [
+            'tokens' => $active->count(),
+            'volume24h' => (float) $volume24h->sum(),
+            'holders' => (int) CryptoWallet::where('balance', '>', 0)->distinct('user_id')->count('user_id'),
+            'marketCap' => (float) $active->sum('market_cap'),
+        ];
+
+        return view('cryptocurrency.marketplace', compact(
+            'trending', 'cryptocurrencies', 'gainers', 'stats', 'volume24h', 'holders', 'search', 'sort'
+        ));
     }
 
     /**
