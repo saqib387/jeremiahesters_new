@@ -1386,9 +1386,14 @@ html:not([data-theme="dark"]) .side-menu .user-details {
     }
 }
 
+/* Keep the drawer out of the way on desktop, but only while it is CLOSED.
+   The previous rule hid .mobile-sidebar/.mobile-search unconditionally at
+   >=769px, which meant the home page's #header-menu-btn (which is visible on
+   desktop) toggled .is-open on a panel that display:none !important could
+   never reveal — the menu simply did nothing on desktop. */
 @media (min-width: 769px) {
-    .mobile-sidebar,
-    .mobile-search {
+    .mobile-sidebar:not(.is-open),
+    .mobile-search:not(.is-open) {
         display: none !important;
     }
 }
@@ -1738,9 +1743,14 @@ body.mobile-search-open .reels-container {
     }
 }
 
+/* Keep the drawer out of the way on desktop, but only while it is CLOSED.
+   The previous rule hid .mobile-sidebar/.mobile-search unconditionally at
+   >=769px, which meant the home page's #header-menu-btn (which is visible on
+   desktop) toggled .is-open on a panel that display:none !important could
+   never reveal — the menu simply did nothing on desktop. */
 @media (min-width: 769px) {
-    .mobile-sidebar,
-    .mobile-search {
+    .mobile-sidebar:not(.is-open),
+    .mobile-search:not(.is-open) {
         display: none !important;
     }
 }
