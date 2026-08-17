@@ -124,14 +124,16 @@
                             <label for="request_description" class="cr-label">
                                 {{ __('Description') }} <span class="cr-req">*</span>
                             </label>
-                            <span class="cr-count"><span id="description_count">0</span> {{ __('characters') }}</span>
+                            <span class="cr-count"><span id="description_count">0</span>/2000</span>
                         </div>
                         <textarea class="cr-input cr-textarea"
                                   id="request_description"
                                   name="description"
                                   rows="4"
                                   placeholder="{{ __('Describe your custom request in detail…') }}"
-                                  required></textarea>
+                                  required
+                                  maxlength="2000"></textarea>
+                        <p class="cr-hint">{{ __('Be specific — clear requests get accepted faster.') }}</p>
                     </div>
 
                     {{-- Pricing --}}

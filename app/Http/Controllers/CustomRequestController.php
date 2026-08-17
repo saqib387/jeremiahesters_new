@@ -156,15 +156,21 @@ class CustomRequestController extends Controller
             'creator_id' => 'required|exists:users,id',
             'type' => 'required|in:private,public,marketplace',
             'title' => 'required|string|max:255',
-            'description' => 'required|string',
+            // Was unbounded, so the modal's character counter had nothing to count toward
+            // and an arbitrarily long description could be stored.
+            'description' => 'required|string|max:2000',
             'price' => 'nullable|numeric|min:1',
             'goal_amount' => 'nullable|numeric|min:1',
             'upfront_payment' => 'required|numeric|min:1',
-            'deadline' => 'nullable|date',
+            // The form sets min="today" but that is only a browser hint — enforce it server-side
+            // so a past deadline can't be submitted directly.
+            'deadline' => 'nullable|date|after_or_equal:today',
             'message_id' => 'nullable|exists:user_messages,id',
         ], [
             'price.min' => 'Price must be at least $1.00',
             'goal_amount.min' => 'Goal amount must be at least $1.00',
+            'description.max' => 'Description cannot be longer than 2000 characters.',
+            'deadline.after_or_equal' => 'The deadline cannot be in the past.',
         ]);
 
         if ($validator->fails()) {

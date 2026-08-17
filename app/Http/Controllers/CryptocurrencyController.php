@@ -27,7 +27,11 @@ class CryptocurrencyController extends Controller
      */
     public function index(Request $request)
     {
-        return view('cryptocurrency.custom-request-redirect');
+        // This used to render a splash interstitial (three checkmarks plus links onward) that
+        // did nothing on its own. The route name is kept because the sidebar, side-menu,
+        // app-bar back button and several views all link to it — they now land straight on
+        // the token marketplace instead of a dead middle step.
+        return redirect()->route('cryptocurrency.marketplace');
     }
 
     /**
