@@ -159,7 +159,11 @@ ssh "${SSH_MUX[@]}" "$HOST" "$REMOTE_SCRIPT" 2>&1 | sed 's/^/  /'
 
 # --- Verify over HTTP (no SSH needed) -----------------------------------------------
 echo "Verifying..."
-code=$(curl -s -o /dev/null -w '%{http_code}' -m 45 https://xtrafreaky.com/ || echo 000)
+# Capture the status separately from curl's exit code: on a non-zero exit the old
+# `$(curl ... || echo 000)` form concatenated BOTH outputs ("200" + "000" = "200000")
+# and reported a healthy deploy as failed.
+code=$(curl -s -o /dev/null -w '%{http_code}' -m 45 https://xtrafreaky.com/) || code=000
+[ -n "$code" ] || code=000
 log "https://xtrafreaky.com/ => HTTP $code"
 [ "$code" = "200" ] || fail "site did not return 200 after deploy"
 
