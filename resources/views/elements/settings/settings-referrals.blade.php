@@ -1,73 +1,114 @@
-<div class="pb-2">
-    <div class="pb-2 text-center">{{__('Copy your referral link and invite other people to get a fee from their earnings.')}}</div>
-    <div class="pl-5 pr-5">
-        <div class="input-group">
-            <input type="text" class="form-control text-center"
-                   @switch(getSetting('referrals.referrals_default_link_page'))
-                       @case('profile')
-                           value="{{route('profile',['ref'=> Auth::user()->referral_code, 'username'=> Auth::user()->username])}}"
-                       @break
-                       @case('home')
-                            value="{{route('home',['ref'=> Auth::user()->referral_code])}}"
-                       @break
-                       @case('register')
-                            value="{{route('register',['ref'=> Auth::user()->referral_code])}}"
-                       @break
-                   @endswitch
-                   placeholder="{{route('profile',['ref'=> Auth::user()->referral_code, 'username'=> Auth::user()->username])}}"
-                   id="copy-input"
-            >
-            <div class="input-group-append">
-      <button class="btn btn-primary btn-block rounded mr-0 text-truncate" type="button" id="copy-button"
-              data-toggle="tooltip" data-placement="bottom"
-              title={{__('Copy to Clipboard')}}>
-        {{__('Copy')}}
-      </button>
-    </div>
+@php
+    $me = Auth::user();
+
+    // Referral link target follows the admin's configured landing page.
+    $refLink = match (getSetting('referrals.referrals_default_link_page')) {
+        'home' => route('home', ['ref' => $me->referral_code]),
+        'register' => route('register', ['ref' => $me->referral_code]),
+        default => route('profile', ['ref' => $me->referral_code, 'username' => $me->username]),
+    };
+
+    // getTotalAmountEarnedFromRewardsByUsers() requires BOTH the referred and referral
+    // ids, so the all-referrals total is summed directly rather than calling it with
+    // one argument (which throws ArgumentCountError).
+    $totalEarned = \App\Model\Reward::where('to_user_id', $me->id)
+        ->where('reward_type', \App\Model\Reward::FEE_PERCENTAGE_REWARD_TYPE)
+        ->sum('amount');
+@endphp
+
+<div class="profile-settings ps">
+
+    {{-- Your link ---------------------------------------------------------------- --}}
+    <div class="ps-card">
+        <div class="ps-card__head">
+            <h2 class="ps-card__title">{{ __('Your referral link') }}</h2>
+            <p class="ps-card__sub">{{ __('Share it. When someone signs up through it, you earn a share of what they make.') }}</p>
+        </div>
+
+        {{-- #copy-input / #copy-button are the hooks referrals.js binds to — keep both. --}}
+        <div class="ref-copy">
+            <input type="text" id="copy-input" class="ref-copy__input" readonly
+                   value="{{ $refLink }}" aria-label="{{ __('Your referral link') }}">
+            <button class="ref-copy__btn" type="button" id="copy-button"
+                    data-toggle="tooltip" data-placement="bottom" title="{{ __('Copy to Clipboard') }}">
+                {{ __('Copy') }}
+            </button>
         </div>
     </div>
-</div>
-<div class="table-wrapper ">
-    <div class="">
-        <div class="col py-3 text-bold border-bottom">
-            <div class="col-lg-12 text-truncate d-md-block text-center">{{__('Your referral list')}}</div>
+
+    {{-- Stats -------------------------------------------------------------------- --}}
+    <div class="ps-card">
+        <div class="ps-card__head">
+            <h2 class="ps-card__title">{{ __('Your referrals') }}</h2>
         </div>
+        <div class="ref-stats">
+            <div class="ref-stat">
+                <span class="ref-stat__value">{{ number_format($referrals->total()) }}</span>
+                <span class="ref-stat__label">{{ __('People referred') }}</span>
+            </div>
+            <div class="ref-stat">
+                <span class="ref-stat__value">{{ \App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount($totalEarned) }}</span>
+                <span class="ref-stat__label">{{ __('Total earned') }}</span>
+            </div>
+        </div>
+    </div>
+
+    {{-- List --------------------------------------------------------------------- --}}
+    <div class="ps-card">
+        <div class="ps-card__head">
+            <h2 class="ps-card__title">{{ __('Referral list') }}</h2>
+        </div>
+
         @if(count($referrals))
-            @foreach($referrals as $referral)
-                <div class="col d-flex align-items-center py-3 border-bottom">
-                    <div class="pl-2">
-                        @if($referral->usedBy)
-                            <a href="{{route('profile',['username'=>$referral->usedBy->username])}}">
-                                <img class="rounded-circle avatar" src="{{$referral->usedBy->avatar}}" alt="{{$referral->usedBy->username}}">
+            <ul class="ref-list">
+                @foreach($referrals as $referral)
+                    @php $u = $referral->usedBy; @endphp
+                    <li class="ref-item">
+                        {{-- Guard on $u: the old markup called $referral->usedBy->username inside
+                             the branch that ran when usedBy was null, which would fatal. --}}
+                        @if($u)
+                            <a href="{{ route('profile', ['username' => $u->username]) }}" class="ref-item__avatar-link">
+                                <img class="ref-item__avatar" src="{{ $u->avatar }}" alt="{{ $u->username }}" loading="lazy">
                             </a>
                         @else
-                            <a href="{{route('profile',['username'=>$referral->usedBy->username])}}">
-                                <img class="rounded-circle avatar" src="{{\App\Providers\GenericHelperServiceProvider::getStorageAvatarPath(null)}}" alt="Avatar">
-                            </a>
+                            <span class="ref-item__avatar-link">
+                                <img class="ref-item__avatar" src="{{ \App\Providers\GenericHelperServiceProvider::getStorageAvatarPath(null) }}" alt="" loading="lazy">
+                            </span>
                         @endif
-                    </div>
-                    <div class="col-lg-4 text-truncate">
-                        <a href="{{route('profile',['username'=>$referral->usedBy->username])}}" class="text-dark-r">
-                            {{$referral->usedBy->name}}
-                        </a>
-                    </div>
-                    <div class="col-lg-4 d-none d-md-block">
-                        {{__('Since')}}: {{ \Carbon\Carbon::parse($referral->created_at)->format('Y-m-d') }}
-                    </div>
-                    <div class="col-lg-4 text-truncate">
-                        {{__('Earned')}}:<b> {{\App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount(\App\Providers\UsersServiceProvider::getTotalAmountEarnedFromRewardsByUsers(\Illuminate\Support\Facades\Auth::user()->id, $referral->used_by))}}</b>
-                    </div>
-                </div>
-            @endforeach
-            <div class="d-flex flex-row-reverse mt-3 mr-4">
-                {{ $referrals->onEachSide(1)->links() }}
-            </div>
+
+                        <span class="ref-item__meta">
+                            <span class="ref-item__name">
+                                @if($u)
+                                    <a href="{{ route('profile', ['username' => $u->username]) }}">{{ $u->name }}</a>
+                                @else
+                                    {{ __('Deleted user') }}
+                                @endif
+                            </span>
+                            <span class="ref-item__since">
+                                {{ __('Since') }} {{ \Carbon\Carbon::parse($referral->created_at)->format('M j, Y') }}
+                            </span>
+                        </span>
+
+                        <span class="ref-item__earned">
+                            {{ \App\Providers\SettingsServiceProvider::getWebsiteFormattedAmount(
+                                \App\Providers\UsersServiceProvider::getTotalAmountEarnedFromRewardsByUsers($me->id, $referral->used_by)
+                            ) }}
+                        </span>
+                    </li>
+                @endforeach
+            </ul>
+
+            @if($referrals->hasPages())
+                <div class="ref-pagination">{{ $referrals->onEachSide(1)->links() }}</div>
+            @endif
         @else
-            <div class="p-3 text-center">
-                <p>{{__('There are no referrals to show.')}}</p>
+            <div class="ref-empty">
+                <span class="ref-empty__icon" aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                <h3>{{ __('No referrals yet') }}</h3>
+                <p>{{ __('Share your link above — you earn from everyone who joins through it.') }}</p>
             </div>
         @endif
     </div>
 </div>
-
-

@@ -1,6 +1,166 @@
-.avatar{
+/* ============================================
+   REFERRALS SETTINGS
+   Was raw Bootstrap with a 6-line stylesheet. Now uses the ps-* card
+   system shared with the profile and security settings pages.
+   ============================================ */
+
+.avatar {
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+}
+
+/* --- Copy link ----------------------------------------------------------- */
+.ref-copy {
+    display: flex;
+    gap: 8px;
+}
+
+.ref-copy__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 11px 14px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-bg-muted, rgba(128, 128, 140, .10));
+    color: var(--st-text, inherit);
+    font-size: 13.5px;
+    text-overflow: ellipsis;
+}
+
+.ref-copy__input:focus { outline: none; border-color: var(--st-brand-neon, #cb0c9f); }
+
+.ref-copy__btn {
+    flex: 0 0 auto;
+    padding: 11px 22px;
+    border: 0;
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-accent-gradient);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter .15s ease;
+}
+
+.ref-copy__btn:hover { filter: brightness(1.08); }
+
+/* --- Stats --------------------------------------------------------------- */
+.ref-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.ref-stat {
+    padding: 14px 16px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-bg-muted, rgba(128, 128, 140, .10));
+}
+
+.ref-stat__value {
+    display: block;
+    font-size: 21px;
+    font-weight: 800;
+    color: var(--st-text, inherit);
+}
+
+.ref-stat__label {
+    display: block;
+    margin-top: 2px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--st-text-muted, #8b8b94);
+}
+
+/* --- List ---------------------------------------------------------------- */
+.ref-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.ref-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    border: 1px solid var(--st-glass-border);
+    border-radius: var(--st-radius-md, 12px);
+    background: var(--st-bg-muted, rgba(128, 128, 140, .10));
+}
+
+.ref-item__avatar-link { flex: 0 0 auto; line-height: 0; }
+
+.ref-item__avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.ref-item__meta { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+
+.ref-item__name {
+    font-size: 14px;
+    font-weight: 700;
     overflow: hidden;
-    outline-offset: -2px;
-    width:36px;
-    height:36px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ref-item__name a { color: var(--st-text, inherit); text-decoration: none; }
+.ref-item__name a:hover { color: var(--st-brand-neon, #cb0c9f); }
+
+.ref-item__since { font-size: 12px; color: var(--st-text-muted, #8b8b94); }
+
+.ref-item__earned {
+    flex: 0 0 auto;
+    font-size: 14.5px;
+    font-weight: 800;
+    color: var(--st-brand-neon, #cb0c9f);
+    white-space: nowrap;
+}
+
+.ref-pagination { display: flex; justify-content: center; margin-top: 14px; }
+.ref-pagination .pagination { margin: 0; }
+
+/* --- Empty --------------------------------------------------------------- */
+.ref-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.ref-empty__icon { color: var(--st-text-muted, #8b8b94); }
+
+.ref-empty__icon svg {
+    width: 40px;
+    height: 40px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.ref-empty h3 { margin: 4px 0 0; font-size: 17px; font-weight: 700; color: var(--st-text, inherit); }
+.ref-empty p  { margin: 0; font-size: 14px; color: var(--st-text-muted, #8b8b94); max-width: 400px; }
+
+@media (max-width: 520px) {
+    .ref-stats { grid-template-columns: 1fr; }
+    .ref-item__earned { font-size: 13.5px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ref-copy__btn { transition: none; }
 }

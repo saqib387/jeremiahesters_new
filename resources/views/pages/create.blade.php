@@ -537,7 +537,7 @@
 }
 
 .page-title i {
-    color: #6366f1;
+    color: #cb0c9f;
     font-size: 1.75rem;
 }
 
@@ -632,7 +632,7 @@
 }
 
 .alert-text a {
-    color: #6366f1;
+    color: #cb0c9f;
     text-decoration: none;
     font-weight: 500;
 }
@@ -722,7 +722,7 @@
 }
 
 .current-count {
-    color: #6366f1;
+    color: #cb0c9f;
     font-weight: 600;
 }
 
@@ -753,7 +753,7 @@
 
 .modern-textarea:focus {
     outline: none;
-    border-color: #6366f1;
+    border-color: #cb0c9f;
     background: rgba(249, 250, 251, 0.8);
     box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
@@ -774,7 +774,7 @@
     transform: translateX(-50%);
     width: 0;
     height: 2px;
-    background: linear-gradient(90deg, #6366f1, #8b5cf6);
+    background: linear-gradient(90deg, #cb0c9f, #830866);
     border-radius: 1px;
     transition: width 0.3s ease;
 }
@@ -811,14 +811,14 @@
     border: 2px dashed rgba(99, 102, 241, 0.3);
     border-radius: 16px;
     background: rgba(99, 102, 241, 0.05);
-    color: #6366f1;
+    color: #cb0c9f;
     cursor: pointer;
     transition: all 0.3s ease;
     overflow: hidden;
 }
 
 .upload-btn:hover {
-    border-color: #6366f1;
+    border-color: #cb0c9f;
     background: rgba(99, 102, 241, 0.1);
     transform: translateY(-2px);
 }
@@ -888,7 +888,7 @@
     align-items: center;
     gap: 0.75rem;
     padding: 1rem 2rem;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #cb0c9f 0%, #830866 100%);
     color: white;
     border: none;
     border-radius: 16px;
@@ -1051,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (count > 4000) {
                 currentCount.style.color = '#f59e0b';
             } else {
-                currentCount.style.color = '#6366f1';
+                currentCount.style.color = '#cb0c9f';
             }
         });
         
